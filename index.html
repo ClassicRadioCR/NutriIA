@@ -2,14 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#16a34a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="NutriWeb">
     <title>NutriWeb - Tu Diario Nutricional</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ENLACE DE NETLIFY PARA QUE SE PUEDA INSTALAR (PWA) -->
+    <link rel="manifest" href="manifest.json">
+    
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script>
@@ -17,7 +20,7 @@
             darkMode: 'class',
             theme: { 
                 extend: { 
-                    colors: { brand: { 100: 'var(--b100)', 200: 'var(--b200)', 400: 'var(--b400)', 500: 'var(--b500)', 600: 'var(--b600)', 800: 'var(--b800)', 900: 'var(--b900)' } },
+                    colors: { brand: { 50: 'rgb(var(--b50) / <alpha-value>)', 100: 'rgb(var(--b100) / <alpha-value>)', 200: 'rgb(var(--b200) / <alpha-value>)', 300: 'rgb(var(--b300) / <alpha-value>)', 400: 'rgb(var(--b400) / <alpha-value>)', 500: 'rgb(var(--b500) / <alpha-value>)', 600: 'rgb(var(--b600) / <alpha-value>)', 700: 'rgb(var(--b700) / <alpha-value>)', 800: 'rgb(var(--b800) / <alpha-value>)', 900: 'rgb(var(--b900) / <alpha-value>)', 950: 'rgb(var(--b950) / <alpha-value>)' } },
                     animation: { 
                         'fade-in': 'fadeIn 0.3s ease-out forwards', 
                         'bounce-sm': 'bounceSm 0.25s ease-in-out' 
@@ -32,10 +35,10 @@
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --b100: #dcfce7; --b200: #bbf7d0; --b400: #4ade80; --b500: #22c55e; --b600: #16a34a; --b800: #166534; --b900: #14532d; }
-        .theme-ocean { --b100: #e0f2fe; --b200: #bae6fd; --b400: #38bdf8; --b500: #0ea5e9; --b600: #0284c7; --b800: #075985; --b900: #0c4a6e; }
-        .theme-fire { --b100: #ffedd5; --b200: #fed7aa; --b400: #fb923c; --b500: #f97316; --b600: #ea580c; --b800: #9a3412; --b900: #7c2d12; }
-        .theme-cyber { --b100: #f3e8ff; --b200: #e9d5ff; --b400: #c084fc; --b500: #a855f7; --b600: #9333ea; --b800: #6b21a8; --b900: #581c87; }
+        :root { --b50: 240 253 244; --b100: 220 252 231; --b200: 187 247 208; --b300: 134 239 172; --b400: 74 222 128; --b500: 34 197 94; --b600: 22 163 74; --b700: 21 128 61; --b800: 22 101 52; --b900: 20 83 45; --b950: 5 46 22; }
+        .theme-ocean { --b50: 240 249 255; --b100: 224 242 254; --b200: 186 230 253; --b300: 125 211 252; --b400: 56 189 248; --b500: 14 165 233; --b600: 2 132 199; --b700: 3 105 161; --b800: 7 89 133; --b900: 12 74 110; --b950: 8 47 73; }
+        .theme-fire { --b50: 255 247 237; --b100: 255 237 213; --b200: 254 215 170; --b300: 253 186 116; --b400: 251 146 60; --b500: 249 115 22; --b600: 234 88 12; --b700: 194 65 12; --b800: 154 52 18; --b900: 124 45 18; --b950: 67 20 7; }
+        .theme-cyber { --b50: 250 245 255; --b100: 243 232 255; --b200: 233 213 255; --b300: 216 180 254; --b400: 192 132 252; --b500: 168 85 247; --b600: 147 51 234; --b700: 126 34 206; --b800: 107 33 168; --b900: 88 28 135; --b950: 59 7 100; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; } .tab-content.active { display: block; }
         .ring-progress { transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease; }
@@ -65,26 +68,26 @@
                     <p class="text-xs font-bold text-gray-400 uppercase">Perfiles:</p>
                     <div id="botonesPerfiles" class="flex flex-wrap gap-2"></div>
                 </div>
-                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Nombre</label><input type="text" id="loginUser" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 transition-all"></div>
-                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">PIN (4 números)</label><input type="password" id="loginPin" maxlength="4" inputmode="numeric" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-center text-lg font-bold tracking-widest focus:ring-2 focus:ring-brand-500 transition-all" onkeypress="if(event.key === 'Enter') iniciarSesion()"></div>
+                <div><label for="loginUser" class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Nombre</label><input type="text" id="loginUser" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 transition-all"></div>
+                <div><label for="loginPin" class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">PIN (4 números)</label><input type="password" id="loginPin" maxlength="4" inputmode="numeric" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-center text-lg font-bold tracking-widest focus:ring-2 focus:ring-brand-500 transition-all" onkeypress="if(event.key === 'Enter') iniciarSesion()"></div>
                 <button onclick="iniciarSesion()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition-transform active:scale-95">Ingresar <i class="fas fa-arrow-right ml-1"></i></button>
             </div>
 
             <div id="formRegister" class="hidden p-6 space-y-3 max-h-[75vh] overflow-y-auto">
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nombre *</label><input type="text" id="regUser" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">PIN *</label><input type="password" id="regPin" maxlength="4" inputmode="numeric" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center font-bold transition-all"></div>
+                    <div><label for="regUser" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nombre *</label><input type="text" id="regUser" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
+                    <div><label for="regPin" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">PIN *</label><input type="password" id="regPin" maxlength="4" inputmode="numeric" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center font-bold transition-all"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Edad *</label><input type="number" id="regEdad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Género</label><select id="regGenero" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
+                    <div><label for="regEdad" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Edad *</label><input type="number" id="regEdad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
+                    <div><label for="regGenero" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Género</label><select id="regGenero" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Peso (kg) *</label><input type="number" id="regPeso" step="0.1" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Altura (cm)*</label><input type="number" id="regAltura" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
+                    <div><label for="regPeso" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Peso (kg) *</label><input type="number" id="regPeso" step="0.1" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
+                    <div><label for="regAltura" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Altura (cm)*</label><input type="number" id="regAltura" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
                 </div>
-                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Actividad</label><select id="regActividad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55">Moderado</option><option value="1.725">Fuerte</option></select></div>
-                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Objetivo</label><select id="regObjetivo" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400"><option value="-500">Perder grasa (-500 kcal)</option><option value="-250">Definición suave (-250 kcal)</option><option value="0" selected>Mantener mi peso</option><option value="250">Ganar masa</option></select></div>
+                <div><label for="regActividad" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Actividad</label><select id="regActividad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55">Moderado</option><option value="1.725">Fuerte</option></select></div>
+                <div><label for="regObjetivo" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Objetivo</label><select id="regObjetivo" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400"><option value="-500">Perder grasa (-500 kcal)</option><option value="-250">Definición suave (-250 kcal)</option><option value="0" selected>Mantener mi peso</option><option value="250">Ganar masa</option></select></div>
                 <button onclick="registrarUsuario()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg mt-2 transition-transform active:scale-95">Crear Perfil</button>
             </div>
         </div>
@@ -155,7 +158,7 @@
                     <div class="relative w-36 h-36 mx-auto">
                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                             <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" class="text-gray-200 dark:text-slate-800 transition-colors" stroke-width="10"></circle>
-                            <circle id="anilloCalorias" cx="50" cy="50" r="45" fill="none" stroke="var(--b500)" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" class="ring-progress"></circle>
+                            <circle id="anilloCalorias" cx="50" cy="50" r="45" fill="none" stroke="rgb(var(--b500))" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" class="ring-progress"></circle>
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
                             <span class="text-3xl font-black text-gray-800 dark:text-white transition-colors" id="caloriasConsumidas">0</span>
@@ -221,9 +224,9 @@
                 <!-- HÁBITOS Y AGUA -->
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
                     <div class="grid grid-cols-3 gap-3 text-center">
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pasos</label><input type="number" id="inpPasos" placeholder="8000" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs py-2 px-1 text-center font-bold text-gray-700 dark:text-slate-200 transition-colors"></div>
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Sueño (hr)</label><input type="number" id="inpSueno" step="0.5" placeholder="7.5" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs py-2 px-1 text-center font-bold text-gray-700 dark:text-slate-200 transition-colors"></div>
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Energía</label><select id="inpEnergia" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-lg py-1 px-1 text-center cursor-pointer transition-colors"><option value="">...</option><option value="😴">😴 Baja</option><option value="😐">😐 Normal</option><option value="⚡">⚡ Alta</option></select></div>
+                        <div><label for="inpPasos" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pasos</label><input type="number" id="inpPasos" placeholder="8000" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs py-2 px-1 text-center font-bold text-gray-700 dark:text-slate-200 transition-colors"></div>
+                        <div><label for="inpSueno" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Sueño (hr)</label><input type="number" id="inpSueno" step="0.5" placeholder="7.5" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs py-2 px-1 text-center font-bold text-gray-700 dark:text-slate-200 transition-colors"></div>
+                        <div><label for="inpEnergia" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Energía</label><select id="inpEnergia" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-lg py-1 px-1 text-center cursor-pointer transition-colors"><option value="">...</option><option value="😴">😴 Baja</option><option value="😐">😐 Normal</option><option value="⚡">⚡ Alta</option></select></div>
                     </div>
                     <div class="flex justify-between items-center gap-2 pt-2 border-t dark:border-slate-800 transition-colors">
                         <button onclick="sumarAgua(-250)" class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-3.5 py-2 rounded-xl font-bold text-sm transition-colors active:scale-95">-250</button>
@@ -297,13 +300,13 @@
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
                     <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm border-b dark:border-slate-800 pb-2 transition-colors"><i class="fas fa-ruler-combined text-blue-500"></i> Medidas y Peso (<span id="pesoFechaLabel">Hoy</span>)</h2>
                     <div class="flex gap-2 items-end">
-                        <div class="flex-1"><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Peso (kg)</label><input type="number" id="inputPeso" step="0.1" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold transition-colors"></div>
+                        <div class="flex-1"><label for="inputPeso" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Peso (kg)</label><input type="number" id="inputPeso" step="0.1" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold transition-colors"></div>
                         <button onclick="guardarPeso()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors">Guardar</button>
                     </div>
                     <div class="grid grid-cols-3 gap-2 border-t dark:border-slate-800 pt-3 transition-colors">
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cintura (cm)</label><input type="number" id="inpCintura" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Brazo (cm)</label><input type="number" id="inpBrazo" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pierna (cm)</label><input type="number" id="inpPierna" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
+                        <div><label for="inpCintura" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cintura (cm)</label><input type="number" id="inpCintura" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
+                        <div><label for="inpBrazo" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Brazo (cm)</label><input type="number" id="inpBrazo" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
+                        <div><label for="inpPierna" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pierna (cm)</label><input type="number" id="inpPierna" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
                     </div>
                 </div>
 
@@ -341,10 +344,10 @@
                     <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm border-b dark:border-slate-800 pb-2 transition-colors"><i class="fas fa-palette text-pink-500"></i> Identidad y Tema</h2>
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-2xl transition-colors" id="avatarPreview">U</div>
-                        <div class="flex-1"><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Avatar (Emoji)</label><input type="text" id="inpAvatarEmoji" maxlength="2" placeholder="😎" onchange="guardarIdentidad()" class="w-16 text-center bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-lg py-1 px-1 transition-colors"></div>
+                        <div class="flex-1"><label for="inpAvatarEmoji" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Avatar (Emoji)</label><input type="text" id="inpAvatarEmoji" maxlength="2" placeholder="😎" onchange="guardarIdentidad()" class="w-16 text-center bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-lg py-1 px-1 transition-colors"></div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tema de Color</label>
+                        <label for="selTemaColor" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tema de Color</label>
                         <select id="selTemaColor" onchange="guardarIdentidad()" class="w-full bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm py-2 px-3 font-semibold cursor-pointer transition-colors">
                             <option value="">🌳 Defecto (Verde)</option><option value="theme-ocean">🌊 Océano (Azul)</option><option value="theme-fire">🔥 Fuego (Naranja)</option><option value="theme-cyber">👾 Cyberpunk (Morado)</option>
                         </select>
@@ -364,21 +367,21 @@
                     <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-4"><i class="fas fa-sliders-h text-brand-500"></i> Actualizar Metas</h2>
                     <div class="space-y-3 text-sm">
                         <div class="flex gap-3">
-                            <div class="flex-1"><label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Edad</label><input type="number" id="calcEdad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
-                            <div class="flex-1"><label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Género</label><select id="calcGenero" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
+                            <div class="flex-1"><label for="calcEdad" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Edad</label><input type="number" id="calcEdad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
+                            <div class="flex-1"><label for="calcGenero" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Género</label><select id="calcGenero" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
                         </div>
                         <div class="flex gap-3">
-                            <div class="flex-1"><label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Peso (kg)</label><input type="number" id="calcPeso" step="0.1" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
-                            <div class="flex-1"><label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Altura (cm)</label><input type="number" id="calcAltura" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
+                            <div class="flex-1"><label for="calcPeso" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Peso (kg)</label><input type="number" id="calcPeso" step="0.1" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
+                            <div class="flex-1"><label for="calcAltura" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Altura (cm)</label><input type="number" id="calcAltura" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
                         </div>
                         <div>
-                            <label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Actividad</label>
+                            <label for="calcActividad" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Actividad</label>
                             <select id="calcActividad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors">
                                 <option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55">Moderado</option><option value="1.725">Fuerte</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Objetivo</label>
+                            <label for="calcObjetivo" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Objetivo</label>
                             <select id="calcObjetivo" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold text-xs transition-colors">
                                 <option value="0">Mantener peso</option><option value="-250">Déficit ligero</option><option value="-500">Déficit normal</option><option value="250">Superávit</option>
                             </select>
@@ -468,18 +471,30 @@
         function normalizarTexto(txt) { return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); }
         function getFechaStr(fechaObj) { let y = fechaObj.getFullYear(); let m = String(fechaObj.getMonth() + 1).padStart(2, '0'); let d = String(fechaObj.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
         function getUsuarioActual() { return usuariosDB[usuarioActivoKey]; }
+        let ctrlBusq = null;
+        const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const limpiarB = x => String(x ?? '').replace(/[<>"'`\\]/g, '').trim();
+        const aB64 = o => { const b = new TextEncoder().encode(JSON.stringify(o)); let t = ''; for (let i = 0; i < b.length; i += 8192) t += String.fromCharCode(...b.subarray(i, i + 8192)); return btoa(t); };
+        const deB64 = c => { const t = atob(String(c).replace(/\s+/g, '')); return JSON.parse(new TextDecoder().decode(Uint8Array.from(t, ch => ch.charCodeAt(0))), (k, v) => typeof v === 'string' ? limpiarB(v) : v); };
+        const nuevoSalt = () => Array.from(crypto.getRandomValues(new Uint8Array(8))).map(x => x.toString(16).padStart(2, '0')).join('');
+        async function hashPin(pin, salt) { try { if (!(window.crypto && crypto.subtle)) return 'plain:' + pin; const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + ':' + pin)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''); } catch (e) { return 'plain:' + pin; } }
+        const diaVacio = () => ({ calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: null, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null });
+        function recalcular(d) { const t = k => (d.comidas || []).reduce((a, c) => a + (c[k] || 0), 0); d.calorias = t('kcal'); d.carbs = t('c'); d.prot = t('p'); d.gras = t('g'); }
+        function podarDiasVacios(u) { Object.keys(u.historial).forEach(f => { const d = u.historial[f]; if (!(d.comidas || []).length && !(d.rutina || []).length && !d.agua && !d.ejercicioKcal && d.peso == null && d.pasos == null && d.sueno == null && !d.energia && !d.retoDelDia && !d.celebrado) delete u.historial[f]; }); }
+        function persistir() { try { const u = getUsuarioActual(); if (u) { recalcular(getDatosHoy()); podarDiasVacios(u); } localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); } catch (e) { console.error(e); alert("No se pudo guardar: almacenamiento lleno o bloqueado."); } }
+        const ETQ = {'fa-chevron-left':'Día anterior','fa-chevron-right':'Día siguiente','fa-times':'Cerrar o eliminar','fa-trash':'Eliminar','fa-save':'Guardar como receta','fa-star':'Favorito','fa-moon':'Cambiar modo oscuro','fa-sun':'Cambiar modo oscuro','fa-plus':'Agregar','fa-minus':'Quitar'};
+        function etiquetarBotones() { document.querySelectorAll('button:not([aria-label])').forEach(b => { if (b.textContent.trim()) return; const i = b.querySelector('i'); if (!i) return; for (const k in ETQ) if (i.classList.contains(k)) { b.setAttribute('aria-label', ETQ[k]); break; } }); }
+
         
         function getDatosHoy() { 
             let u = getUsuarioActual(); let str = getFechaStr(fechaActual); 
-            let hDef = { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: null, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null };
+            let hDef = diaVacio();
             if (!u.historial[str]) u.historial[str] = hDef;
             else { for(let key in hDef) { if(u.historial[str][key] === undefined) u.historial[str][key] = hDef[key]; } }
             return u.historial[str]; 
         }
         
-        function guardarDatos() { 
-            localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); 
-            actualizarUI(); 
+        function guardarDatos() { persistir(); actualizarUI(); 
             if(document.getElementById('tab-progreso').classList.contains('active')) { 
                 renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); dibujarProgresoYTablas();
             } 
@@ -645,22 +660,22 @@
             resDiv.classList.remove('hidden');
 
             try {
-                let url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(txt)}&search_simple=1&action=process&json=1&page_size=10`;
-                let response = await fetch(url);
+                let url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(txt)}&search_simple=1&action=process&json=1&page_size=10&fields=product_name,product_name_es,brands,nutriments`;
+                if (ctrlBusq) ctrlBusq.abort(); ctrlBusq = new AbortController(); let response = await fetch(url, { signal: ctrlBusq.signal });
                 
                 if (!response.ok) throw new Error("Error de red");
                 
                 let data = await response.json();
                 
                 if (!data || !data.products || data.products.length === 0) { 
-                    resDiv.innerHTML = `<p class="text-xs text-red-500 text-center font-bold">No encontré "${txt}". Intenta usar palabras más simples.</p><button onclick="document.getElementById('resultadosInternet').classList.add('hidden')" class="w-full mt-2 text-[10px] font-bold text-gray-400">Cerrar</button>`; 
+                    resDiv.innerHTML = `<p class="text-xs text-red-500 text-center font-bold">No encontré "${esc(txt)}". Intenta usar palabras más simples.</p><button onclick="document.getElementById('resultadosInternet').classList.add('hidden')" class="w-full mt-2 text-[10px] font-bold text-gray-400">Cerrar</button>`; 
                     return; 
                 }
 
                 let prods = data.products.filter(p => p.nutriments && p.nutriments['energy-kcal_100g']);
                 
                 if(prods.length === 0) { 
-                    resDiv.innerHTML = `<p class="text-xs text-orange-500 text-center font-bold">Encontré "${txt}", pero sin datos de calorías.</p><button onclick="document.getElementById('resultadosInternet').classList.add('hidden')" class="w-full mt-2 text-[10px] font-bold text-gray-400">Cerrar</button>`; 
+                    resDiv.innerHTML = `<p class="text-xs text-orange-500 text-center font-bold">Encontré "${esc(txt)}", pero sin datos de calorías.</p><button onclick="document.getElementById('resultadosInternet').classList.add('hidden')" class="w-full mt-2 text-[10px] font-bold text-gray-400">Cerrar</button>`; 
                     return; 
                 }
 
@@ -675,8 +690,8 @@
                     let pr = Math.round(p.nutriments['proteins_100g'] || 0);
                     let g = Math.round(p.nutriments['fat_100g'] || 0);
                     
-                    h += `<button onclick="guardarDesdeInternet('${nombreFinal}', ${kcal}, ${c}, ${pr}, ${g})" class="w-full text-left bg-white dark:bg-slate-800 p-2.5 rounded-lg text-xs hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex justify-between items-center shadow-sm border border-transparent dark:border-slate-700 transition-colors">
-                            <span class="truncate w-3/4 font-semibold text-gray-800 dark:text-slate-200">${nombreFinal}</span>
+                    h += `<button data-n="${esc(nombreFinal)}" onclick="guardarDesdeInternet(this.dataset.n, ${kcal}, ${c}, ${pr}, ${g})" class="w-full text-left bg-white dark:bg-slate-800 p-2.5 rounded-lg text-xs hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex justify-between items-center shadow-sm border border-transparent dark:border-slate-700 transition-colors">
+                            <span class="truncate w-3/4 font-semibold text-gray-800 dark:text-slate-200">${esc(nombreFinal)}</span>
                             <span class="text-indigo-600 dark:text-indigo-400 font-bold shrink-0">${kcal} kcal</span>
                           </button>`;
                 });
@@ -684,7 +699,7 @@
                 h += '</div><button onclick="document.getElementById(\'resultadosInternet\').classList.add(\'hidden\')" class="w-full mt-2.5 py-1 text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-100 dark:bg-slate-800 rounded-lg">Cerrar</button>';
                 resDiv.innerHTML = h;
             } catch(e) {
-                console.error("Error API:", e);
+                if (e.name === 'AbortError') return; console.error("Error API:", e);
                 let msg = (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) 
                     ? "Tu navegador o Adblocker bloqueó la conexión." 
                     : "Error al conectar. Intenta de nuevo.";
@@ -694,7 +709,7 @@
 
         function guardarDesdeInternet(nombre, kcal, c, p, g) {
             let u = getUsuarioActual();
-            let nombreFinal = nombre + " (100g)";
+            let nombreFinal = limpiarB(nombre) + " (100g)";
             u.alimentosPersonalizados.push({ nombre: nombreFinal, kcal: kcal, c: c, p: p, g: g });
             guardarDatos(); 
             actualizarDatalist();
@@ -750,24 +765,27 @@
         function toggleDarkMode() { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('nutriWeb_DarkMode', isDark); actualizarIconoDarkMode(); }
         function actualizarIconoDarkMode() { const i = document.getElementById('darkModeIcon'); if (!i) return; if (document.documentElement.classList.contains('dark')) { i.classList.replace('fa-moon', 'fa-sun'); i.classList.add('text-yellow-300'); } else { i.classList.replace('fa-sun', 'fa-moon'); i.classList.remove('text-yellow-300'); } }
         function guardarIdentidad() { let u = getUsuarioActual(); u.perfil.avatar = document.getElementById('inpAvatarEmoji').value.trim() || u.nombre.charAt(0); u.perfil.tema = document.getElementById('selTemaColor').value; document.getElementById('userAvatar').innerText = u.perfil.avatar; document.getElementById('avatarPreview').innerText = u.perfil.avatar; document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200 " + u.perfil.tema; guardarDatos(); }
-        function inicializarPWA() { const iSA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; const iM = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); if (iM && !iSA && !localStorage.getItem('nutriWeb_HideInstallBanner')) { document.getElementById('bannerInstalar').classList.remove('hidden'); } }
+        function inicializarPWA() { if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {}); const iSA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; const iM = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); if (iM && !iSA && !localStorage.getItem('nutriWeb_HideInstallBanner')) { document.getElementById('bannerInstalar').classList.remove('hidden'); } }
         function cerrarBannerInstalar() { document.getElementById('bannerInstalar').classList.add('hidden'); localStorage.setItem('nutriWeb_HideInstallBanner', 'true'); }
 
         function switchAuthTab(t) { let fL = document.getElementById('formLogin'), fR = document.getElementById('formRegister'), bL = document.getElementById('tabBtnLogin'), bR = document.getElementById('tabBtnRegister'); if (t === 'login') { fL.classList.remove('hidden'); fR.classList.add('hidden'); bL.className = "flex-1 py-3.5 text-sm font-bold text-brand-600 border-b-2 border-brand-500 bg-brand-50/50 dark:bg-slate-800 transition-colors"; bR.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors"; } else { fR.classList.remove('hidden'); fL.classList.add('hidden'); bR.className = "flex-1 py-3.5 text-sm font-bold text-blue-600 border-b-2 border-blue-500 bg-blue-50/50 dark:bg-slate-800 transition-colors"; bL.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors"; } }
-        function renderizarPerfilesRapidos() { let ks = Object.keys(usuariosDB); let bt = document.getElementById('botonesPerfiles'); if (ks.length === 0) { document.getElementById('listaUsuariosRapidos').classList.add('hidden'); return; } document.getElementById('listaUsuariosRapidos').classList.remove('hidden'); bt.innerHTML = ''; ks.forEach(k => { bt.innerHTML += `<button onclick="seleccionarPerfilRapido('${k}')" class="px-3 py-1.5 bg-brand-100 dark:bg-brand-950 text-brand-800 dark:text-brand-300 rounded-full text-xs font-bold hover:bg-brand-200 transition-colors"><i class="fas fa-user mr-1"></i>${usuariosDB[k].nombre}</button>`; }); }
+        function renderizarPerfilesRapidos() { let ks = Object.keys(usuariosDB); let bt = document.getElementById('botonesPerfiles'); if (ks.length === 0) { document.getElementById('listaUsuariosRapidos').classList.add('hidden'); return; } document.getElementById('listaUsuariosRapidos').classList.remove('hidden'); bt.innerHTML = ''; ks.forEach(k => { bt.innerHTML += `<button data-k="${esc(k)}" onclick="seleccionarPerfilRapido(this.dataset.k)" class="px-3 py-1.5 bg-brand-100 dark:bg-brand-950 text-brand-800 dark:text-brand-300 rounded-full text-xs font-bold hover:bg-brand-200 transition-colors"><i class="fas fa-user mr-1"></i>${esc(usuariosDB[k].nombre)}</button>`; }); }
         function seleccionarPerfilRapido(k) { document.getElementById('loginUser').value = usuariosDB[k].nombre; document.getElementById('loginPin').focus(); }
         function calcularFormulaMetas(e, g, w, a, ac, o) { let tmb = (10 * w) + (6.25 * a) - (5 * e) + (g === 'm' ? 5 : -161); let m = Math.max(1200, Math.round((tmb * ac) + o)); let pP = o > 0 ? 0.30 : (o < 0 ? 0.35 : 0.25); return { metaKcal: m, metaProt: Math.round((m*pP)/4), metaGras: Math.round((m*0.25)/9), metaCarbs: Math.round((m*(1-pP-0.25))/4) }; }
         
-        function registrarUsuario() { 
+        async function registrarUsuario() { 
             let n=document.getElementById('regUser').value.trim(), p=document.getElementById('regPin').value.trim(), e=parseInt(document.getElementById('regEdad').value), g=document.getElementById('regGenero').value, w=parseFloat(document.getElementById('regPeso').value), a=parseFloat(document.getElementById('regAltura').value), ac=parseFloat(document.getElementById('regActividad').value), o=parseInt(document.getElementById('regObjetivo').value); 
-            if (!n || p.length !== 4) return alert("Nombre y PIN 4 dígitos requeridos."); if (!e || !w || !a) return alert("Faltan datos corporales."); 
-            let k = normalizarTexto(n); if (usuariosDB[k]) return alert("Usuario ya existe."); 
+            if (!n || p.length !== 4) return alert("Nombre y PIN 4 dígitos requeridos."); if (!e || !w || !a) return alert("Faltan datos corporales."); if (e < 10 || e > 110 || w < 25 || w > 400 || a < 100 || a > 250) return alert("Revisa edad, peso y altura."); 
+            n = limpiarB(n); if (!n) return alert("Nombre inválido."); let k = normalizarTexto(n); if (usuariosDB[k]) return alert("Usuario ya existe."); 
             let m = calcularFormulaMetas(e, g, w, a, ac, o); 
-            usuariosDB[k] = { nombre: n, pin: p, perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '', triviaXP: 0 }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] }; 
+            const salt = nuevoSalt(); usuariosDB[k] = { nombre: n, salt, pinHash: await hashPin(p, salt), perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '', triviaXP: 0 }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] }; 
             localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); entrarAlSistema(k); 
         }
         
-        function iniciarSesion() { let n = document.getElementById('loginUser').value.trim(), p = document.getElementById('loginPin').value.trim(), k = normalizarTexto(n); if (!usuariosDB[k] || usuariosDB[k].pin !== p) return alert("Usuario/PIN incorrecto."); entrarAlSistema(k); }
+        async function iniciarSesion() { let n = document.getElementById('loginUser').value.trim(), p = document.getElementById('loginPin').value.trim(), k = normalizarTexto(n), u = usuariosDB[k], ok = false;
+            if (u && u.pinHash) ok = (await hashPin(p, u.salt)) === u.pinHash;
+            else if (u && u.pin !== undefined && u.pin === p) { ok = true; u.salt = nuevoSalt(); u.pinHash = await hashPin(p, u.salt); delete u.pin; localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); }
+            if (!ok) return alert("Usuario/PIN incorrecto."); entrarAlSistema(k); }
         
         function entrarAlSistema(k) {
             usuarioActivoKey = k; localStorage.setItem('nutriWeb_CurrentUser', k); fechaActual = new Date(); document.getElementById('authScreen').classList.add('hidden'); document.getElementById('mainApp').classList.remove('hidden');
@@ -778,7 +796,7 @@
             for(let ky in pDef) { if(u.perfil[ky] === undefined) u.perfil[ky] = pDef[ky]; }
             if(!u.perfil.medidas) u.perfil.medidas = { cintura: null, brazo: null, pierna: null };
             Object.keys(u.historial).forEach(f => {
-                let hDef = { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: null, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null };
+                let hDef = diaVacio();
                 for(let hk in hDef) { if(u.historial[f][hk] === undefined) u.historial[f][hk] = hDef[hk]; }
             });
 
@@ -818,7 +836,7 @@
         function registrarComidaManual() {
             let n = document.getElementById('manNombre').value.trim(); let kB = parseInt(document.getElementById('manKcal').value)||0; let cB = parseInt(document.getElementById('manCarbs').value)||0; let pB = parseInt(document.getElementById('manProt').value)||0; let gB = parseInt(document.getElementById('manGras').value)||0; let f = parseFloat(document.getElementById('manMedida').value)||1;
             if (!n || kB<=0) return alert("Escribe nombre y calorías."); let k=Math.round(kB*f); let c=Math.round(cB*f); let p=Math.round(pB*f); let g=Math.round(gB*f); let d=getDatosHoy(); d.calorias+=k; d.carbs+=c; d.prot+=p; d.gras+=g; d.comidas.push({ texto: (f===1?n:`${f}x ${n}`), nombreBase: n, kcalBase: kB, cBase: cB, pBase: pB, gBase: gB, kcal: k, c: c, p: p, g: g, tiempo: tiempoComidaActual });
-            let u = getUsuarioActual(); if (!obtenerBibliotecaCompleta().some(i => normalizarTexto(i.nombre) === normalizarTexto(n))) { u.alimentosPersonalizados.push({ nombre: n, kcal: kB, c: cB, p: pB, g: gB }); actualizarDatalist(); } guardarDatos(); document.getElementById('manNombre').value=''; document.getElementById('manKcal').value=''; document.getElementById('manCarbs').value=''; document.getElementById('manProt').value=''; document.getElementById('manGras').value=''; document.getElementById('manMedida').value='1'; document.getElementById('inputComida').value=''; toggleModoManual();
+            let u = getUsuarioActual(); if (!obtenerBibliotecaCompleta().some(i => normalizarTexto(i.nombre) === normalizarTexto(n))) { u.alimentosPersonalizados.push({ nombre: limpiarB(n), kcal: kB, c: cB, p: pB, g: gB }); actualizarDatalist(); } guardarDatos(); document.getElementById('manNombre').value=''; document.getElementById('manKcal').value=''; document.getElementById('manCarbs').value=''; document.getElementById('manProt').value=''; document.getElementById('manGras').value=''; document.getElementById('manMedida').value='1'; document.getElementById('inputComida').value=''; toggleModoManual();
         }
         function borrarComida(index) { if(confirm("¿Borrar?")) { let d = getDatosHoy(); let c = d.comidas[index]; d.calorias=Math.max(0,d.calorias-c.kcal); d.carbs=Math.max(0,d.carbs-c.c); d.prot=Math.max(0,d.prot-c.p); d.gras=Math.max(0,d.gras-c.g); d.comidas.splice(index, 1); guardarDatos(); } }
         function copiarDiaAnterior() { let a=new Date(fechaActual); a.setDate(a.getDate()-1); let dA=getUsuarioActual().historial[getFechaStr(a)]; if(!dA || !dA.comidas.length) return alert("Nada que copiar."); if(confirm("¿Copiar de ayer?")) { let d=getDatosHoy(); dA.comidas.forEach(c => { d.calorias+=c.kcal; d.carbs+=c.c; d.prot+=c.p; d.gras+=c.g; d.comidas.push({...c}); }); guardarDatos(); } }
@@ -827,17 +845,17 @@
             let r = getUsuarioActual().perfil.metaKcal + (getDatosHoy().ejercicioKcal||0) - getDatosHoy().calorias;
             if (r < 80) { c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Casi al límite. Toma agua o café.</p>`; c.classList.remove('hidden'); return; }
             let cand = obtenerBibliotecaCompleta().filter(i => i.kcal >= 70 && i.kcal <= r).sort(()=>0.5-Math.random()).slice(0,3);
-            if (!cand.length) c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Tienes ${r} kcal. Arma algo a tu gusto.</p>`; else { let h = `<p class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Opciones para tus ${r} kcal:</p>`; cand.forEach(s => h += `<div class="flex justify-between items-center bg-white/80 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg text-xs mt-1"><span class="truncate pr-2 font-medium">${s.nombre}</span><span class="font-bold text-brand-600">${s.kcal} kcal</span></div>`); c.innerHTML = h; } c.classList.remove('hidden');
+            if (!cand.length) c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Tienes ${r} kcal. Arma algo a tu gusto.</p>`; else { let h = `<p class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Opciones para tus ${r} kcal:</p>`; cand.forEach(s => h += `<div class="flex justify-between items-center bg-white/80 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg text-xs mt-1"><span class="truncate pr-2 font-medium">${esc(s.nombre)}</span><span class="font-bold text-brand-600">${s.kcal} kcal</span></div>`); c.innerHTML = h; } c.classList.remove('hidden');
         }
         function guardarComoReceta(tiempo) {
             let d = getDatosHoy(); let items = d.comidas.filter(c => (c.tiempo || 'Almuerzo') === tiempo);
             if (items.length < 2) return alert("Agrega al menos 2 alimentos a este tiempo para crear un combo.");
             let nombre = prompt(`¿Nombre para esta Receta de ${items.length} alimentos?`); if (!nombre) return;
             let tKcal = 0, tC = 0, tP = 0, tG = 0; items.forEach(i => { tKcal += i.kcal; tC += i.c; tP += i.p; tG += i.g; });
-            getUsuarioActual().alimentosPersonalizados.push({ nombre: nombre + " (Combo)", kcal: tKcal, c: tC, p: tP, g: tG }); guardarDatos(); actualizarDatalist(); alert(`¡Combo "${nombre}" guardado!`);
+            getUsuarioActual().alimentosPersonalizados.push({ nombre: limpiarB(nombre) + " (Combo)", kcal: tKcal, c: tC, p: tP, g: tG }); guardarDatos(); actualizarDatalist(); alert(`¡Combo "${nombre}" guardado!`);
         }
         function toggleFavorito(nombreBase, kcal, c, p, g) { let u = getUsuarioActual(); u.favoritos = u.favoritos || []; const idx = u.favoritos.findIndex(f => normalizarTexto(f.nombre) === normalizarTexto(nombreBase)); if (idx >= 0) u.favoritos.splice(idx, 1); else u.favoritos.push({ nombre: nombreBase, kcal: kcal, c: c, p: p, g: g }); guardarDatos(); renderizarFavoritos(); }
-        function renderizarFavoritos() { let favs = getUsuarioActual().favoritos || []; let barra = document.getElementById('barraFavoritos'); let cont = document.getElementById('listaFavoritosChips'); if (favs.length === 0) { barra.classList.add('hidden'); return; } barra.classList.remove('hidden'); cont.innerHTML = ''; favs.forEach((f, idx) => { cont.innerHTML += `<button onclick="agregarFavoritoRapido(${idx})" class="shrink-0 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800/60 text-yellow-800 dark:text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-100 transition-colors flex items-center gap-1.5"><i class="fas fa-plus-circle text-brand-500"></i><span class="truncate max-w-[130px]">${f.nombre.split('(')[0].trim()}</span></button>`; }); }
+        function renderizarFavoritos() { let favs = getUsuarioActual().favoritos || []; let barra = document.getElementById('barraFavoritos'); let cont = document.getElementById('listaFavoritosChips'); if (favs.length === 0) { barra.classList.add('hidden'); return; } barra.classList.remove('hidden'); cont.innerHTML = ''; favs.forEach((f, idx) => { cont.innerHTML += `<button onclick="agregarFavoritoRapido(${idx})" class="shrink-0 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800/60 text-yellow-800 dark:text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-100 transition-colors flex items-center gap-1.5"><i class="fas fa-plus-circle text-brand-500"></i><span class="truncate max-w-[130px]">${esc(f.nombre.split('(')[0].trim())}</span></button>`; }); }
         function agregarFavoritoRapido(idx) { let f = getUsuarioActual().favoritos[idx]; if (!f) return; let d = getDatosHoy(); d.calorias += f.kcal; d.carbs += f.c; d.prot += f.p; d.gras += f.g; d.comidas.push({ texto: f.nombre, nombreBase: f.nombre, kcalBase: f.kcal, cBase: f.c, pBase: f.p, gBase: f.g, kcal: f.kcal, c: f.c, p: f.p, g: f.g, tiempo: tiempoComidaActual }); guardarDatos(); }
 
         function guardarHabitos() { let d=getDatosHoy(); d.pasos=parseInt(document.getElementById('inpPasos').value)||null; d.sueno=parseFloat(document.getElementById('inpSueno').value)||null; d.energia=document.getElementById('inpEnergia').value||null; guardarDatos(); }
@@ -892,11 +910,11 @@
             
             let pct = Math.min((dia.calorias / mE) * 100, 100); document.getElementById('anilloCalorias').style.strokeDashoffset = 283 - (283 * pct) / 100;
             if(dia.calorias > mE) { document.getElementById('anilloCalorias').style.stroke = "#ef4444"; document.getElementById('alertaExceso').classList.remove('hidden'); } 
-            else { document.getElementById('anilloCalorias').style.stroke = "var(--b500)"; document.getElementById('alertaExceso').classList.add('hidden'); }
+            else { document.getElementById('anilloCalorias').style.stroke = "rgb(var(--b500))"; document.getElementById('alertaExceso').classList.add('hidden'); }
 
-            if (res <= 50 && res >= -10 && dia.comidas.length > 0 && !dia.celebrado) {
+            if (res <= 50 && res >= -10 && dia.comidas.length > 0 && !dia.celebrado && getFechaStr(fechaActual) === getFechaStr(new Date())) {
                 if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#22c55e', '#facc15', '#ef4444', '#3b82f6'] });
-                dia.celebrado = true; guardarDatos();
+                dia.celebrado = true; persistir();
             }
 
             actualizarAsistenteToxico(dia, p, mE);
@@ -915,14 +933,14 @@
                         cL.forEach(c => { 
                             let esF = fN.includes(normalizarTexto(c.nombreBase||c.texto)); let sC = esF ? 'fas fa-star text-yellow-400' : 'far fa-star text-gray-300 dark:text-slate-600';
                             let kB=c.kcalBase||c.kcal; let cB=c.cBase!==undefined?c.cBase:c.c; let pB=c.pBase!==undefined?c.pBase:c.p; let gB=c.gBase!==undefined?c.gBase:c.g;
-                            h += `<li class="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col gap-1 transition-colors"><div class="flex justify-between items-center"><div class="flex items-center gap-2 min-w-0"><button onclick="toggleFavorito('${(c.nombreBase||c.texto).replace(/'/g, "\\'")}', ${kB}, ${cB}, ${pB}, ${gB})" class="shrink-0 p-0.5"><i class="${sC} text-xs transition-colors"></i></button><span class="text-gray-800 dark:text-slate-100 font-semibold text-xs truncate max-w-[170px]">${c.texto}</span></div><div class="flex items-center gap-2.5 shrink-0 ml-2"><span class="text-brand-600 font-bold text-xs">${c.kcal} kcal</span><button onclick="borrarComida(${c.idx})" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-trash text-xs"></i></button></div></div><div class="flex gap-3 text-[10px] text-gray-400 pl-6"><span>C: ${c.c}g</span> <span>P: ${c.p}g</span> <span>G: ${c.g}g</span></div></li>`;
+                            h += `<li class="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col gap-1 transition-colors"><div class="flex justify-between items-center"><div class="flex items-center gap-2 min-w-0"><button data-n="${esc(c.nombreBase||c.texto)}" onclick="toggleFavorito(this.dataset.n, ${kB}, ${cB}, ${pB}, ${gB})" class="shrink-0 p-0.5"><i class="${sC} text-xs transition-colors"></i></button><span class="text-gray-800 dark:text-slate-100 font-semibold text-xs truncate max-w-[170px]">${esc(c.texto)}</span></div><div class="flex items-center gap-2.5 shrink-0 ml-2"><span class="text-brand-600 font-bold text-xs">${c.kcal} kcal</span><button onclick="borrarComida(${c.idx})" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-trash text-xs"></i></button></div></div><div class="flex gap-3 text-[10px] text-gray-400 pl-6"><span>C: ${c.c}g</span> <span>P: ${c.p}g</span> <span>G: ${c.g}g</span></div></li>`;
                         }); h += `</ul></div>`; 
                     }
                 }); cont.innerHTML = h;
             }
             
             const rut = document.getElementById('listaRutinaHoy'); rut.innerHTML = ''; document.getElementById('conteoEjercicios').innerText = `${dia.rutina.length} series`;
-            dia.rutina.forEach((r, idx) => { rut.innerHTML += `<li class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-xl border border-emerald-100 dark:border-emerald-800 text-xs transition-colors"><span class="font-bold text-emerald-800 dark:text-emerald-300 truncate pr-2">${r.e}</span><div class="shrink-0 flex items-center gap-3"><span class="text-emerald-700 dark:text-emerald-400 font-medium">${r.p} kg x ${r.r} reps</span><button onclick="borrarEjercicioRutina(${idx})" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-times"></i></button></div></li>`; });
+            dia.rutina.forEach((r, idx) => { rut.innerHTML += `<li class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-xl border border-emerald-100 dark:border-emerald-800 text-xs transition-colors"><span class="font-bold text-emerald-800 dark:text-emerald-300 truncate pr-2">${esc(r.e)}</span><div class="shrink-0 flex items-center gap-3"><span class="text-emerald-700 dark:text-emerald-400 font-medium">${r.p} kg x ${r.r} reps</span><button onclick="borrarEjercicioRutina(${idx})" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-times"></i></button></div></li>`; });
 
             // RACHA 
             let rc=0; let fC=new Date(); let hoS=getFechaStr(fC); 
@@ -991,7 +1009,7 @@
         function exportarCodigoReto() { 
             let u=getUsuarioActual(); 
             let payload = {tipo:"NutriWeb_Reto", n:u.nombre, r:parseInt(document.getElementById('rachaDisplay').innerText)||0, m:u.perfil.mejorRacha, x:u.perfil.triviaXP||0}; 
-            let c=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); 
+            let c=aB64(payload); 
             navigator.clipboard.writeText(c).then(()=>alert("¡Código copiado con tu XP actual!")).catch(()=>prompt("Copia:",c)); 
         }
         
@@ -999,10 +1017,10 @@
             let c = document.getElementById('inpCodigoAmigo').value; if(!c) return; 
             try { 
                 c = c.replace(/\s+/g, ''); 
-                let p = JSON.parse(decodeURIComponent(escape(atob(c)))); 
+                let p = deB64(c); 
                 if(p.tipo!=="NutriWeb_Reto") throw new Error(); 
                 let u=getUsuarioActual(); 
-                u.perfil.amigosReto[normalizarTexto(p.n)]={nombre:p.n, racha:p.r, mejor:p.m, xp:p.x||0}; 
+                let nm=limpiarB(p.n).slice(0,30); if(!nm) throw new Error(); u.perfil.amigosReto[normalizarTexto(nm)]={nombre:nm, racha:parseInt(p.r)||0, mejor:parseInt(p.m)||0, xp:parseInt(p.x)||0}; 
                 guardarDatos(); 
                 document.getElementById('inpCodigoAmigo').value=''; 
                 alert(`¡${p.n} añadido!`); 
@@ -1029,23 +1047,23 @@
                         <div class="flex items-center gap-2">
                             <span class="text-xl">${ic}</span>
                             <div class="leading-tight">
-                                <span class="font-bold text-sm text-gray-800 dark:text-slate-200 block">${i.nombre}</span>
-                                <span class="text-[10px] text-green-600 dark:text-green-400 font-bold"><i class="fas fa-fire"></i> ${i.xp} XP</span>
+                                <span class="font-bold text-sm text-gray-800 dark:text-slate-200 block">${esc(i.nombre)}</span>
+                                <span class="text-[10px] text-green-600 dark:text-green-400 font-bold"><i class="fas fa-fire"></i> ${esc(i.xp)} XP</span>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-black text-orange-500 text-sm">${i.racha} días 🔥</p>
-                            <p class="text-[10px] text-gray-400">Récord: ${i.mejor}</p>
+                            <p class="font-black text-orange-500 text-sm">${esc(i.racha)} días 🔥</p>
+                            <p class="text-[10px] text-gray-400">Récord: ${esc(i.mejor)}</p>
                         </div>
                     </div>`; 
             }); 
             document.getElementById('listaRetoGrupal').innerHTML=h; 
         }
 
-        function exportarBibliotecaComidas() { let lista = getUsuarioActual().alimentosPersonalizados || []; if (lista.length === 0) return alert("Sin comidas nuevas."); let c = btoa(unescape(encodeURIComponent(JSON.stringify({ tipo: "NutriWeb_Comidas", items: lista })))); navigator.clipboard.writeText(c).then(() => alert(`Copiadas.`)).catch(() => prompt("Copia:", c)); }
-        function importarBibliotecaComidas() { let c = prompt("Pega código:"); if (!c) return; try { c = c.replace(/\s+/g, ''); let p = JSON.parse(decodeURIComponent(escape(atob(c)))); if (p.tipo !== "NutriWeb_Comidas") throw new Error(); let u = getUsuarioActual(); let ex = obtenerBibliotecaCompleta().map(i => normalizarTexto(i.nombre)); let ag = 0; p.items.forEach(i => { if (i.nombre && i.kcal && !ex.includes(normalizarTexto(i.nombre))) { u.alimentosPersonalizados.push({ nombre: i.nombre, kcal: parseInt(i.kcal)||0, c: parseInt(i.c)||0, p: parseInt(i.p)||0, g: parseInt(i.g)||0 }); ex.push(normalizarTexto(i.nombre)); ag++; } }); guardarDatos(); actualizarDatalist(); alert(`¡${ag} agregadas!`); } catch (e) { alert("Inválido."); } }
-        function exportarRespaldo() { let c = btoa(unescape(encodeURIComponent(JSON.stringify(getUsuarioActual())))); navigator.clipboard.writeText(c).then(() => alert("Respaldo copiado.")).catch(() => prompt("Copia:", c)); }
-        function importarRespaldo() { let c = prompt("Pega código de respaldo:"); if (!c) return; try { c = c.replace(/\s+/g, ''); let d = JSON.parse(decodeURIComponent(escape(atob(c)))); if (!d.nombre) throw new Error(); usuariosDB[usuarioActivoKey] = d; guardarDatos(); entrarAlSistema(usuarioActivoKey); alert("¡Restaurado!"); } catch (e) { alert("Inválido."); } }
+        function exportarBibliotecaComidas() { let lista = getUsuarioActual().alimentosPersonalizados || []; if (lista.length === 0) return alert("Sin comidas nuevas."); let c = aB64({ tipo: "NutriWeb_Comidas", items: lista }); navigator.clipboard.writeText(c).then(() => alert(`Copiadas.`)).catch(() => prompt("Copia:", c)); }
+        function importarBibliotecaComidas() { let c = prompt("Pega código:"); if (!c) return; try { c = c.replace(/\s+/g, ''); let p = deB64(c); if (p.tipo !== "NutriWeb_Comidas") throw new Error(); let u = getUsuarioActual(); let ex = obtenerBibliotecaCompleta().map(i => normalizarTexto(i.nombre)); let ag = 0; p.items.forEach(i => { if (i.nombre && i.kcal && !ex.includes(normalizarTexto(i.nombre))) { u.alimentosPersonalizados.push({ nombre: i.nombre, kcal: parseInt(i.kcal)||0, c: parseInt(i.c)||0, p: parseInt(i.p)||0, g: parseInt(i.g)||0 }); ex.push(normalizarTexto(i.nombre)); ag++; } }); guardarDatos(); actualizarDatalist(); alert(`¡${ag} agregadas!`); } catch (e) { alert("Inválido."); } }
+        function exportarRespaldo() { let { pin, pinHash, salt, ...resto } = getUsuarioActual(); let c = aB64(resto); navigator.clipboard.writeText(c).then(() => alert("Respaldo copiado (sin PIN).")).catch(() => prompt("Copia:", c)); }
+        function importarRespaldo() { let c = prompt("Pega código de respaldo:"); if (!c) return; try { let d = deB64(c), act = getUsuarioActual(); if (!d || typeof d.nombre !== 'string' || !d.perfil || typeof d.perfil !== 'object' || !d.historial || typeof d.historial !== 'object') throw new Error(); d.alimentosPersonalizados = Array.isArray(d.alimentosPersonalizados) ? d.alimentosPersonalizados : []; d.favoritos = Array.isArray(d.favoritos) ? d.favoritos : []; delete d.pin; d.pinHash = act.pinHash; d.salt = act.salt; if (act.pin !== undefined) d.pin = act.pin; if (!confirm("Esto reemplazará tus datos actuales. ¿Continuar?")) return; usuariosDB[usuarioActivoKey] = d; guardarDatos(); entrarAlSistema(usuarioActivoKey); alert("¡Restaurado!"); } catch (e) { alert("Inválido."); } }
 
         // =========================================================
         // MINIJUEGO: TRIVIA ESTILO DUOLINGO
@@ -1203,7 +1221,7 @@
             }
         }
 
-        inicializarPWA(); if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) entrarAlSistema(usuarioActivoKey); else renderizarPerfilesRapidos();
+        inicializarPWA(); etiquetarBotones(); new MutationObserver(etiquetarBotones).observe(document.body, { childList: true, subtree: true }); if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) entrarAlSistema(usuarioActivoKey); else renderizarPerfilesRapidos();
     </script>
 </body>
 </html>
