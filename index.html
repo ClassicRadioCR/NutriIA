@@ -3,53 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#16a34a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NutriWeb">
     <title>NutriWeb - Tu Diario Nutricional</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .ring-progress { transition: stroke-dashoffset 0.5s ease-in-out; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+        .fuego-activo { animation: pulseGlow 2s infinite ease-in-out; }
     </style>
 </head>
-<body class="bg-slate-100 text-gray-800">
+<body class="bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200">
 
     <!-- ===================================================================== -->
     <!-- PANTALLA DE BIENVENIDA, REGISTRO E INICIO DE SESIÓN                   -->
     <!-- ===================================================================== -->
     <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-4 bg-gradient-to-br from-green-500 to-emerald-700">
-        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden">
             
             <!-- Encabezado Marca -->
-            <div class="bg-slate-900 text-white p-6 text-center">
+            <div class="bg-slate-900 text-white p-6 text-center relative">
                 <div class="w-14 h-14 bg-green-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
                     <i class="fas fa-leaf text-2xl text-white"></i>
                 </div>
                 <h1 class="text-2xl font-black tracking-tight">NutriWeb</h1>
-                <p class="text-xs text-slate-400 mt-1">Control de calorías, macros y ayuno</p>
+                <p class="text-xs text-slate-400 mt-1">Control inteligente de calorías, macros y ayuno</p>
             </div>
 
             <!-- Pestañas Login / Registro -->
-            <div class="flex border-b border-gray-200">
-                <button onclick="switchAuthTab('login')" id="tabBtnLogin" class="flex-1 py-3.5 text-sm font-bold text-green-600 border-b-2 border-green-500 bg-green-50/50">Entrar</button>
-                <button onclick="switchAuthTab('register')" id="tabBtnRegister" class="flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600">Crear Cuenta</button>
+            <div class="flex border-b border-gray-200 dark:border-slate-800">
+                <button onclick="switchAuthTab('login')" id="tabBtnLogin" class="flex-1 py-3.5 text-sm font-bold text-green-600 border-b-2 border-green-500 bg-green-50/50 dark:bg-slate-800">Entrar</button>
+                <button onclick="switchAuthTab('register')" id="tabBtnRegister" class="flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200">Crear Cuenta</button>
             </div>
 
             <!-- FORMULARIO 1: INICIAR SESIÓN -->
             <div id="formLogin" class="p-6 space-y-4">
-                <div id="listaUsuariosRapidos" class="hidden space-y-2 pb-2 border-b border-gray-100">
+                <div id="listaUsuariosRapidos" class="hidden space-y-2 pb-2 border-b border-gray-100 dark:border-slate-800">
                     <p class="text-xs font-bold text-gray-400 uppercase">Perfiles en este dispositivo:</p>
                     <div id="botonesPerfiles" class="flex flex-wrap gap-2"></div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tu Usuario o Nombre</label>
-                    <input type="text" id="loginUser" placeholder="Ej: Carlos" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Tu Usuario o Nombre</label>
+                    <input type="text" id="loginUser" placeholder="Ej: Carlos" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">PIN de acceso (4 números)</label>
-                    <input type="password" id="loginPin" maxlength="4" inputmode="numeric" placeholder="••••" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl tracking-widest text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-green-500" onkeypress="if(event.key === 'Enter') iniciarSesion()">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">PIN de acceso (4 números)</label>
+                    <input type="password" id="loginPin" maxlength="4" inputmode="numeric" placeholder="••••" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl tracking-widest text-center text-lg font-bold focus:outline-none focus:ring-2 focus:ring-green-500" onkeypress="if(event.key === 'Enter') iniciarSesion()">
                 </div>
                 <button onclick="iniciarSesion()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-green-500/30 transition-all">
                     Ingresar a mi diario <i class="fas fa-arrow-right ml-1"></i>
@@ -60,23 +74,23 @@
             <div id="formRegister" class="hidden p-6 space-y-3 max-h-[75vh] overflow-y-auto">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Nombre / Usuario *</label>
-                        <input type="text" id="regUser" placeholder="Ej: Ana" class="w-full p-2.5 bg-gray-50 border rounded-xl text-sm">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nombre / Usuario *</label>
+                        <input type="text" id="regUser" placeholder="Ej: Ana" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">PIN (4 dígitos) *</label>
-                        <input type="password" id="regPin" maxlength="4" inputmode="numeric" placeholder="1234" class="w-full p-2.5 bg-gray-50 border rounded-xl text-sm text-center font-bold">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">PIN (4 dígitos) *</label>
+                        <input type="password" id="regPin" maxlength="4" inputmode="numeric" placeholder="1234" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center font-bold">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Edad *</label>
-                        <input type="number" id="regEdad" placeholder="28" class="w-full p-2.5 bg-gray-50 border rounded-xl text-sm">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Edad *</label>
+                        <input type="number" id="regEdad" placeholder="28" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Género</label>
-                        <select id="regGenero" class="w-full p-2.5 bg-gray-50 border rounded-xl text-sm">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Género</label>
+                        <select id="regGenero" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm">
                             <option value="m">Hombre</option>
                             <option value="f">Mujer</option>
                         </select>
@@ -85,18 +99,18 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Peso actual (kg) *</label>
-                        <input type="number" id="regPeso" step="0.1" placeholder="72.5" class="w-full p-2.5 bg-gray-50 border rounded-xl text-sm">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Peso actual (kg) *</label>
+                        <input type="number" id="regPeso" step="0.1" placeholder="72.5" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Altura (cm) *</label>
-                        <input type="number" id="regAltura" placeholder="170" class="w-full p-2.5 bg-gray-50 border rounded-xl text-sm">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Altura (cm) *</label>
+                        <input type="number" id="regAltura" placeholder="170" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Nivel de Actividad</label>
-                    <select id="regActividad" class="w-full p-2.5 bg-gray-50 border rounded-xl text-sm">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nivel de Actividad</label>
+                    <select id="regActividad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm">
                         <option value="1.2" selected>Sedentario (Trabajo sentado / poco ejercicio)</option>
                         <option value="1.375">Ligero (1-3 días/semana)</option>
                         <option value="1.55">Moderado (3-5 días/semana)</option>
@@ -105,8 +119,8 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Tu Objetivo Principal</label>
-                    <select id="regObjetivo" class="w-full p-2.5 bg-gray-50 border rounded-xl text-sm font-bold text-blue-600">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Tu Objetivo Principal</label>
+                    <select id="regObjetivo" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400">
                         <option value="-500">Perder grasa (-500 kcal)</option>
                         <option value="-250">Definición suave (-250 kcal)</option>
                         <option value="0" selected>Mantener mi peso</option>
@@ -127,24 +141,28 @@
     <div id="mainApp" class="hidden pb-24">
 
         <!-- BARRA SUPERIOR -->
-        <div class="bg-green-600 text-white p-3.5 sticky top-0 z-20 shadow-md">
+        <div class="bg-green-600 dark:bg-slate-900 text-white p-3.5 sticky top-0 z-20 shadow-md border-b border-transparent dark:border-slate-800">
             <div class="flex justify-between items-center max-w-md mx-auto">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-green-800 flex items-center justify-center font-bold text-sm uppercase" id="userAvatar">U</div>
-                    <span class="font-bold text-sm truncate max-w-[90px]" id="userNameHeader">Usuario</span>
+                    <div class="w-8 h-8 rounded-full bg-green-800 dark:bg-green-600 flex items-center justify-center font-bold text-sm uppercase" id="userAvatar">U</div>
+                    <span class="font-bold text-sm truncate max-w-[75px]" id="userNameHeader">Usuario</span>
                 </div>
 
-                <div class="flex items-center gap-1 bg-green-700/60 px-2 py-1 rounded-xl">
+                <div class="flex items-center gap-1 bg-green-700/60 dark:bg-slate-800 px-2 py-1 rounded-xl">
                     <button onclick="cambiarFecha(-1)" class="p-1.5 hover:text-green-200"><i class="fas fa-chevron-left text-xs"></i></button>
-                    <span class="font-bold text-sm px-2" id="fechaDisplay">Hoy</span>
+                    <span class="font-bold text-xs px-1.5" id="fechaDisplay">Hoy</span>
                     <button onclick="cambiarFecha(1)" class="p-1.5 hover:text-green-200"><i class="fas fa-chevron-right text-xs"></i></button>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1 font-bold text-orange-200 text-sm" title="Días seguidos registrando">
-                        <i class="fas fa-fire"></i> <span id="rachaDisplay">0</span>
-                    </div>
-                    <button onclick="cerrarSesion()" class="text-green-200 hover:text-white text-sm" title="Salir / Cambiar usuario">
+                <div class="flex items-center gap-2">
+                    <button onclick="cambiarTab('progreso')" class="flex items-center gap-1 bg-black/20 hover:bg-black/30 px-2.5 py-1 rounded-full font-bold text-orange-200 text-xs transition-colors" title="Ver niveles y medallas de racha">
+                        <i class="fas fa-fire text-orange-400" id="iconoFuegoHeader"></i>
+                        <span id="rachaDisplay">0</span>
+                    </button>
+                    <button onclick="toggleDarkMode()" class="text-green-100 hover:text-white text-sm p-1" title="Modo Oscuro / Claro">
+                        <i class="fas fa-moon" id="darkModeIcon"></i>
+                    </button>
+                    <button onclick="cerrarSesion()" class="text-green-200 hover:text-white text-sm p-1" title="Salir / Cambiar usuario">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
                 </div>
@@ -155,65 +173,159 @@
         <div class="max-w-md mx-auto p-4">
 
             <!-- PESTAÑA 1: DIARIO -->
-            <div id="tab-diario" class="tab-content active space-y-5">
+            <div id="tab-diario" class="tab-content active space-y-4">
                 
-                <div id="alertaExceso" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-xl shadow-sm">
-                    <p class="font-bold text-sm"><i class="fas fa-exclamation-triangle"></i> ¡Atención!</p>
-                    <p class="text-xs">Has superado tu meta de calorías para hoy.</p>
+                <!-- Banner Instalar App (PWA) -->
+                <div id="bannerInstalar" class="hidden bg-slate-900 dark:bg-slate-800 text-white p-3.5 rounded-2xl shadow-sm flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-green-500 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fas fa-mobile-alt text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold">Instala NutriWeb en tu inicio</p>
+                            <p class="text-[11px] text-slate-400">Safari: Compartir → "Agregar a inicio" • Chrome: Menú ⋮ → "Instalar"</p>
+                        </div>
+                    </div>
+                    <button onclick="cerrarBannerInstalar()" class="text-slate-400 hover:text-white p-1"><i class="fas fa-times"></i></button>
+                </div>
+
+                <!-- TARJETA DE RACHA Y NIVEL GAMIFICADO -->
+                <div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white p-4 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="flex justify-between items-center relative z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-2xl shadow-inner" id="rachaEmojiNivel">
+                                🌱
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-black text-base" id="rachaDiasTexto">0 días de racha</span>
+                                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-black/25" id="rachaTituloNivel">Novato</span>
+                                </div>
+                                <p class="text-[11px] text-orange-100 mt-0.5" id="rachaSubtitulo">Registra tu primera comida para encender la llama</p>
+                            </div>
+                        </div>
+                        <div class="text-right shrink-0" id="escudoRachaBox" title="Escudo protector: salva tu racha si olvidas registrar 1 día">
+                            <div class="inline-flex items-center gap-1 bg-white/20 px-2.5 py-1 rounded-xl text-xs font-bold">
+                                <i class="fas fa-shield-alt text-cyan-200"></i>
+                                <span id="escudoEstadoText">Activo</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Barra de progreso hacia el siguiente nivel -->
+                    <div class="mt-3 relative z-10">
+                        <div class="flex justify-between text-[10px] font-bold text-orange-100 mb-1">
+                            <span id="rachaProgresoLabel">Progreso de nivel</span>
+                            <span id="rachaMetaSiguiente">Meta: 3 días</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
+                            <div id="rachaBarraProgreso" class="h-full bg-white rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="alertaExceso" class="hidden bg-red-100 dark:bg-red-950/80 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-3.5 rounded-r-xl shadow-sm">
+                    <p class="font-bold text-xs"><i class="fas fa-exclamation-triangle"></i> ¡Atención! Has superado tu meta de calorías para hoy.</p>
                 </div>
 
                 <!-- Resumen y Anillo de Calorías -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm text-center relative">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm text-center relative border border-transparent dark:border-slate-800">
                     <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-gray-500 font-bold text-sm">Resumen del Día</h2>
-                        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700" id="kcalRestantesBadge">Restan: 2000 kcal</span>
+                        <h2 class="text-gray-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Balance del Día</h2>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="compartirResumenWhatsApp()" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-colors flex items-center gap-1" title="Compartir progreso en WhatsApp">
+                                <i class="fab fa-whatsapp"></i> Compartir
+                            </button>
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400" id="kcalRestantesBadge">Restan: 2000</span>
+                        </div>
                     </div>
 
-                    <div class="relative w-40 h-40 mx-auto">
+                    <div class="relative w-36 h-36 mx-auto">
                         <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="45" fill="none" stroke="#e5e7eb" stroke-width="10"></circle>
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" class="text-gray-200 dark:text-slate-800" stroke-width="10"></circle>
                             <circle id="anilloCalorias" cx="50" cy="50" r="45" fill="none" stroke="#22c55e" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" class="ring-progress"></circle>
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
-                            <span class="text-3xl font-black text-gray-800" id="caloriasConsumidas">0</span>
-                            <span class="text-xs text-gray-400 font-medium" id="metaCaloriasText">/ 2000 kcal</span>
+                            <span class="text-3xl font-black text-gray-800 dark:text-white" id="caloriasConsumidas">0</span>
+                            <span class="text-[11px] text-gray-400 font-medium" id="metaCaloriasText">/ 2000 kcal</span>
                         </div>
                     </div>
 
+                    <!-- Desglose Meta + Ejercicio -->
+                    <div id="infoEjercicioBadge" class="hidden mt-2 text-[11px] font-semibold text-orange-500">
+                        <i class="fas fa-running"></i> +<span id="kcalEjercicioText">0</span> kcal ganadas por ejercicio hoy
+                    </div>
+
                     <!-- Macros con Metas -->
-                    <div class="grid grid-cols-3 gap-2 mt-6 text-sm border-t pt-4">
-                        <div class="bg-blue-50/60 p-2 rounded-xl">
-                            <p class="text-blue-600 font-bold"><span id="carbTotal">0</span>g</p>
-                            <p class="text-gray-400 text-[11px]" id="metaCarbs">/ 250g</p>
-                            <p class="text-gray-600 text-xs font-semibold mt-0.5">Carbs</p>
+                    <div class="grid grid-cols-3 gap-2 mt-4 text-sm border-t dark:border-slate-800 pt-3.5">
+                        <div class="bg-blue-50/70 dark:bg-blue-950/40 p-2 rounded-xl">
+                            <p class="text-blue-600 dark:text-blue-400 font-bold"><span id="carbTotal">0</span>g</p>
+                            <p class="text-gray-400 text-[10px]" id="metaCarbs">/ 250g</p>
+                            <p class="text-gray-600 dark:text-slate-300 text-xs font-semibold mt-0.5">Carbs</p>
                         </div>
-                        <div class="bg-red-50/60 p-2 rounded-xl">
-                            <p class="text-red-600 font-bold"><span id="protTotal">0</span>g</p>
-                            <p class="text-gray-400 text-[11px]" id="metaProt">/ 100g</p>
-                            <p class="text-gray-600 text-xs font-semibold mt-0.5">Proteína</p>
+                        <div class="bg-red-50/70 dark:bg-red-950/40 p-2 rounded-xl">
+                            <p class="text-red-600 dark:text-red-400 font-bold"><span id="protTotal">0</span>g</p>
+                            <p class="text-gray-400 text-[10px]" id="metaProt">/ 100g</p>
+                            <p class="text-gray-600 dark:text-slate-300 text-xs font-semibold mt-0.5">Proteína</p>
                         </div>
-                        <div class="bg-yellow-50/60 p-2 rounded-xl">
-                            <p class="text-yellow-600 font-bold"><span id="grasTotal">0</span>g</p>
-                            <p class="text-gray-400 text-[11px]" id="metaGras">/ 65g</p>
-                            <p class="text-gray-600 text-xs font-semibold mt-0.5">Grasas</p>
+                        <div class="bg-yellow-50/70 dark:bg-yellow-950/40 p-2 rounded-xl">
+                            <p class="text-yellow-600 dark:text-yellow-400 font-bold"><span id="grasTotal">0</span>g</p>
+                            <p class="text-gray-400 text-[10px]" id="metaGras">/ 65g</p>
+                            <p class="text-gray-600 dark:text-slate-300 text-xs font-semibold mt-0.5">Grasas</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Entrada Inteligente Local con Selector de Medidas -->
-                <div class="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+                <!-- ASISTENTE INTELIGENTE Y RECOMENDADOR DE CENA -->
+                <div class="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 rounded-2xl shadow-sm border border-indigo-100 dark:border-slate-700 space-y-2.5">
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="flex gap-2.5 items-start">
+                            <div class="w-7 h-7 rounded-lg bg-indigo-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="fas fa-robot text-xs"></i>
+                            </div>
+                            <p class="text-xs text-slate-700 dark:text-slate-200 leading-relaxed" id="mensajeAsistente">
+                                Analizando tu progreso de hoy...
+                            </p>
+                        </div>
+                        <button onclick="sugerirQueComer()" class="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl shadow-sm transition-colors">
+                            ¿Qué como?
+                        </button>
+                    </div>
+                    <div id="cajaSugerenciasCena" class="hidden pt-2 border-t border-indigo-200/60 dark:border-slate-700 space-y-1.5"></div>
+                </div>
+
+                <!-- ENTRADA DE ALIMENTOS CON TIEMPO DE COMIDA, FAVORITOS Y MEDIDAS -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm space-y-3 border border-transparent dark:border-slate-800">
                     <div class="flex justify-between items-center">
-                        <label class="text-sm font-bold text-gray-700"><i class="fas fa-utensils text-green-500"></i> Agrega tu comida <span id="contadorAlimentos" class="text-xs font-normal text-gray-400"></span></label>
-                        <button onclick="toggleModoManual()" id="btnToggleModo" class="text-xs text-blue-600 font-bold hover:underline">Ingreso manual</button>
+                        <label class="text-sm font-bold text-gray-700 dark:text-slate-200"><i class="fas fa-utensils text-green-500"></i> Registrar Alimento</label>
+                        <div class="flex items-center gap-3">
+                            <button onclick="copiarDiaAnterior()" class="text-xs text-purple-600 dark:text-purple-400 font-bold hover:underline" title="Duplicar las comidas de ayer">
+                                <i class="fas fa-copy"></i> Copiar ayer
+                            </button>
+                            <button onclick="toggleModoManual()" id="btnToggleModo" class="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline">Ingreso manual</button>
+                        </div>
+                    </div>
+
+                    <!-- Selector de Tiempo de Comida -->
+                    <div class="grid grid-cols-4 gap-1.5 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
+                        <button onclick="seleccionarTiempoComida('Desayuno')" id="tc-Desayuno" class="tc-btn py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm">Desayuno</button>
+                        <button onclick="seleccionarTiempoComida('Almuerzo')" id="tc-Almuerzo" class="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400">Almuerzo</button>
+                        <button onclick="seleccionarTiempoComida('Cena')" id="tc-Cena" class="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400">Cena</button>
+                        <button onclick="seleccionarTiempoComida('Snacks')" id="tc-Snacks" class="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400">Snacks</button>
+                    </div>
+
+                    <!-- Barra de Favoritos Rápidos (1 toque) -->
+                    <div id="barraFavoritos" class="hidden space-y-1">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase"><i class="fas fa-star text-yellow-400"></i> Tus Favoritos (1 toque):</p>
+                        <div id="listaFavoritosChips" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
                     </div>
 
                     <!-- Modo Búsqueda Rápida + Medida -->
                     <div id="modoBusqueda" class="space-y-2">
-                        <input type="text" id="inputComida" list="sugerenciasAlimentos" placeholder="Escribe: sardina, huevo, casado, pollo..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" onkeypress="if(event.key === 'Enter') registrarComidaLocal()">
+                        <input type="text" id="inputComida" list="sugerenciasAlimentos" placeholder="Busca: sardina, huevo, casado, pollo..." class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500" onkeypress="if(event.key === 'Enter') registrarComidaLocal()">
                         <datalist id="sugerenciasAlimentos"></datalist>
                         
                         <div class="flex gap-2">
-                            <select id="selectMedida" class="flex-1 px-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <select id="selectMedida" class="flex-1 px-3 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500">
                                 <option value="1">1 unidad / porción estándar</option>
                                 <option value="0.25">1/4 (Un cuarto)</option>
                                 <option value="0.5">1/2 (Media taza / mitad)</option>
@@ -230,14 +342,14 @@
 
                     <!-- Modo Manual Exacto -->
                     <div id="modoManual" class="hidden space-y-2 pt-1">
-                        <input type="text" id="manNombre" placeholder="Nombre del alimento o marca" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm">
+                        <input type="text" id="manNombre" placeholder="Nombre del alimento o marca" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm">
                         <div class="grid grid-cols-4 gap-2">
-                            <input type="number" id="manKcal" placeholder="Kcal" class="px-2 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-center">
-                            <input type="number" id="manCarbs" placeholder="Carbs (g)" class="px-2 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-center">
-                            <input type="number" id="manProt" placeholder="Prot (g)" class="px-2 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-center">
-                            <input type="number" id="manGras" placeholder="Gras (g)" class="px-2 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm text-center">
+                            <input type="number" id="manKcal" placeholder="Kcal" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-center">
+                            <input type="number" id="manCarbs" placeholder="Carbs (g)" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-center">
+                            <input type="number" id="manProt" placeholder="Prot (g)" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-center">
+                            <input type="number" id="manGras" placeholder="Gras (g)" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-center">
                         </div>
-                        <select id="manMedida" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-600">
+                        <select id="manMedida" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs text-gray-600 dark:text-slate-300">
                             <option value="1">Medida consumida: 1 porción completa (valores de arriba)</option>
                             <option value="0.5">Medida consumida: 1/2 (Mitad de los valores)</option>
                             <option value="0.25">Medida consumida: 1/4 (Un cuarto de los valores)</option>
@@ -248,50 +360,90 @@
                     </div>
                 </div>
 
-                <!-- Agua -->
-                <div class="bg-white p-4 rounded-2xl shadow-sm">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-bold text-gray-700 text-sm"><i class="fas fa-tint text-blue-500"></i> Hidratación</h3>
-                        <span class="text-xs text-gray-400">Meta sugerida: 2000 ml</span>
-                    </div>
-                    <div class="flex justify-between items-center gap-2">
-                        <button onclick="sumarAgua(-250)" class="bg-gray-100 text-gray-600 px-3.5 py-2.5 rounded-xl font-bold text-sm hover:bg-gray-200">-250</button>
-                        <div class="text-center flex-1">
-                            <span id="aguaTotal" class="text-2xl font-black text-blue-500">0</span><span class="text-xs text-gray-400 ml-1">ml</span>
+                <!-- Agua y Ejercicio -->
+                <div class="grid grid-cols-1 gap-3">
+                    <!-- Hidratación -->
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                        <div class="flex justify-between items-center mb-2.5">
+                            <h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm"><i class="fas fa-tint text-blue-500"></i> Agua</h3>
+                            <span class="text-xs text-gray-400">Meta: 2000 ml</span>
                         </div>
-                        <button onclick="sumarAgua(250)" class="bg-blue-100 text-blue-600 px-3.5 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-200">+250</button>
-                        <button onclick="sumarAgua(500)" class="bg-blue-500 text-white px-3.5 py-2.5 rounded-xl font-bold text-sm hover:bg-blue-600">+500</button>
+                        <div class="flex justify-between items-center gap-2">
+                            <button onclick="sumarAgua(-250)" class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-3.5 py-2 rounded-xl font-bold text-sm hover:bg-gray-200">-250</button>
+                            <div class="text-center flex-1">
+                                <span id="aguaTotal" class="text-2xl font-black text-blue-500">0</span><span class="text-xs text-gray-400 ml-1">ml</span>
+                            </div>
+                            <button onclick="sumarAgua(250)" class="bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3.5 py-2 rounded-xl font-bold text-sm hover:bg-blue-200">+250</button>
+                            <button onclick="sumarAgua(500)" class="bg-blue-500 text-white px-3.5 py-2 rounded-xl font-bold text-sm hover:bg-blue-600">+500</button>
+                        </div>
+                    </div>
+
+                    <!-- Ejercicio / Calorías Quemadas -->
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                        <div class="flex justify-between items-center mb-2.5">
+                            <h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm"><i class="fas fa-fire-alt text-orange-500"></i> Ejercicio / Actividad Extra</h3>
+                            <span class="text-xs font-bold text-orange-500" id="ejercicioTotalBadge">0 kcal quemadas</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <select id="selectEjercicio" class="flex-1 px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium">
+                                <option value="120">Caminata rápida (30 min • ~120 kcal)</option>
+                                <option value="220">Pesas / Gimnasio (45 min • ~220 kcal)</option>
+                                <option value="300">Trotar / Correr (30 min • ~300 kcal)</option>
+                                <option value="250">Ciclismo / Bicicleta (30 min • ~250 kcal)</option>
+                                <option value="350">Fútbol / Deporte intenso (45 min • ~350 kcal)</option>
+                                <option value="custom">Escribir calorías manuales...</option>
+                            </select>
+                            <button onclick="registrarEjercicio()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-colors">
+                                + Sumar
+                            </button>
+                            <button onclick="reiniciarEjercicio()" id="btnResetEjercicio" class="hidden bg-gray-100 dark:bg-slate-800 text-gray-500 px-3 py-2.5 rounded-xl text-xs hover:text-red-500" title="Reiniciar ejercicio de hoy">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Lista de Comidas -->
-                <div class="bg-white p-4 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-gray-700 text-sm mb-3 border-b pb-2">Historial de Comidas</h3>
-                    <ul id="listaComidas" class="space-y-2.5"></ul>
+                <!-- HISTORIAL AGRUPADO POR TIEMPOS DE COMIDA -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4">
+                    <div class="flex justify-between items-center border-b dark:border-slate-800 pb-2">
+                        <h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm">Comidas de Hoy</h3>
+                        <span class="text-[11px] text-gray-400">Toca <i class="far fa-star"></i> para hacer favorito</span>
+                    </div>
+                    <div id="contenedorComidasAgrupadas" class="space-y-4"></div>
                 </div>
             </div>
 
-            <!-- PESTAÑA 2: PROGRESO -->
+            <!-- PESTAÑA 2: PROGRESO Y MEDALLAS -->
             <div id="tab-progreso" class="tab-content space-y-5">
-                <div class="bg-white p-5 rounded-2xl shadow-sm">
-                    <h2 class="font-bold text-gray-800 text-sm mb-4"><i class="fas fa-chart-bar text-green-500"></i> Calorías (Últimos 7 Días)</h2>
-                    <div id="graficoBarras" class="h-44 flex items-end justify-between gap-1.5 border-b border-gray-200 pb-2"></div>
+                
+                <!-- VITRINA DE LOGROS Y MEDALLAS -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-trophy text-yellow-500"></i> Tus Medallas y Logros</h2>
+                        <span class="text-xs font-bold text-orange-500" id="recordRachaText">Récord: 0 días</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2.5" id="gridMedallas"></div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-4"><i class="fas fa-chart-bar text-green-500"></i> Calorías (Últimos 7 Días)</h2>
+                    <div id="graficoBarras" class="h-44 flex items-end justify-between gap-1.5 border-b border-gray-200 dark:border-slate-800 pb-2"></div>
                     <div id="graficoFechas" class="flex justify-between text-xs text-gray-400 mt-2"></div>
                 </div>
 
-                <div class="bg-white p-5 rounded-2xl shadow-sm">
-                    <h2 class="font-bold text-gray-800 text-sm mb-3"><i class="fas fa-weight text-blue-500"></i> Registrar Peso (<span id="pesoFechaLabel">Hoy</span>)</h2>
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-3"><i class="fas fa-weight text-blue-500"></i> Registrar Peso (<span id="pesoFechaLabel">Hoy</span>)</h2>
                     <div class="flex gap-2">
-                        <input type="number" id="inputPeso" placeholder="Ej: 71.5 kg" step="0.1" class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm">
+                        <input type="number" id="inputPeso" placeholder="Ej: 71.5 kg" step="0.1" class="flex-1 px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm">
                         <button onclick="guardarPeso()" class="bg-blue-500 text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-blue-600">Guardar</button>
                     </div>
                 </div>
 
-                <div class="bg-white p-5 rounded-2xl shadow-sm">
-                    <h2 class="font-bold text-gray-800 text-sm mb-3"><i class="fas fa-history text-purple-500"></i> Evolución Semanal</h2>
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-3"><i class="fas fa-history text-purple-500"></i> Evolución Semanal</h2>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-gray-500">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <table class="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                            <thead class="text-xs text-gray-700 dark:text-slate-300 uppercase bg-gray-50 dark:bg-slate-800">
                                 <tr>
                                     <th class="px-2 py-2 rounded-l-lg">Día</th>
                                     <th class="px-2 py-2">Peso</th>
@@ -309,18 +461,18 @@
             <div id="tab-perfil" class="tab-content space-y-5">
                 
                 <!-- Tarjeta IMC Independiente -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm flex items-center justify-between border-l-4 border-blue-500">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm flex items-center justify-between border-l-4 border-blue-500">
                     <div>
-                        <h2 class="font-bold text-gray-800 text-sm">Tu IMC Actual</h2>
+                        <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm">Tu IMC Actual</h2>
                         <p class="text-sm font-medium mt-1" id="perfilImcCategoria">Requiere altura y peso</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-3xl font-black text-gray-800" id="perfilImcValor">--</p>
+                        <p class="text-3xl font-black text-gray-800 dark:text-white" id="perfilImcValor">--</p>
                     </div>
                 </div>
 
                 <!-- Ayuno Intermitente -->
-                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-sm relative overflow-hidden">
+                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-sm relative overflow-hidden border border-slate-800">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="font-bold text-sm"><i class="fas fa-clock text-yellow-400"></i> Ayuno Intermitente</h2>
                         <span class="text-xs bg-slate-800 px-2.5 py-1 rounded-lg text-yellow-400 font-bold" id="planAyunoText">16:8</span>
@@ -342,35 +494,35 @@
                     </div>
                 </div>
 
-                <!-- Compartir Biblioteca de Comidas (Sin configuración) -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm space-y-3 border-l-4 border-green-500">
+                <!-- Compartir Biblioteca de Comidas -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm space-y-3 border-l-4 border-green-500">
                     <div class="flex justify-between items-center">
-                        <h2 class="font-bold text-gray-800 text-sm"><i class="fas fa-share-alt text-green-600"></i> Compartir Comidas con Amigos</h2>
-                        <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full" id="contadorPersonalizadas">0 creadas</span>
+                        <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-share-alt text-green-600"></i> Compartir Comidas con Amigos</h2>
+                        <span class="text-xs font-bold text-green-600 bg-green-50 dark:bg-green-950 px-2 py-0.5 rounded-full" id="contadorPersonalizadas">0 creadas</span>
                     </div>
-                    <p class="text-xs text-gray-500">Comparte los alimentos nuevos que has creado (sin enviar tus datos personales) o agrega los de tus amigos.</p>
+                    <p class="text-xs text-gray-500 dark:text-slate-400">Comparte los alimentos nuevos que has creado (sin datos personales) o agrega los de tus amigos.</p>
                     <div class="flex gap-2">
-                        <button onclick="exportarBibliotecaComidas()" class="flex-1 bg-green-100 text-green-800 hover:bg-green-200 font-bold py-2.5 px-2 rounded-xl text-xs transition-colors">
+                        <button onclick="exportarBibliotecaComidas()" class="flex-1 bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-300 hover:bg-green-200 font-bold py-2.5 px-2 rounded-xl text-xs transition-colors">
                             <i class="fas fa-copy"></i> Copiar mis comidas
                         </button>
-                        <button onclick="importarBibliotecaComidas()" class="flex-1 bg-blue-100 text-blue-800 hover:bg-blue-200 font-bold py-2.5 px-2 rounded-xl text-xs transition-colors">
+                        <button onclick="importarBibliotecaComidas()" class="flex-1 bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 hover:bg-blue-200 font-bold py-2.5 px-2 rounded-xl text-xs transition-colors">
                             <i class="fas fa-plus-circle"></i> Pegar de un amigo
                         </button>
                     </div>
                 </div>
 
                 <!-- Recalcular Metas -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm">
-                    <h2 class="font-bold text-gray-800 text-sm mb-4"><i class="fas fa-sliders-h text-green-500"></i> Actualizar Datos y Metas</h2>
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-4"><i class="fas fa-sliders-h text-green-500"></i> Actualizar Datos y Metas</h2>
                     <div class="space-y-3 text-sm">
                         <div class="flex gap-3">
                             <div class="flex-1">
-                                <label class="block text-xs text-gray-500 mb-1">Edad</label>
-                                <input type="number" id="calcEdad" class="w-full p-2 border rounded-xl bg-gray-50">
+                                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Edad</label>
+                                <input type="number" id="calcEdad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800">
                             </div>
                             <div class="flex-1">
-                                <label class="block text-xs text-gray-500 mb-1">Género</label>
-                                <select id="calcGenero" class="w-full p-2 border rounded-xl bg-gray-50">
+                                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Género</label>
+                                <select id="calcGenero" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800">
                                     <option value="m">Hombre</option>
                                     <option value="f">Mujer</option>
                                 </select>
@@ -378,17 +530,17 @@
                         </div>
                         <div class="flex gap-3">
                             <div class="flex-1">
-                                <label class="block text-xs text-gray-500 mb-1">Peso actual (kg)</label>
-                                <input type="number" id="calcPeso" step="0.1" class="w-full p-2 border rounded-xl bg-gray-50">
+                                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Peso actual (kg)</label>
+                                <input type="number" id="calcPeso" step="0.1" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800">
                             </div>
                             <div class="flex-1">
-                                <label class="block text-xs text-gray-500 mb-1">Altura (cm)</label>
-                                <input type="number" id="calcAltura" class="w-full p-2 border rounded-xl bg-gray-50">
+                                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Altura (cm)</label>
+                                <input type="number" id="calcAltura" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Actividad Física</label>
-                            <select id="calcActividad" class="w-full p-2 border rounded-xl bg-gray-50">
+                            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Actividad Física</label>
+                            <select id="calcActividad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800">
                                 <option value="1.2">Sedentario (Trabajo sentado / poco ejercicio)</option>
                                 <option value="1.375">Ligero (1-3 días/sem)</option>
                                 <option value="1.55">Moderado (3-5 días/sem)</option>
@@ -396,8 +548,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-500 mb-1">Objetivo</label>
-                            <select id="calcObjetivo" class="w-full p-2 border rounded-xl bg-gray-50 text-blue-600 font-bold">
+                            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Objetivo</label>
+                            <select id="calcObjetivo" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold">
                                 <option value="0">Mantener peso</option>
                                 <option value="-250">Déficit ligero (-250 kcal)</option>
                                 <option value="-500">Déficit normal (-500 kcal)</option>
@@ -409,14 +561,14 @@
                 </div>
 
                 <!-- Respaldo Completo de Cuenta -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm space-y-3">
-                    <h2 class="font-bold text-gray-800 text-sm"><i class="fas fa-cloud-download-alt text-purple-500"></i> Respaldo Total de Mi Cuenta</h2>
-                    <p class="text-xs text-gray-500">Usa esto solo si cambias de teléfono y quieres pasar todo tu historial personal.</p>
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm space-y-3 border border-transparent dark:border-slate-800">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-cloud-download-alt text-purple-500"></i> Respaldo Total de Mi Cuenta</h2>
+                    <p class="text-xs text-gray-500 dark:text-slate-400">Usa esto si cambias de teléfono y quieres pasar todo tu historial personal.</p>
                     <div class="flex gap-2">
-                        <button onclick="exportarRespaldo()" class="flex-1 bg-purple-100 text-purple-700 hover:bg-purple-200 font-bold py-2.5 rounded-xl text-xs transition-colors">
+                        <button onclick="exportarRespaldo()" class="flex-1 bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 hover:bg-purple-200 font-bold py-2.5 rounded-xl text-xs transition-colors">
                             <i class="fas fa-copy"></i> Copiar mi cuenta
                         </button>
-                        <button onclick="importarRespaldo()" class="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold py-2.5 rounded-xl text-xs transition-colors">
+                        <button onclick="importarRespaldo()" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 font-bold py-2.5 rounded-xl text-xs transition-colors">
                             <i class="fas fa-paste"></i> Restaurar cuenta
                         </button>
                     </div>
@@ -426,12 +578,12 @@
         </div>
 
         <!-- BARRA DE NAVEGACIÓN INFERIOR -->
-        <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-3 pb-4 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+        <div class="fixed bottom-0 w-full bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 flex justify-around p-3 pb-4 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
             <button onclick="cambiarTab('diario')" id="nav-diario" class="flex flex-col items-center text-green-600 w-20 cursor-pointer">
                 <i class="fas fa-book-open text-xl mb-1"></i><span class="text-xs font-bold">Diario</span>
             </button>
             <button onclick="cambiarTab('progreso')" id="nav-progreso" class="flex flex-col items-center text-gray-400 w-20 hover:text-green-600 cursor-pointer">
-                <i class="fas fa-chart-line text-xl mb-1"></i><span class="text-xs font-bold">Progreso</span>
+                <i class="fas fa-trophy text-xl mb-1"></i><span class="text-xs font-bold">Logros</span>
             </button>
             <button onclick="cambiarTab('perfil')" id="nav-perfil" class="flex flex-col items-center text-gray-400 w-20 hover:text-green-600 cursor-pointer">
                 <i class="fas fa-user-cog text-xl mb-1"></i><span class="text-xs font-bold">Perfil</span>
@@ -595,28 +747,66 @@
         ];
 
         // ==========================================
-        // 2. SISTEMA MULTIUSUARIO Y AUTENTICACIÓN
+        // 2. SISTEMA MULTIUSUARIO, MODO OSCURO Y PWA
         // ==========================================
         let usuariosDB = JSON.parse(localStorage.getItem('nutriWeb_Users')) || {};
         let usuarioActivoKey = localStorage.getItem('nutriWeb_CurrentUser') || null;
         let fechaActual = new Date();
+        let tiempoComidaActual = 'Desayuno';
         let intervaloAyuno = null;
 
-        let datosViejos = localStorage.getItem('nutriIA_Definitiva');
-        if (datosViejos && Object.keys(usuariosDB).length === 0) {
-            try {
-                let parsed = JSON.parse(datosViejos);
-                if (parsed && parsed.historial) {
-                    usuariosDB['invitado'] = {
-                        nombre: "Invitado",
-                        pin: "0000",
-                        perfil: parsed.perfil,
-                        historial: parsed.historial,
-                        alimentosPersonalizados: parsed.alimentosPersonalizados || []
-                    };
-                    localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB));
-                }
-            } catch(e) {}
+        if (localStorage.getItem('nutriWeb_DarkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('nutriWeb_DarkMode', isDark);
+            actualizarIconoDarkMode();
+        }
+
+        function actualizarIconoDarkMode() {
+            const icon = document.getElementById('darkModeIcon');
+            if (!icon) return;
+            if (document.documentElement.classList.contains('dark')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                icon.classList.add('text-yellow-300');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                icon.classList.remove('text-yellow-300');
+            }
+        }
+
+        function inicializarPWA() {
+            const manifest = {
+                name: "NutriWeb - Diario Nutricional",
+                short_name: "NutriWeb",
+                start_url: window.location.href,
+                display: "standalone",
+                background_color: "#0f172a",
+                theme_color: "#16a34a",
+                icons: [{
+                    src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2322c55e'/><text y='.9em' x='12' font-size='72'>🥗</text></svg>",
+                    sizes: "192x192",
+                    type: "image/svg+xml"
+                }]
+            };
+            const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = URL.createObjectURL(blob);
+            document.head.appendChild(link);
+
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile && !isStandalone && !localStorage.getItem('nutriWeb_HideInstallBanner')) {
+                document.getElementById('bannerInstalar').classList.remove('hidden');
+            }
+        }
+
+        function cerrarBannerInstalar() {
+            document.getElementById('bannerInstalar').classList.add('hidden');
+            localStorage.setItem('nutriWeb_HideInstallBanner', 'true');
         }
 
         function switchAuthTab(tab) {
@@ -627,12 +817,12 @@
 
             if (tab === 'login') {
                 fLogin.classList.remove('hidden'); fReg.classList.add('hidden');
-                bLogin.className = "flex-1 py-3.5 text-sm font-bold text-green-600 border-b-2 border-green-500 bg-green-50/50";
-                bReg.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600";
+                bLogin.className = "flex-1 py-3.5 text-sm font-bold text-green-600 border-b-2 border-green-500 bg-green-50/50 dark:bg-slate-800";
+                bReg.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200";
             } else {
                 fReg.classList.remove('hidden'); fLogin.classList.add('hidden');
-                bReg.className = "flex-1 py-3.5 text-sm font-bold text-blue-600 border-b-2 border-blue-500 bg-blue-50/50";
-                bLogin.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600";
+                bReg.className = "flex-1 py-3.5 text-sm font-bold text-blue-600 border-b-2 border-blue-500 bg-blue-50/50 dark:bg-slate-800";
+                bLogin.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200";
             }
         }
 
@@ -646,7 +836,7 @@
             btns.innerHTML = '';
             keys.forEach(k => {
                 let u = usuariosDB[k];
-                btns.innerHTML += `<button onclick="seleccionarPerfilRapido('${k}')" class="px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-xs font-bold hover:bg-green-200 transition-colors"><i class="fas fa-user mr-1"></i>${u.nombre}</button>`;
+                btns.innerHTML += `<button onclick="seleccionarPerfilRapido('${k}')" class="px-3 py-1.5 bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-300 rounded-full text-xs font-bold hover:bg-green-200 transition-colors"><i class="fas fa-user mr-1"></i>${u.nombre}</button>`;
             });
         }
 
@@ -703,12 +893,13 @@
                 perfil: {
                     edad: edad, genero: gen, altura: alt, actividad: act, objetivo: obj,
                     metaKcal: metas.metaKcal, metaCarbs: metas.metaCarbs, metaProt: metas.metaProt, metaGras: metas.metaGras,
-                    horasAyuno: 16, inicioAyuno: null
+                    horasAyuno: 16, inicioAyuno: null, mejorRacha: 0
                 },
                 historial: {
-                    [hoyStr]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, peso: peso, ayunoHoras: null, comidas: [] }
+                    [hoyStr]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: peso, ayunoHoras: null, comidas: [] }
                 },
-                alimentosPersonalizados: []
+                alimentosPersonalizados: [],
+                favoritos: []
             };
 
             localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB));
@@ -737,9 +928,12 @@
 
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
+            actualizarIconoDarkMode();
 
             let u = getUsuarioActual();
             u.alimentosPersonalizados = u.alimentosPersonalizados || [];
+            u.favoritos = u.favoritos || [];
+            u.perfil.mejorRacha = u.perfil.mejorRacha || 0;
             document.getElementById('userNameHeader').innerText = u.nombre;
             document.getElementById('userAvatar').innerText = u.nombre.charAt(0);
             document.getElementById('planAyunoText').innerText = `${u.perfil.horasAyuno}:${24 - u.perfil.horasAyuno}`;
@@ -750,7 +944,14 @@
             document.getElementById('calcActividad').value = u.perfil.actividad || '1.2';
             document.getElementById('calcObjetivo').value = u.perfil.objetivo || '0';
 
+            const hora = new Date().getHours();
+            if (hora < 11) seleccionarTiempoComida('Desayuno');
+            else if (hora < 15) seleccionarTiempoComida('Almuerzo');
+            else if (hora < 18) seleccionarTiempoComida('Snacks');
+            else seleccionarTiempoComida('Cena');
+
             actualizarDatalist();
+            renderizarFavoritos();
             if (u.perfil.inicioAyuno) cicloAyuno();
             actualizarUI();
             actualizarTarjetaIMC();
@@ -790,8 +991,9 @@
             let u = getUsuarioActual();
             let str = getFechaStr(fechaActual);
             if (!u.historial[str]) {
-                u.historial[str] = { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, peso: null, ayunoHoras: null, comidas: [] };
+                u.historial[str] = { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: null, ayunoHoras: null, comidas: [] };
             }
+            u.historial[str].ejercicioKcal = u.historial[str].ejercicioKcal || 0;
             return u.historial[str];
         }
 
@@ -807,7 +1009,6 @@
             const personalizadas = u.alimentosPersonalizados || [];
             const lista = obtenerBibliotecaCompleta();
             
-            document.getElementById('contadorAlimentos').innerText = `(${lista.length} disponibles)`;
             document.getElementById('contadorPersonalizadas').innerText = `${personalizadas.length} creadas`;
             
             lista.forEach(item => {
@@ -818,8 +1019,224 @@
         }
 
         // ==========================================
-        // 4. REGISTRO DE ALIMENTOS Y MEDIDAS
+        // 4. SISTEMA DE RACHA GAMIFICADO Y MEDALLAS
         // ==========================================
+        function calcularRachaConEscudo() {
+            let u = getUsuarioActual();
+            let racha = 0;
+            let escudoUsado = false;
+            let fechaCheck = new Date();
+            let hoyStr = getFechaStr(fechaCheck);
+
+            // Verificar si hoy ya registró comida
+            let hoyTiene = u.historial[hoyStr] && u.historial[hoyStr].comidas && u.historial[hoyStr].comidas.length > 0;
+            if (hoyTiene) {
+                racha++;
+            }
+            fechaCheck.setDate(fechaCheck.getDate() - 1);
+
+            // Revisar hacia atrás permitiendo 1 día de gracia (Escudo Protector)
+            for (let i = 0; i < 365; i++) {
+                let str = getFechaStr(fechaCheck);
+                let tiene = u.historial[str] && u.historial[str].comidas && u.historial[str].comidas.length > 0;
+                if (tiene) {
+                    racha++;
+                } else if (!escudoUsado && racha > 0) {
+                    // Usar el escudo protector para salvar la racha de 1 día olvidado
+                    escudoUsado = true;
+                } else if (!hoyTiene && i === 0) {
+                    // Si hoy aún no registra pero ayer sí, mantener racha viva esperando registro de hoy
+                    continue;
+                } else {
+                    break;
+                }
+                fechaCheck.setDate(fechaCheck.getDate() - 1);
+            }
+
+            if (racha > (u.perfil.mejorRacha || 0)) {
+                u.perfil.mejorRacha = racha;
+            }
+
+            return { dias: racha, escudoUsado: escudoUsado, hoyRegistrado: hoyTiene };
+        }
+
+        function actualizarTarjetaRacha() {
+            const u = getUsuarioActual();
+            const info = calcularRachaConEscudo();
+            const dias = info.dias;
+
+            document.getElementById('rachaDisplay').innerText = dias;
+            document.getElementById('rachaDiasTexto').innerText = dias === 1 ? "1 día de racha" : `${dias} días de racha`;
+
+            const iconoFuego = document.getElementById('iconoFuegoHeader');
+            if (info.hoyRegistrado) {
+                iconoFuego.classList.add('fuego-activo');
+            } else {
+                iconoFuego.classList.remove('fuego-activo');
+            }
+
+            // Definir niveles según días de racha
+            const niveles = [
+                { min: 0, max: 3, titulo: "Novato", emoji: "🌱", sub: "Registra hoy para encender tu racha" },
+                { min: 3, max: 7, titulo: "Constante", emoji: "🔥", sub: "¡Buen ritmo! Ya creaste el hábito" },
+                { min: 7, max: 14, titulo: "Disciplinado", emoji: "⚡", sub: "Una semana entera sin fallar" },
+                { min: 14, max: 30, titulo: "Imparable", emoji: "🏆", sub: "Tu constancia está dando resultados" },
+                { min: 30, max: 100, titulo: "Leyenda", emoji: "👑", sub: "Maestro absoluto de la nutrición" }
+            ];
+
+            let nivelActual = niveles[0];
+            for (let n of niveles) {
+                if (dias >= n.min) nivelActual = n;
+            }
+
+            document.getElementById('rachaEmojiNivel').innerText = nivelActual.emoji;
+            document.getElementById('rachaTituloNivel').innerText = nivelActual.titulo;
+            document.getElementById('rachaSubtitulo').innerText = info.hoyRegistrado
+                ? nivelActual.sub
+                : "⏳ ¡Registra una comida hoy para asegurar tu racha!";
+
+            // Estado del Escudo Protector
+            const escudoEl = document.getElementById('escudoEstadoText');
+            if (info.escudoUsado) {
+                escudoEl.innerText = "En uso (1/1)";
+                escudoEl.parentElement.className = "inline-flex items-center gap-1 bg-cyan-500/40 px-2.5 py-1 rounded-xl text-xs font-bold";
+            } else {
+                escudoEl.innerText = "Listo";
+                escudoEl.parentElement.className = "inline-flex items-center gap-1 bg-white/20 px-2.5 py-1 rounded-xl text-xs font-bold";
+            }
+
+            // Barra de progreso hacia el siguiente nivel
+            let rango = nivelActual.max - nivelActual.min;
+            let avance = Math.min(dias - nivelActual.min, rango);
+            let pct = Math.round((avance / rango) * 100);
+            document.getElementById('rachaBarraProgreso').style.width = `${pct}%`;
+            document.getElementById('rachaMetaSiguiente').innerText = `Siguiente nivel: ${nivelActual.max} días`;
+        }
+
+        function renderizarMedallas() {
+            const u = getUsuarioActual();
+            const info = calcularRachaConEscudo();
+            const mejorRacha = Math.max(info.dias, u.perfil.mejorRacha || 0);
+            document.getElementById('recordRachaText').innerText = `Récord: ${mejorRacha} días`;
+
+            // Calcular estadísticas históricas
+            const diasHistorial = Object.values(u.historial || {});
+            const totalComidas = diasHistorial.reduce((acc, d) => acc + (d.comidas ? d.comidas.length : 0), 0);
+            const diasAguaMeta = diasHistorial.filter(d => (d.agua || 0) >= 2000).length;
+            const diasAyuno = diasHistorial.filter(d => d.ayunoHoras && parseFloat(d.ayunoHoras) >= 14).length;
+
+            const medallas = [
+                { nombre: "Primer Paso", desc: "1 comida registrada", icon: "🥗", desbloqueada: totalComidas >= 1 },
+                { nombre: "En Llamas", desc: "3 días de racha", icon: "🔥", desbloqueada: mejorRacha >= 3 },
+                { nombre: "Semana Pro", desc: "7 días de racha", icon: "⚡", desbloqueada: mejorRacha >= 7 },
+                { nombre: "Hidratado", desc: "2L de agua en 1 día", icon: "💧", desbloqueada: diasAguaMeta >= 1 },
+                { nombre: "Ayunador", desc: "Completar 1 ayuno", icon: "⏳", desbloqueada: diasAyuno >= 1 },
+                { nombre: "Imparable", desc: "14 días de racha", icon: "👑", desbloqueada: mejorRacha >= 14 }
+            ];
+
+            const grid = document.getElementById('gridMedallas');
+            grid.innerHTML = '';
+            medallas.forEach(m => {
+                const estilo = m.desbloqueada
+                    ? "bg-gradient-to-b from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-800/80 border-amber-300 dark:border-amber-600/50 opacity-100"
+                    : "bg-gray-50 dark:bg-slate-800/30 border-gray-200 dark:border-slate-800 opacity-45 grayscale";
+                grid.innerHTML += `
+                    <div class="p-3 rounded-2xl border text-center flex flex-col items-center justify-center ${estilo}">
+                        <span class="text-2xl mb-1">${m.icon}</span>
+                        <p class="text-xs font-bold text-gray-800 dark:text-slate-100 leading-tight">${m.nombre}</p>
+                        <p class="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">${m.desc}</p>
+                    </div>`;
+            });
+        }
+
+        // ==========================================
+        // 5. TIEMPOS DE COMIDA, FAVORITOS Y REGISTRO
+        // ==========================================
+        function seleccionarTiempoComida(tiempo) {
+            tiempoComidaActual = tiempo;
+            document.querySelectorAll('.tc-btn').forEach(btn => {
+                btn.className = "tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400 transition-all";
+            });
+            const activo = document.getElementById(`tc-${tiempo}`);
+            if (activo) {
+                activo.className = "tc-btn py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-700 text-green-600 dark:text-green-400 shadow-sm transition-all";
+            }
+        }
+
+        function toggleFavorito(nombreBase, kcal, c, p, g) {
+            let u = getUsuarioActual();
+            u.favoritos = u.favoritos || [];
+            const idx = u.favoritos.findIndex(f => normalizarTexto(f.nombre) === normalizarTexto(nombreBase));
+            
+            if (idx >= 0) {
+                u.favoritos.splice(idx, 1);
+            } else {
+                u.favoritos.push({ nombre: nombreBase, kcal: kcal, c: c, p: p, g: g });
+            }
+            guardarDatos();
+            renderizarFavoritos();
+        }
+
+        function renderizarFavoritos() {
+            let u = getUsuarioActual();
+            let favs = u.favoritos || [];
+            let barra = document.getElementById('barraFavoritos');
+            let cont = document.getElementById('listaFavoritosChips');
+            
+            if (favs.length === 0) {
+                barra.classList.add('hidden');
+                return;
+            }
+            barra.classList.remove('hidden');
+            cont.innerHTML = '';
+            favs.forEach((f, idx) => {
+                cont.innerHTML += `
+                    <button onclick="agregarFavoritoRapido(${idx})" class="shrink-0 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800/60 text-yellow-800 dark:text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-100 transition-colors flex items-center gap-1.5">
+                        <i class="fas fa-plus-circle text-green-500"></i>
+                        <span class="truncate max-w-[130px]">${f.nombre.split('(')[0].trim()}</span>
+                        <span class="text-[10px] opacity-75">(${f.kcal})</span>
+                    </button>`;
+            });
+        }
+
+        function agregarFavoritoRapido(idx) {
+            let u = getUsuarioActual();
+            let f = u.favoritos[idx];
+            if (!f) return;
+
+            let d = getDatosHoy();
+            d.calorias += f.kcal; d.carbs += f.c; d.prot += f.p; d.gras += f.g;
+            d.comidas.push({
+                texto: f.nombre,
+                nombreBase: f.nombre,
+                kcalBase: f.kcal, cBase: f.c, pBase: f.p, gBase: f.g,
+                kcal: f.kcal, c: f.c, p: f.p, g: f.g,
+                tiempo: tiempoComidaActual
+            });
+            guardarDatos();
+        }
+
+        function copiarDiaAnterior() {
+            let u = getUsuarioActual();
+            let ayer = new Date(fechaActual);
+            ayer.setDate(ayer.getDate() - 1);
+            let datosAyer = u.historial[getFechaStr(ayer)];
+
+            if (!datosAyer || !datosAyer.comidas || datosAyer.comidas.length === 0) {
+                alert("No hay comidas registradas en el día anterior para copiar.");
+                return;
+            }
+
+            if (confirm(`¿Copiar las ${datosAyer.comidas.length} comida(s) del día anterior a hoy?`)) {
+                let d = getDatosHoy();
+                datosAyer.comidas.forEach(c => {
+                    d.calorias += c.kcal; d.carbs += c.c; d.prot += c.p; d.gras += c.g;
+                    d.comidas.push({ ...c });
+                });
+                guardarDatos();
+            }
+        }
+
         function toggleModoManual() {
             let busq = document.getElementById('modoBusqueda');
             let man = document.getElementById('modoManual');
@@ -882,11 +1299,15 @@
                 d.calorias += kcal; d.carbs += c; d.prot += p; d.gras += g;
                 d.comidas.push({
                     texto: formatearEtiquetaMedida(factor, encontrado.nombre),
-                    kcal: kcal, c: c, p: p, g: g
+                    nombreBase: encontrado.nombre,
+                    kcalBase: encontrado.kcal, cBase: encontrado.c, pBase: encontrado.p, gBase: encontrado.g,
+                    kcal: kcal, c: c, p: p, g: g,
+                    tiempo: tiempoComidaActual
                 });
                 guardarDatos();
                 input.value = '';
                 select.value = "1";
+                document.getElementById('cajaSugerenciasCena').classList.add('hidden');
             } else {
                 toggleModoManual();
                 document.getElementById('manNombre').value = textoOriginal;
@@ -914,7 +1335,13 @@
 
             let d = getDatosHoy();
             d.calorias += kcal; d.carbs += c; d.prot += p; d.gras += g;
-            d.comidas.push({ texto: formatearEtiquetaMedida(factor, nombre), kcal: kcal, c: c, p: p, g: g });
+            d.comidas.push({
+                texto: formatearEtiquetaMedida(factor, nombre),
+                nombreBase: nombre,
+                kcalBase: kcalBase, cBase: cBase, pBase: pBase, gBase: gBase,
+                kcal: kcal, c: c, p: p, g: g,
+                tiempo: tiempoComidaActual
+            });
 
             let u = getUsuarioActual();
             let existe = obtenerBibliotecaCompleta().some(item => normalizarTexto(item.nombre) === normalizarTexto(nombre));
@@ -937,7 +1364,125 @@
         }
 
         // ==========================================
-        // 5. UI, NAVEGACIÓN Y GRÁFICAS
+        // 6. EJERCICIO, ASISTENTE Y WHATSAPP
+        // ==========================================
+        function registrarEjercicio() {
+            let sel = document.getElementById('selectEjercicio');
+            let kcal = 0;
+            if (sel.value === 'custom') {
+                let inp = prompt("¿Cuántas calorías quemaste en tu ejercicio?");
+                kcal = parseInt(inp) || 0;
+            } else {
+                kcal = parseInt(sel.value) || 0;
+            }
+            if (kcal <= 0) return;
+
+            let d = getDatosHoy();
+            d.ejercicioKcal = (d.ejercicioKcal || 0) + kcal;
+            guardarDatos();
+        }
+
+        function reiniciarEjercicio() {
+            if (confirm("¿Reiniciar las calorías de ejercicio de hoy a 0?")) {
+                getDatosHoy().ejercicioKcal = 0;
+                guardarDatos();
+            }
+        }
+
+        function actualizarAsistenteInteligente(dia, perfil, metaEfectiva) {
+            const msgEl = document.getElementById('mensajeAsistente');
+            const restantes = metaEfectiva - dia.calorias;
+            const protRestante = perfil.metaProt - dia.prot;
+            const hora = new Date().getHours();
+
+            if (dia.comidas.length === 0) {
+                msgEl.innerHTML = `¡Hola <b>${getUsuarioActual().nombre}</b>! Aún no registras comidas hoy. Empieza anotando tu desayuno para calcular tu margen.`;
+                return;
+            }
+
+            if (restantes < 0) {
+                msgEl.innerHTML = `Superaste tu meta por <b>${Math.abs(restantes)} kcal</b>. Trata de tomar más agua y compensar ligeramente mañana.`;
+            } else if (protRestante > 25 && restantes > 150) {
+                msgEl.innerHTML = `Te quedan <b>${restantes} kcal</b> y te faltan <b>${protRestante}g de proteína</b>. Prioriza pollo, huevos, atún o sardinas en tu próxima comida.`;
+            } else if (dia.agua < 1000 && hora >= 14) {
+                msgEl.innerHTML = `Vas muy bien con tus calorías (restan <b>${restantes} kcal</b>), pero llevas poca agua (<b>${dia.agua} ml</b>). ¡Toma un vaso ahora!`;
+            } else if (restantes <= 250 && restantes >= 0) {
+                msgEl.innerHTML = `¡Cierre perfecto! Estás justo dentro de tu objetivo con <b>${restantes} kcal</b> de margen.`;
+            } else {
+                msgEl.innerHTML = `Vas excelente: llevas <b>${dia.calorias} kcal</b> y aún tienes <b>${restantes} kcal</b> disponibles para el resto del día.`;
+            }
+        }
+
+        function sugerirQueComer() {
+            const caja = document.getElementById('cajaSugerenciasCena');
+            if (!caja.classList.contains('hidden')) {
+                caja.classList.add('hidden');
+                return;
+            }
+
+            const dia = getDatosHoy();
+            const p = getUsuarioActual().perfil;
+            const metaEfectiva = p.metaKcal + (dia.ejercicioKcal || 0);
+            const restantes = metaEfectiva - dia.calorias;
+            const faltaProt = (p.metaProt - dia.prot) > 15;
+
+            if (restantes < 80) {
+                caja.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300 font-medium">Ya casi llegas a tu límite (${restantes} kcal). Te conviene un café negro, té o una fruta pequeña.</p>`;
+                caja.classList.remove('hidden');
+                return;
+            }
+
+            const bib = obtenerBibliotecaCompleta();
+            let candidatos = bib.filter(item => item.kcal >= 70 && item.kcal <= restantes);
+            if (faltaProt) {
+                let altosProt = candidatos.filter(item => item.p >= 12);
+                if (altosProt.length >= 2) candidatos = altosProt;
+            }
+
+            candidatos.sort(() => 0.5 - Math.random());
+            const seleccion = candidatos.slice(0, 3);
+
+            if (seleccion.length === 0) {
+                caja.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Tienes ${restantes} kcal disponibles. Puedes armar una porción ligera a tu gusto.</p>`;
+            } else {
+                let html = `<p class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Opciones que caben en tus ${restantes} kcal restantes:</p>`;
+                seleccion.forEach(s => {
+                    html += `
+                        <div class="flex justify-between items-center bg-white/80 dark:bg-slate-900/80 px-2.5 py-1.5 rounded-lg text-xs">
+                            <span class="truncate pr-2 font-medium">${s.nombre}</span>
+                            <span class="shrink-0 font-bold text-green-600">${s.kcal} kcal • ${s.p}g P</span>
+                        </div>`;
+                });
+                caja.innerHTML = html;
+            }
+            caja.classList.remove('hidden');
+        }
+
+        function compartirResumenWhatsApp() {
+            const u = getUsuarioActual();
+            const dia = getDatosHoy();
+            const metaEfectiva = u.perfil.metaKcal + (dia.ejercicioKcal || 0);
+            const infoRacha = calcularRachaConEscudo();
+            const nivelTxt = document.getElementById('rachaTituloNivel').innerText;
+            const fechaTxt = document.getElementById('fechaDisplay').innerText;
+
+            const texto = `🥗 *Resumen NutriWeb (${u.nombre} - ${fechaTxt})*\n` +
+                          `🔥 Racha: ${infoRacha.dias} días (Nivel ${nivelTxt})\n` +
+                          `📊 Calorías: ${dia.calorias} / ${metaEfectiva} kcal\n` +
+                          `🥩 Proteína: ${dia.prot}g / ${u.perfil.metaProt}g\n` +
+                          `💧 Agua: ${dia.agua} ml\n` +
+                          (dia.ejercicioKcal > 0 ? `🏃 Ejercicio: -${dia.ejercicioKcal} kcal\n` : ``) +
+                          `¡Seguimos firmes con la meta! 💪`;
+
+            navigator.clipboard.writeText(texto).then(() => {
+                alert("¡Resumen copiado! Pégalo en tu grupo de WhatsApp.");
+            }).catch(() => {
+                prompt("Copia tu resumen para WhatsApp:", texto);
+            });
+        }
+
+        // ==========================================
+        // 7. UI, NAVEGACIÓN Y GRÁFICAS
         // ==========================================
         function cambiarTab(tab) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -949,7 +1494,10 @@
             document.getElementById(`nav-${tab}`).classList.remove('text-gray-400');
             document.getElementById(`nav-${tab}`).classList.add('text-green-600');
 
-            if(tab === 'progreso') dibujarProgresoYTablas();
+            if(tab === 'progreso') {
+                renderizarMedallas();
+                dibujarProgresoYTablas();
+            }
         }
 
         function cambiarFecha(dias) {
@@ -963,25 +1511,6 @@
             document.getElementById('fechaDisplay').innerText = label;
             document.getElementById('pesoFechaLabel').innerText = label;
             actualizarUI();
-        }
-
-        function calcularRacha() {
-            let u = getUsuarioActual();
-            let racha = 0; let fechaCheck = new Date();
-            if(u.historial[getFechaStr(fechaCheck)] && u.historial[getFechaStr(fechaCheck)].comidas.length > 0) {
-                racha++; fechaCheck.setDate(fechaCheck.getDate() - 1);
-            } else {
-                fechaCheck.setDate(fechaCheck.getDate() - 1);
-                if(!u.historial[getFechaStr(fechaCheck)] || u.historial[getFechaStr(fechaCheck)].comidas.length === 0) {
-                    document.getElementById('rachaDisplay').innerText = 0; return;
-                }
-            }
-            while(true) {
-                if(u.historial[getFechaStr(fechaCheck)] && u.historial[getFechaStr(fechaCheck)].comidas.length > 0) {
-                    racha++; fechaCheck.setDate(fechaCheck.getDate() - 1);
-                } else break;
-            }
-            document.getElementById('rachaDisplay').innerText = racha;
         }
 
         function actualizarTarjetaIMC() {
@@ -1004,7 +1533,7 @@
                 
                 let cat = ""; let color = "";
                 if(imc < 18.5) { cat = "Bajo peso"; color = "text-blue-500"; }
-                else if(imc < 25) { cat = "Peso saludable"; color = "text-green-600"; }
+                else if(imc < 25) { cat = "Peso saludable"; color = "text-green-600 dark:text-green-400"; }
                 else if(imc < 30) { cat = "Sobrepeso"; color = "text-yellow-500"; }
                 else { cat = "Obesidad"; color = "text-red-500"; }
                 
@@ -1015,30 +1544,43 @@
         }
 
         function actualizarUI() {
+            let u = getUsuarioActual();
             let dia = getDatosHoy();
-            let p = getUsuarioActual().perfil;
+            let p = u.perfil;
+            let extraEj = dia.ejercicioKcal || 0;
+            let metaEfectiva = p.metaKcal + extraEj;
 
             document.getElementById('caloriasConsumidas').innerText = dia.calorias;
-            document.getElementById('metaCaloriasText').innerText = `/ ${p.metaKcal} kcal`;
+            document.getElementById('metaCaloriasText').innerText = `/ ${metaEfectiva} kcal`;
             document.getElementById('carbTotal').innerText = dia.carbs; document.getElementById('metaCarbs').innerText = `/ ${p.metaCarbs}g`;
             document.getElementById('protTotal').innerText = dia.prot; document.getElementById('metaProt').innerText = `/ ${p.metaProt}g`;
             document.getElementById('grasTotal').innerText = dia.gras; document.getElementById('metaGras').innerText = `/ ${p.metaGras}g`;
             document.getElementById('aguaTotal').innerText = dia.agua;
+
+            document.getElementById('ejercicioTotalBadge').innerText = `${extraEj} kcal quemadas`;
+            if (extraEj > 0) {
+                document.getElementById('infoEjercicioBadge').classList.remove('hidden');
+                document.getElementById('kcalEjercicioText').innerText = extraEj;
+                document.getElementById('btnResetEjercicio').classList.remove('hidden');
+            } else {
+                document.getElementById('infoEjercicioBadge').classList.add('hidden');
+                document.getElementById('btnResetEjercicio').classList.add('hidden');
+            }
             
-            let restantes = p.metaKcal - dia.calorias;
+            let restantes = metaEfectiva - dia.calorias;
             let badge = document.getElementById('kcalRestantesBadge');
             if (restantes >= 0) {
-                badge.innerText = `Restan: ${restantes} kcal`;
-                badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 text-green-700";
+                badge.innerText = `Restan: ${restantes}`;
+                badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-950 text-green-700 dark:text-green-400";
             } else {
-                badge.innerText = `Exceso: +${Math.abs(restantes)} kcal`;
-                badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 text-red-700";
+                badge.innerText = `Exceso: +${Math.abs(restantes)}`;
+                badge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400";
             }
 
-            let porcentaje = Math.min((dia.calorias / p.metaKcal) * 100, 100);
+            let porcentaje = Math.min((dia.calorias / metaEfectiva) * 100, 100);
             document.getElementById('anilloCalorias').style.strokeDashoffset = 283 - (283 * porcentaje) / 100;
             
-            if(dia.calorias > p.metaKcal) {
+            if(dia.calorias > metaEfectiva) {
                 document.getElementById('anilloCalorias').style.stroke = "#ef4444";
                 document.getElementById('alertaExceso').classList.remove('hidden');
             } else {
@@ -1046,25 +1588,70 @@
                 document.getElementById('alertaExceso').classList.add('hidden');
             }
 
-            let ul = document.getElementById('listaComidas');
-            ul.innerHTML = dia.comidas.length === 0 ? '<p class="text-xs text-gray-400 text-center py-3">Sin registros en este día.</p>' : '';
-            dia.comidas.forEach((c, index) => {
-                ul.innerHTML += `
-                    <li class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex flex-col gap-1">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-800 font-semibold text-sm">${c.texto}</span>
-                            <div class="flex items-center gap-3 shrink-0 ml-2">
-                                <span class="text-green-600 font-bold text-sm">${c.kcal} kcal</span>
-                                <button onclick="borrarComida(${index})" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-trash text-xs"></i></button>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 text-[11px] text-gray-400">
-                            <span>C: ${c.c}g</span> <span>P: ${c.p}g</span> <span>G: ${c.g}g</span>
-                        </div>
-                    </li>`;
-            });
+            const contenedor = document.getElementById('contenedorComidasAgrupadas');
+            if (dia.comidas.length === 0) {
+                contenedor.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Sin registros en este día. ¡Agrega tu primera comida arriba!</p>';
+            } else {
+                const tiempos = [
+                    { id: 'Desayuno', icono: 'fa-coffee text-amber-500' },
+                    { id: 'Almuerzo', icono: 'fa-sun text-orange-500' },
+                    { id: 'Cena', icono: 'fa-moon text-indigo-500' },
+                    { id: 'Snacks', icono: 'fa-apple-alt text-green-500' }
+                ];
+                let html = '';
+                const favsNorm = (u.favoritos || []).map(f => normalizarTexto(f.nombre));
 
-            calcularRacha();
+                tiempos.forEach(t => {
+                    let itemsTiempo = dia.comidas
+                        .map((c, idx) => ({ ...c, idxOriginal: idx }))
+                        .filter(c => (c.tiempo || 'Almuerzo') === t.id);
+
+                    if (itemsTiempo.length > 0) {
+                        let subKcal = itemsTiempo.reduce((acc, item) => acc + item.kcal, 0);
+                        html += `
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs font-bold text-gray-500 dark:text-slate-400 px-1">
+                                    <span><i class="fas ${t.icono} mr-1"></i> ${t.id}</span>
+                                    <span>${subKcal} kcal</span>
+                                </div>
+                                <ul class="space-y-2">`;
+
+                        itemsTiempo.forEach(c => {
+                            let nomBase = c.nombreBase || c.texto;
+                            let esFav = favsNorm.includes(normalizarTexto(nomBase));
+                            let starClass = esFav ? 'fas fa-star text-yellow-400' : 'far fa-star text-gray-300 dark:text-slate-600 hover:text-yellow-400';
+                            let kB = c.kcalBase || c.kcal;
+                            let cB = c.cBase !== undefined ? c.cBase : c.c;
+                            let pB = c.pBase !== undefined ? c.pBase : c.p;
+                            let gB = c.gBase !== undefined ? c.gBase : c.g;
+
+                            html += `
+                                <li class="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col gap-1">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <button onclick="toggleFavorito('${nomBase.replace(/'/g, "\\'")}', ${kB}, ${cB}, ${pB}, ${gB})" class="shrink-0 p-0.5" title="Guardar en favoritos">
+                                                <i class="${starClass} text-xs"></i>
+                                            </button>
+                                            <span class="text-gray-800 dark:text-slate-100 font-semibold text-xs truncate">${c.texto}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2.5 shrink-0 ml-2">
+                                            <span class="text-green-600 dark:text-green-400 font-bold text-xs">${c.kcal} kcal</span>
+                                            <button onclick="borrarComida(${c.idxOriginal})" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-trash text-xs"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-3 text-[10px] text-gray-400 pl-6">
+                                        <span>C: ${c.c}g</span> <span>P: ${c.p}g</span> <span>G: ${c.g}g</span>
+                                    </div>
+                                </li>`;
+                        });
+                        html += `</ul></div>`;
+                    }
+                });
+                contenedor.innerHTML = html;
+            }
+
+            actualizarAsistenteInteligente(dia, p, metaEfectiva);
+            actualizarTarjetaRacha();
         }
 
         function sumarAgua(cant) { getDatosHoy().agua = Math.max(0, getDatosHoy().agua + cant); guardarDatos(); }
@@ -1113,7 +1700,7 @@
         }
 
         // ==========================================
-        // 6. AYUNO, COMPARTIR COMIDAS Y RESPALDO
+        // 8. AYUNO, COMPARTIR COMIDAS Y RESPALDO
         // ==========================================
         function setPlanAyuno(horas) {
             let u = getUsuarioActual();
@@ -1265,11 +1852,11 @@
                 let ayunoTxt = dataDia.ayunoHoras ? `${dataDia.ayunoHoras} h` : "-";
 
                 tabla.innerHTML = `
-                    <tr class="bg-white border-b hover:bg-gray-50">
-                        <td class="px-2 py-2.5 font-semibold text-gray-800 capitalize">${diaNom.substring(0,3)} ${d.getDate()}</td>
+                    <tr class="bg-white dark:bg-slate-900 border-b dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                        <td class="px-2 py-2.5 font-semibold text-gray-800 dark:text-slate-200 capitalize">${diaNom.substring(0,3)} ${d.getDate()}</td>
                         <td class="px-2 py-2.5">${pesoTxt}</td>
-                        <td class="px-2 py-2.5 font-bold text-blue-600">${imcTxt}</td>
-                        <td class="px-2 py-2.5 text-purple-600 font-medium">${ayunoTxt}</td>
+                        <td class="px-2 py-2.5 font-bold text-blue-600 dark:text-blue-400">${imcTxt}</td>
+                        <td class="px-2 py-2.5 text-purple-600 dark:text-purple-400 font-medium">${ayunoTxt}</td>
                     </tr>
                 ` + tabla.innerHTML; 
             }
@@ -1278,6 +1865,7 @@
         // ==========================================
         // INICIO DE LA PÁGINA
         // ==========================================
+        inicializarPWA();
         if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) {
             entrarAlSistema(usuarioActivoKey);
         } else {
