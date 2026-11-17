@@ -1,0 +1,1358 @@
+let usuariosDB = JSON.parse(localStorage.getItem('nutriWeb_Users')) || {}; 
+let usuarioActivoKey = localStorage.getItem('nutriWeb_CurrentUser') || null; 
+let fechaActual = new Date(); let tiempoComidaActual = 'Desayuno'; 
+
+function normalizarTexto(txt) { return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); }
+function getFechaStr(fechaObj) { let y = fechaObj.getFullYear(); let m = String(fechaObj.getMonth() + 1).padStart(2, '0'); let d = String(fechaObj.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
+function getUsuarioActual() { return usuariosDB[usuarioActivoKey]; }
+let ctrlBusq = null;
+const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const limpiarB = x => String(x ?? '').replace(/[<>"'`\\]/g, '').trim();
+const aB64 = o => { const b = new TextEncoder().encode(JSON.stringify(o)); let t = ''; for (let i = 0; i < b.length; i += 8192) t += String.fromCharCode(...b.subarray(i, i + 8192)); return btoa(t); };
+const deB64 = c => { const t = atob(String(c).replace(/\s+/g, '')); return JSON.parse(new TextDecoder().decode(Uint8Array.from(t, ch => ch.charCodeAt(0))), (k, v) => typeof v === 'string' ? limpiarB(v) : v); };
+const nuevoSalt = () => Array.from(crypto.getRandomValues(new Uint8Array(8))).map(x => x.toString(16).padStart(2, '0')).join('');
+async function hashPin(pin, salt) { try { if (!(window.crypto && crypto.subtle)) return 'plain:' + pin; const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + ':' + pin)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''); } catch (e) { return 'plain:' + pin; } }
+const diaVacio = () => ({ calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: null, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null });
+function recalcular(d) { const t = k => (d.comidas || []).reduce((a, c) => a + (c[k] || 0), 0); d.calorias = t('kcal'); d.carbs = t('c'); d.prot = t('p'); d.gras = t('g'); }
+function podarDiasVacios(u) { Object.keys(u.historial).forEach(f => { const d = u.historial[f]; if (!(d.comidas || []).length && !(d.rutina || []).length && !d.agua && !d.ejercicioKcal && d.peso == null && d.pasos == null && d.sueno == null && !d.energia && !d.retoDelDia && !d.celebrado) delete u.historial[f]; }); }
+function persistir() { try { const u = getUsuarioActual(); if (u) { recalcular(getDatosHoy()); podarDiasVacios(u); } localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); } catch (e) { console.error(e); alert("No se pudo guardar: almacenamiento lleno o bloqueado."); } }
+const ETQ = {'fa-chevron-left':'Día anterior','fa-chevron-right':'Día siguiente','fa-times':'Cerrar o eliminar','fa-trash':'Eliminar','fa-save':'Guardar como receta','fa-star':'Favorito','fa-moon':'Cambiar modo oscuro','fa-sun':'Cambiar modo oscuro','fa-plus':'Agregar','fa-minus':'Quitar'};
+function etiquetarBotones() { document.querySelectorAll('button:not([aria-label])').forEach(b => { if (b.textContent.trim()) return; const i = b.querySelector('i'); if (!i) return; for (const k in ETQ) if (i.classList.contains(k)) { b.setAttribute('aria-label', ETQ[k]); break; } }); }
+
+
+function getDatosHoy() { 
+    let u = getUsuarioActual(); let str = getFechaStr(fechaActual); 
+    let hDef = diaVacio();
+    if (!u.historial[str]) u.historial[str] = hDef;
+    else { for(let key in hDef) { if(u.historial[str][key] === undefined) u.historial[str][key] = hDef[key]; } }
+    return u.historial[str]; 
+}
+
+function guardarDatos() { persistir(); actualizarUI(); 
+    if(document.getElementById('tab-progreso').classList.contains('active')) { 
+        renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); dibujarProgresoYTablas();
+    } 
+}
+
+// --- SÚPER BIBLIOTECA BASE (EXPANSIÓN COMIDA TICA Y GENERAL) ---
+const bibliotecaBase = [
+    // BÁSICOS GYM Y SUPLEMENTOS
+    { nombre: "Creatina Monohidratada (5g)", kcal: 0, c: 0, p: 0, g: 0 },
+    { nombre: "Pre-entreno en polvo (1 scoop)", kcal: 15, c: 3, p: 0, g: 0 },
+    { nombre: "Batido de proteína Whey (1 scoop en agua)", kcal: 120, c: 3, p: 24, g: 1 },
+    { nombre: "Barra de proteína (promedio 60g)", kcal: 220, c: 22, p: 20, g: 7 },
+    { nombre: "Proats (Avena + Whey Protein)", kcal: 350, c: 45, p: 35, g: 6 },
+    { nombre: "Rice Cakes / Tortita de arroz (1 unidad)", kcal: 35, c: 7, p: 1, g: 0 },
+
+    // COMIDA TÍPICA COSTARRICENSE Y PICADILLOS (AMPLIADO)
+    { nombre: "Gallo Pinto (1 taza)", kcal: 260, c: 46, p: 7, g: 5 },
+    { nombre: "Casado tradicional (promedio)", kcal: 750, c: 90, p: 35, g: 25 },
+    { nombre: "Olla de carne con verduras (1 plato grande)", kcal: 450, c: 50, p: 30, g: 14 },
+    { nombre: "Chifrijo (1 tazón mediano)", kcal: 650, c: 55, p: 35, g: 30 },
+    { nombre: "Vigorón (1 porción regular)", kcal: 520, c: 45, p: 20, g: 28 },
+    { nombre: "Rice and Beans Limonense (1 taza)", kcal: 350, c: 50, p: 12, g: 11 },
+    { nombre: "Patí Limonense (1 unidad)", kcal: 280, c: 30, p: 10, g: 13 },
+    { nombre: "Arroz con Pollo Tico (1 taza)", kcal: 320, c: 45, p: 15, g: 9 },
+    { nombre: "Arroz con Cerdo (1 taza)", kcal: 360, c: 45, p: 18, g: 12 },
+    { nombre: "Macarrones con carne molida (1 taza)", kcal: 380, c: 45, p: 20, g: 14 },
+    { nombre: "Sopa Negra con huevo duro (1 tazón)", kcal: 250, c: 30, p: 16, g: 8 },
+    { nombre: "Picadillo de papa con chorizo (1 taza)", kcal: 320, c: 25, p: 12, g: 20 },
+    { nombre: "Picadillo de chayote con elote (1 taza)", kcal: 120, c: 18, p: 4, g: 4 },
+    { nombre: "Picadillo de vainica con carne (1 taza)", kcal: 180, c: 12, p: 15, g: 9 },
+    { nombre: "Picadillo de arracache (1 taza)", kcal: 250, c: 30, p: 8, g: 10 },
+    { nombre: "Picadillo de plátano verde (1 taza)", kcal: 210, c: 40, p: 4, g: 5 },
+    { nombre: "Gallito de salchichón (1 tortilla + salchichón)", kcal: 210, c: 14, p: 7, g: 14 },
+    { nombre: "Gallito de papa (1 tortilla + picadillo)", kcal: 150, c: 20, p: 4, g: 6 },
+    { nombre: "Pejibaye con mayonesa (1 unidad)", kcal: 135, c: 15, p: 2, g: 8 },
+    { nombre: "Pejibaye solo (1 unidad)", kcal: 90, c: 15, p: 2, g: 3 },
+    { nombre: "Empanada arreglada (carne, repollo, mayo/ketchup)", kcal: 450, c: 35, p: 15, g: 28 },
+    { nombre: "Empanada de carne frita (1 unidad)", kcal: 300, c: 25, p: 10, g: 18 },
+    { nombre: "Empanada de pollo frita (1 unidad)", kcal: 280, c: 25, p: 12, g: 15 },
+    { nombre: "Empanada de chiverre (1 unidad horneada)", kcal: 220, c: 35, p: 3, g: 8 },
+    { nombre: "Enyucado de carne (1 unidad frita)", kcal: 320, c: 35, p: 12, g: 15 },
+    { nombre: "Tamal de cerdo (1 unidad)", kcal: 450, c: 45, p: 12, g: 25 },
+    { nombre: "Tamal de pollo (1 unidad)", kcal: 410, c: 45, p: 15, g: 18 },
+    { nombre: "Tamal asado (1 porción)", kcal: 280, c: 45, p: 5, g: 9 },
+    { nombre: "Chorreada de maíz con natilla (1 unidad)", kcal: 260, c: 30, p: 6, g: 13 },
+    { nombre: "Tortilla aliñada con queso (1 grande)", kcal: 260, c: 25, p: 10, g: 14 },
+    { nombre: "Bizcocho tico (porción 30g)", kcal: 140, c: 15, p: 4, g: 7 },
+    { nombre: "Cajeta de coco (1 unidad pequeña)", kcal: 120, c: 20, p: 1, g: 5 },
+    { nombre: "Pan Bon (1 tajada)", kcal: 210, c: 40, p: 4, g: 5 },
+
+    // HUEVOS Y LÁCTEOS
+    { nombre: "Huevo entero (1 unidad)", kcal: 72, c: 0, p: 6, g: 5 },
+    { nombre: "Huevo frito en aceite (1 unidad)", kcal: 90, c: 0, p: 6, g: 7 },
+    { nombre: "Clara de huevo (1 unidad)", kcal: 17, c: 0, p: 4, g: 0 },
+    { nombre: "Leche descremada (1 vaso 250ml)", kcal: 85, c: 12, p: 8, g: 0 },
+    { nombre: "Leche entera (1 vaso 250ml)", kcal: 150, c: 12, p: 8, g: 8 },
+    { nombre: "Yogurt Griego sin azúcar (1 taza)", kcal: 100, c: 6, p: 15, g: 0 },
+    { nombre: "Queso Turrialba / Fresco (30g)", kcal: 85, c: 1, p: 6, g: 6 },
+    { nombre: "Queso Palmito (30g)", kcal: 90, c: 1, p: 7, g: 6 },
+    { nombre: "Queso Mozzarella (30g)", kcal: 85, c: 1, p: 6, g: 6 },
+    { nombre: "Natilla (1 cucharada)", kcal: 60, c: 2, p: 1, g: 6 },
+
+    // CARNES, AVES Y EMBUTIDOS
+    { nombre: "Pechuga de pollo a la plancha (100g)", kcal: 165, c: 0, p: 31, g: 4 },
+    { nombre: "Muslo de pollo sin piel (100g)", kcal: 175, c: 0, p: 24, g: 8 },
+    { nombre: "Carne de res magra / Bistec (100g)", kcal: 215, c: 0, p: 27, g: 11 },
+    { nombre: "Carne molida magra 90/10 (100g)", kcal: 176, c: 0, p: 20, g: 10 },
+    { nombre: "Lomo de cerdo (100g)", kcal: 143, c: 0, p: 26, g: 4 },
+    { nombre: "Chuleta de cerdo (100g)", kcal: 230, c: 0, p: 24, g: 14 },
+    { nombre: "Chorizo de cerdo (1 unidad / 60g)", kcal: 220, c: 1, p: 9, g: 20 },
+    { nombre: "Salchichón (1 rodaja gruesa)", kcal: 150, c: 2, p: 6, g: 13 },
+
+    // PESCADOS Y MARISCOS
+    { nombre: "Atún en agua (1 lata escurrida)", kcal: 110, c: 0, p: 24, g: 1 },
+    { nombre: "Salmón a la plancha (150g)", kcal: 310, c: 0, p: 34, g: 19 },
+    { nombre: "Tilapia a la plancha (150g)", kcal: 190, c: 0, p: 39, g: 4 },
+    { nombre: "Ceviche de pescado (1 taza)", kcal: 140, c: 10, p: 20, g: 2 },
+    { nombre: "Ceviche de Plátano Verde (1 taza)", kcal: 180, c: 40, p: 2, g: 1 },
+
+    // GRANOS, CEREALES Y HARINAS
+    { nombre: "Arroz blanco cocido (1 taza)", kcal: 205, c: 45, p: 4, g: 0 },
+    { nombre: "Frijoles negros cocidos (1 taza)", kcal: 230, c: 40, p: 16, g: 1 },
+    { nombre: "Frijoles molidos (1/2 taza)", kcal: 120, c: 18, p: 6, g: 3 },
+    { nombre: "Lentejas cocidas (1 taza)", kcal: 230, c: 40, p: 18, g: 1 },
+    { nombre: "Avena en hojuelas (1 taza cruda)", kcal: 300, c: 54, p: 10, g: 6 },
+    { nombre: "Pasta blanca cocida (1 taza)", kcal: 220, c: 43, p: 8, g: 1 },
+    { nombre: "Pan cuadrado blanco (1 rebanada)", kcal: 70, c: 13, p: 2, g: 1 },
+    { nombre: "Tortilla de maíz (1 unidad)", kcal: 60, c: 12, p: 1, g: 1 },
+
+    // TUBÉRCULOS Y FRUTAS
+    { nombre: "Papa cocida (1 unidad mediana)", kcal: 130, c: 30, p: 3, g: 0 },
+    { nombre: "Yuca hervida (1 taza)", kcal: 330, c: 78, p: 3, g: 1 },
+    { nombre: "Plátano maduro cocido (1 tajada/50g)", kcal: 65, c: 17, p: 1, g: 0 },
+    { nombre: "Patacones / Tostones (3 unidades)", kcal: 150, c: 25, p: 2, g: 5 },
+    { nombre: "Banano (1 unidad mediana)", kcal: 105, c: 27, p: 1, g: 0 },
+    { nombre: "Manzana (1 unidad mediana)", kcal: 95, c: 25, p: 0, g: 0 },
+    { nombre: "Aguacate (entero)", kcal: 320, c: 16, p: 4, g: 30 },
+
+    // BEBIDAS TICAS Y POSTRES
+    { nombre: "Agua dulce (1 taza)", kcal: 90, c: 23, p: 0, g: 0 },
+    { nombre: "Fresco de Cas con azúcar (1 vaso)", kcal: 110, c: 28, p: 0, g: 0 },
+    { nombre: "Fresco de Tamarindo con azúcar (1 vaso)", kcal: 120, c: 30, p: 0, g: 0 },
+    { nombre: "Fresco de Guanábana en leche (1 vaso)", kcal: 190, c: 30, p: 6, g: 5 },
+    { nombre: "Horchata (1 vaso)", kcal: 180, c: 35, p: 3, g: 4 },
+    { nombre: "Agua de Sapo (1 vaso)", kcal: 120, c: 30, p: 0, g: 0 },
+    { nombre: "Churchill (1 vaso mediano)", kcal: 650, c: 130, p: 8, g: 12 },
+    { nombre: "Granizado sencillo (1 vaso)", kcal: 250, c: 62, p: 0, g: 0 },
+    { nombre: "Café negro sin azúcar", kcal: 5, c: 0, p: 0, g: 0 },
+    { nombre: "Cerveza Regular (355ml)", kcal: 153, c: 13, p: 2, g: 0 }
+];
+
+function obtenerBibliotecaCompleta() { return [...(getUsuarioActual().alimentosPersonalizados || []), ...bibliotecaBase]; }
+
+function actualizarDatalist() { 
+    const dl = document.getElementById('sugerenciasAlimentos'); if(!dl) return; dl.innerHTML = ''; 
+    const u = getUsuarioActual(); if(document.getElementById('contadorPersonalizadas')) document.getElementById('contadorPersonalizadas').innerText = `${(u.alimentosPersonalizados || []).length} creadas`; 
+    obtenerBibliotecaCompleta().forEach(item => { 
+        let o = document.createElement('option'); 
+        o.value = item.nombre; o.textContent = `${item.kcal} kcal`; 
+        dl.appendChild(o); 
+    }); 
+}
+
+// =========================================================
+// FUNCIONES: BÚSQUEDA MUNDIAL (API) Y CSV
+// =========================================================
+
+async function buscarEnInternet() {
+    let txt = document.getElementById('inputComida').value.trim();
+    if(!txt) { alert("Escribe el nombre de un alimento en la barra de búsqueda primero."); return; }
+    
+    let resDiv = document.getElementById('resultadosInternet');
+    resDiv.innerHTML = '<p class="text-xs text-indigo-500 font-bold text-center py-2"><i class="fas fa-spinner fa-spin mr-2"></i> Buscando en el mundo...</p>';
+    resDiv.classList.remove('hidden');
+
+    try {
+        let url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(txt)}&search_simple=1&action=process&json=1&page_size=10&fields=product_name,product_name_es,brands,nutriments`;
+        if (ctrlBusq) ctrlBusq.abort(); ctrlBusq = new AbortController(); let response = await fetch(url, { signal: ctrlBusq.signal });
+        
+        if (!response.ok) throw new Error("Error de red");
+        
+        let data = await response.json();
+        
+        if (!data || !data.products || data.products.length === 0) { 
+            resDiv.innerHTML = `<p class="text-xs text-red-500 text-center font-bold">No encontré "${esc(txt)}". Intenta usar palabras más simples.</p><button onclick="document.getElementById('resultadosInternet').classList.add('hidden')" class="w-full mt-2 text-[10px] font-bold text-gray-400">Cerrar</button>`; 
+            return; 
+        }
+
+        let prods = data.products.filter(p => p.nutriments && p.nutriments['energy-kcal_100g']);
+        
+        if(prods.length === 0) { 
+            resDiv.innerHTML = `<p class="text-xs text-orange-500 text-center font-bold">Encontré "${esc(txt)}", pero sin datos de calorías.</p><button onclick="document.getElementById('resultadosInternet').classList.add('hidden')" class="w-full mt-2 text-[10px] font-bold text-gray-400">Cerrar</button>`; 
+            return; 
+        }
+
+        let h = '<p class="text-[10px] font-bold text-indigo-700 dark:text-indigo-400 mb-1.5 uppercase tracking-wide">Resultados de Internet (Por 100g):</p><div class="space-y-1.5">';
+        
+        prods.forEach(p => {
+            let nombreLimpio = (p.product_name_es || p.product_name || "Producto").replace(/'/g, "");
+            let marca = p.brands ? ` (${p.brands.split(',')[0]})` : '';
+            let nombreFinal = nombreLimpio + marca;
+            let kcal = Math.round(p.nutriments['energy-kcal_100g']);
+            let c = Math.round(p.nutriments['carbohydrates_100g'] || 0);
+            let pr = Math.round(p.nutriments['proteins_100g'] || 0);
+            let g = Math.round(p.nutriments['fat_100g'] || 0);
+            
+            h += `<button data-n="${esc(nombreFinal)}" onclick="guardarDesdeInternet(this.dataset.n, ${kcal}, ${c}, ${pr}, ${g})" class="w-full text-left bg-white dark:bg-slate-800 p-2.5 rounded-lg text-xs hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex justify-between items-center shadow-sm border border-transparent dark:border-slate-700 transition-colors">
+                    <span class="truncate w-3/4 font-semibold text-gray-800 dark:text-slate-200">${esc(nombreFinal)}</span>
+                    <span class="text-indigo-600 dark:text-indigo-400 font-bold shrink-0">${kcal} kcal</span>
+                  </button>`;
+        });
+        
+        h += '</div><button onclick="document.getElementById(\'resultadosInternet\').classList.add(\'hidden\')" class="w-full mt-2.5 py-1 text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-100 dark:bg-slate-800 rounded-lg">Cerrar</button>';
+        resDiv.innerHTML = h;
+    } catch(e) {
+        if (e.name === 'AbortError') return; console.error("Error API:", e);
+        let msg = (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) 
+            ? "Tu navegador o Adblocker bloqueó la conexión." 
+            : "Error al conectar. Intenta de nuevo.";
+        resDiv.innerHTML = `<p class="text-[11px] text-red-500 font-bold text-center">${msg}</p><button onclick="document.getElementById('resultadosInternet').classList.add('hidden')" class="w-full mt-2 text-[10px] font-bold text-gray-400">Cerrar</button>`;
+    }
+}
+
+function guardarDesdeInternet(nombre, kcal, c, p, g) {
+    let u = getUsuarioActual();
+    let nombreFinal = limpiarB(nombre) + " (100g)";
+    u.alimentosPersonalizados.push({ nombre: nombreFinal, kcal: kcal, c: c, p: p, g: g });
+    guardarDatos(); 
+    actualizarDatalist();
+    
+    document.getElementById('inputComida').value = nombreFinal;
+    document.getElementById('selectMedida').value = "1";
+    document.getElementById('resultadosInternet').classList.add('hidden');
+    registrarComidaLocal();
+    
+    alert(`¡Guardado en tu biblioteca local para siempre!`);
+}
+
+function importarCSV() {
+    let texto = prompt("Pega tu lista masiva de alimentos desde Excel o Bloc de Notas.\n\nEl formato obligatorio por cada línea es:\nNombre, Calorías, Carbohidratos, Proteína, Grasas\n\nEjemplo:\nChorizo picante, 250, 2, 10, 20\nPollo frito, 300, 15, 12, 10");
+    if(!texto) return;
+    
+    let lineas = texto.split('\n');
+    let agregados = 0;
+    let u = getUsuarioActual();
+    let listaActual = obtenerBibliotecaCompleta().map(i => normalizarTexto(i.nombre));
+
+    lineas.forEach(linea => {
+        let partes = linea.split(',');
+        if(partes.length >= 2) {
+            let n = partes[0].trim();
+            let k = parseInt(partes[1]) || 0;
+            let c = parseInt(partes[2]) || 0;
+            let pr = parseInt(partes[3]) || 0;
+            let g = parseInt(partes[4]) || 0;
+            
+            if(n && k > 0 && !listaActual.includes(normalizarTexto(n))) {
+                u.alimentosPersonalizados.push({ nombre: n, kcal: k, c: c, p: pr, g: g });
+                listaActual.push(normalizarTexto(n));
+                agregados++;
+            }
+        }
+    });
+
+    if(agregados > 0) {
+        guardarDatos(); 
+        actualizarDatalist();
+        alert(`¡Éxito! Se han importado ${agregados} alimentos nuevos a tu biblioteca.`);
+    } else {
+        alert("No se agregaron alimentos. Asegúrate de seguir el formato con comas o de que no existan ya.");
+    }
+}
+
+// =========================================================
+// RESTO DE LAS FUNCIONES DEL SISTEMA
+// =========================================================
+
+if (localStorage.getItem('nutriWeb_DarkMode') === 'true') document.documentElement.classList.add('dark');
+function toggleDarkMode() { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('nutriWeb_DarkMode', isDark); actualizarIconoDarkMode(); }
+function actualizarIconoDarkMode() { const i = document.getElementById('darkModeIcon'); if (!i) return; if (document.documentElement.classList.contains('dark')) { i.classList.replace('fa-moon', 'fa-sun'); i.classList.add('text-yellow-300'); } else { i.classList.replace('fa-sun', 'fa-moon'); i.classList.remove('text-yellow-300'); } }
+function guardarIdentidad() { let u = getUsuarioActual(); u.perfil.avatar = document.getElementById('inpAvatarEmoji').value.trim() || u.nombre.charAt(0); u.perfil.tema = document.getElementById('selTemaColor').value; document.getElementById('userAvatar').innerText = u.perfil.avatar; document.getElementById('avatarPreview').innerText = u.perfil.avatar; document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200 " + u.perfil.tema; guardarDatos(); }
+function inicializarPWA() { if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {}); const iSA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; const iM = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); if (iM && !iSA && !localStorage.getItem('nutriWeb_HideInstallBanner')) { document.getElementById('bannerInstalar').classList.remove('hidden'); } }
+function cerrarBannerInstalar() { document.getElementById('bannerInstalar').classList.add('hidden'); localStorage.setItem('nutriWeb_HideInstallBanner', 'true'); }
+
+function switchAuthTab(t) { let fL = document.getElementById('formLogin'), fR = document.getElementById('formRegister'), bL = document.getElementById('tabBtnLogin'), bR = document.getElementById('tabBtnRegister'); if (t === 'login') { fL.classList.remove('hidden'); fR.classList.add('hidden'); bL.className = "flex-1 py-3.5 text-sm font-bold text-brand-600 border-b-2 border-brand-500 bg-brand-50/50 dark:bg-slate-800 transition-colors"; bR.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors"; } else { fR.classList.remove('hidden'); fL.classList.add('hidden'); bR.className = "flex-1 py-3.5 text-sm font-bold text-blue-600 border-b-2 border-blue-500 bg-blue-50/50 dark:bg-slate-800 transition-colors"; bL.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors"; } }
+function renderizarPerfilesRapidos() { let ks = Object.keys(usuariosDB); let bt = document.getElementById('botonesPerfiles'); if (ks.length === 0) { document.getElementById('listaUsuariosRapidos').classList.add('hidden'); return; } document.getElementById('listaUsuariosRapidos').classList.remove('hidden'); bt.innerHTML = ''; ks.forEach(k => { bt.innerHTML += `<button data-k="${esc(k)}" onclick="seleccionarPerfilRapido(this.dataset.k)" class="px-3 py-1.5 bg-brand-100 dark:bg-brand-950 text-brand-800 dark:text-brand-300 rounded-full text-xs font-bold hover:bg-brand-200 transition-colors"><i class="fas fa-user mr-1"></i>${esc(usuariosDB[k].nombre)}</button>`; }); }
+function seleccionarPerfilRapido(k) { document.getElementById('loginUser').value = usuariosDB[k].nombre; document.getElementById('loginPin').focus(); }
+function calcularFormulaMetas(e, g, w, a, ac, o) { let tmb = (10 * w) + (6.25 * a) - (5 * e) + (g === 'm' ? 5 : -161); let m = Math.max(1200, Math.round((tmb * ac) + o)); let pP = o > 0 ? 0.30 : (o < 0 ? 0.35 : 0.25); return { metaKcal: m, metaProt: Math.round((m*pP)/4), metaGras: Math.round((m*0.25)/9), metaCarbs: Math.round((m*(1-pP-0.25))/4) }; }
+
+async function registrarUsuario() { 
+    let n=document.getElementById('regUser').value.trim(), p=document.getElementById('regPin').value.trim(), e=parseInt(document.getElementById('regEdad').value), g=document.getElementById('regGenero').value, w=parseFloat(document.getElementById('regPeso').value), a=parseFloat(document.getElementById('regAltura').value), ac=parseFloat(document.getElementById('regActividad').value), o=parseInt(document.getElementById('regObjetivo').value); 
+    if (!n || p.length !== 4) return alert("Nombre y PIN 4 dígitos requeridos."); if (!e || !w || !a) return alert("Faltan datos corporales."); if (e < 10 || e > 110 || w < 25 || w > 400 || a < 100 || a > 250) return alert("Revisa edad, peso y altura."); 
+    n = limpiarB(n); if (!n) return alert("Nombre inválido."); let k = normalizarTexto(n); if (usuariosDB[k]) return alert("Usuario ya existe."); 
+    let m = calcularFormulaMetas(e, g, w, a, ac, o); 
+    const salt = nuevoSalt(); usuariosDB[k] = { nombre: n, salt, pinHash: await hashPin(p, salt), perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '', triviaXP: 0, nivelTrivia: 1 }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] }; 
+    localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); entrarAlSistema(k); 
+}
+
+async function iniciarSesion() { let n = document.getElementById('loginUser').value.trim(), p = document.getElementById('loginPin').value.trim(), k = normalizarTexto(n), u = usuariosDB[k], ok = false;
+    if (u && u.pinHash) ok = (await hashPin(p, u.salt)) === u.pinHash;
+    else if (u && u.pin !== undefined && u.pin === p) { ok = true; u.salt = nuevoSalt(); u.pinHash = await hashPin(p, u.salt); delete u.pin; localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); }
+    if (!ok) return alert("Usuario/PIN incorrecto."); entrarAlSistema(k); }
+
+function entrarAlSistema(k) {
+    usuarioActivoKey = k; localStorage.setItem('nutriWeb_CurrentUser', k); fechaActual = new Date(); document.getElementById('authScreen').classList.add('hidden'); document.getElementById('mainApp').classList.remove('hidden');
+    let u = getUsuarioActual(); 
+    
+    u.alimentosPersonalizados = u.alimentosPersonalizados || []; u.favoritos = u.favoritos || [];
+    let pDef = { edad: 25, genero: 'm', altura: 170, actividad: 1.2, objetivo: 0, metaKcal: 2000, metaCarbs: 250, metaProt: 100, metaGras: 65, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: u.nombre.charAt(0), tema: '', triviaXP: 0, nivelTrivia: 1 };
+    for(let ky in pDef) { if(u.perfil[ky] === undefined) u.perfil[ky] = pDef[ky]; }
+    if(!u.perfil.medidas) u.perfil.medidas = { cintura: null, brazo: null, pierna: null };
+    Object.keys(u.historial).forEach(f => {
+        let hDef = diaVacio();
+        for(let hk in hDef) { if(u.historial[f][hk] === undefined) u.historial[f][hk] = hDef[hk]; }
+    });
+
+    document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200 " + u.perfil.tema;
+    document.getElementById('userNameHeader').innerText = u.nombre; document.getElementById('userAvatar').innerText = u.perfil.avatar; document.getElementById('avatarPreview').innerText = u.perfil.avatar; document.getElementById('inpAvatarEmoji').value = u.perfil.avatar; document.getElementById('selTemaColor').value = u.perfil.tema;
+    document.getElementById('calcEdad').value = u.perfil.edad; document.getElementById('calcGenero').value = u.perfil.genero; document.getElementById('calcAltura').value = u.perfil.altura; document.getElementById('calcActividad').value = u.perfil.actividad; document.getElementById('calcObjetivo').value = u.perfil.objetivo;
+    document.getElementById('inpCintura').value = u.perfil.medidas.cintura || ''; document.getElementById('inpBrazo').value = u.perfil.medidas.brazo || ''; document.getElementById('inpPierna').value = u.perfil.medidas.pierna || '';
+    actualizarIconoDarkMode();
+    
+    let hr = new Date().getHours(); if (hr < 11) seleccionarTiempoComida('Desayuno'); else if (hr < 15) seleccionarTiempoComida('Almuerzo'); else if (hr < 18) seleccionarTiempoComida('Snacks'); else seleccionarTiempoComida('Cena');
+    actualizarDatalist(); renderizarFavoritos(); actualizarUI(); renderizarTriviaMap();
+}
+function cerrarSesion() { usuarioActivoKey = null; localStorage.removeItem('nutriWeb_CurrentUser'); document.getElementById('loginPin').value = ''; document.getElementById('mainApp').classList.add('hidden'); document.getElementById('authScreen').classList.remove('hidden'); renderizarPerfilesRapidos(); document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200"; }
+
+function actualizarAsistenteToxico(dia, p, mE) {
+    const el = document.getElementById('mensajeAsistente'); if(!el) return; const res = mE - dia.calorias; const pR = p.metaProt - dia.prot; const hr = new Date().getHours();
+    if (dia.comidas.length === 0) el.innerHTML = `Día en blanco. Registra algo o asume tu pereza.`;
+    else if (res < 0) el.innerHTML = `Te pasaste por <b>${Math.abs(res)} kcal</b>. Excelente trabajo construyendo papada.`;
+    else if (pR > 25 && res > 150) el.innerHTML = `Sobran <b>${res} kcal</b> pero faltan <b>${pR}g de proteína</b>. Deja el pan y alimenta ese músculo.`;
+    else if (dia.agua < 1000 && hr >= 14) el.innerHTML = `Llevas <b>${dia.agua} ml</b> de agua y ya es tarde. ¿Eres un cactus? Hidrátate.`;
+    else if (res <= 100 && res >= 0) el.innerHTML = `Estás exacto en tu meta. Milagro. Disfruta tu momento de disciplina.`;
+    else el.innerHTML = `Llevas <b>${dia.calorias} kcal</b>. Sobran <b>${res} kcal</b>. Vas bien, pero no te relajes.`;
+}
+const retosToxicos = ["Haz 50 sentadillas o asume que tus piernas parecen palillos.", "Cero azúcar hoy. A ver si tienes voluntad de adulto.", "Toma 1 vaso de agua EN ESTE SEGUNDO. Riñones secos.", "Camina 3000 pasos extra o admite tu sedentarismo.", "Agrega ensalada hoy. Las papas fritas no cuentan.", "Haz 20 flexiones ahora mismo o pierde tu dignidad."];
+function girarRuleta() { let d = getDatosHoy(); if(!d.retoDelDia) { d.retoDelDia = retosToxicos[Math.floor(Math.random() * retosToxicos.length)]; guardarDatos(); } }
+
+function seleccionarTiempoComida(t) { tiempoComidaActual = t; document.querySelectorAll('.tc-btn').forEach(b => b.className="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 transition-all"); document.getElementById(`tc-${t}`).className="tc-btn py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm transition-all"; }
+function toggleModoManual() { let b=document.getElementById('modoBusqueda'); let m=document.getElementById('modoManual'); let bt=document.getElementById('btnToggleModo'); if(m.classList.contains('hidden')){ m.classList.remove('hidden'); b.classList.add('hidden'); bt.innerText="Manual"; }else{ m.classList.add('hidden'); b.classList.remove('hidden'); bt.innerText="Rápida"; } }
+
+function registrarComidaLocal() {
+    let inps = document.getElementById('inputComida'); let sel = document.getElementById('selectMedida'); let txt = inps.value.trim(); if (!txt) return;
+    let f = parseFloat(sel.value)||1; let tNorm = normalizarTexto(txt); const lib = obtenerBibliotecaCompleta(); let enc = lib.find(i => normalizarTexto(i.nombre) === tNorm);
+    if (!enc) { let m = tNorm.match(/^(\d+(?:\.\d+)?)\s+(.*)/); let b = tNorm; if (m) { f = parseFloat(m[1]); b = m[2]; } let bS = b.endsWith('s') && b.length>3 ? b.slice(0, -1) : b; enc = lib.find(i => { let n = normalizarTexto(i.nombre); return n.includes(b) || n.includes(bS); }); }
+    if (enc) { let d = getDatosHoy(); let k = Math.round(enc.kcal*f); let c = Math.round(enc.c*f); let p = Math.round(enc.p*f); let g = Math.round(enc.g*f); let et = f===1 ? enc.nombre : (f===0.5 ? `1/2 de ${enc.nombre}` : `${f}x ${enc.nombre}`); d.calorias += k; d.carbs += c; d.prot += p; d.gras += g; d.comidas.push({ texto: et, nombreBase: enc.nombre, kcalBase: enc.kcal, cBase: enc.c, pBase: enc.p, gBase: enc.g, kcal: k, c: c, p: p, g: g, tiempo: tiempoComidaActual }); guardarDatos(); inps.value = ''; sel.value = "1"; document.getElementById('cajaSugerenciasCena').classList.add('hidden'); } 
+    else { toggleModoManual(); document.getElementById('manNombre').value = txt; document.getElementById('manMedida').value = sel.value; document.getElementById('manKcal').focus(); }
+}
+function registrarComidaManual() {
+    let n = document.getElementById('manNombre').value.trim(); let kB = parseInt(document.getElementById('manKcal').value)||0; let cB = parseInt(document.getElementById('manCarbs').value)||0; let pB = parseInt(document.getElementById('manProt').value)||0; let gB = parseInt(document.getElementById('manGras').value)||0; let f = parseFloat(document.getElementById('manMedida').value)||1;
+    if (!n || kB<=0) return alert("Escribe nombre y calorías."); let k=Math.round(kB*f); let c=Math.round(cB*f); let p=Math.round(pB*f); let g=Math.round(gB*f); let d=getDatosHoy(); d.calorias+=k; d.carbs+=c; d.prot+=p; d.gras+=g; d.comidas.push({ texto: (f===1?n:`${f}x ${n}`), nombreBase: n, kcalBase: kB, cBase: cB, pBase: pB, gBase: gB, kcal: k, c: c, p: p, g: g, tiempo: tiempoComidaActual });
+    let u = getUsuarioActual(); if (!obtenerBibliotecaCompleta().some(i => normalizarTexto(i.nombre) === normalizarTexto(n))) { u.alimentosPersonalizados.push({ nombre: limpiarB(n), kcal: kB, c: cB, p: pB, g: gB }); actualizarDatalist(); } guardarDatos(); document.getElementById('manNombre').value=''; document.getElementById('manKcal').value=''; document.getElementById('manCarbs').value=''; document.getElementById('manProt').value=''; document.getElementById('manGras').value=''; document.getElementById('manMedida').value='1'; document.getElementById('inputComida').value=''; toggleModoManual();
+}
+function borrarComida(index) { if(confirm("¿Borrar?")) { let d = getDatosHoy(); let c = d.comidas[index]; d.calorias=Math.max(0,d.calorias-c.kcal); d.carbs=Math.max(0,d.carbs-c.c); d.prot=Math.max(0,d.prot-c.p); d.gras=Math.max(0,d.gras-c.g); d.comidas.splice(index, 1); guardarDatos(); } }
+function copiarDiaAnterior() { let a=new Date(fechaActual); a.setDate(a.getDate()-1); let dA=getUsuarioActual().historial[getFechaStr(a)]; if(!dA || !dA.comidas.length) return alert("Nada que copiar."); if(confirm("¿Copiar de ayer?")) { let d=getDatosHoy(); dA.comidas.forEach(c => { d.calorias+=c.kcal; d.carbs+=c.c; d.prot+=c.p; d.gras+=c.g; d.comidas.push({...c}); }); guardarDatos(); } }
+function sugerirQueComer() {
+    const c = document.getElementById('cajaSugerenciasCena'); if (!c.classList.contains('hidden')) { c.classList.add('hidden'); return; }
+    let r = getUsuarioActual().perfil.metaKcal + (getDatosHoy().ejercicioKcal||0) - getDatosHoy().calorias;
+    if (r < 80) { c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Casi al límite. Toma agua o café.</p>`; c.classList.remove('hidden'); return; }
+    let cand = obtenerBibliotecaCompleta().filter(i => i.kcal >= 70 && i.kcal <= r).sort(()=>0.5-Math.random()).slice(0,3);
+    if (!cand.length) c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Tienes ${r} kcal. Arma algo a tu gusto.</p>`; else { let h = `<p class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Opciones para tus ${r} kcal:</p>`; cand.forEach(s => h += `<div class="flex justify-between items-center bg-white/80 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg text-xs mt-1"><span class="truncate pr-2 font-medium">${esc(s.nombre)}</span><span class="font-bold text-brand-600">${s.kcal} kcal</span></div>`); c.innerHTML = h; } c.classList.remove('hidden');
+}
+function guardarComoReceta(tiempo) {
+    let d = getDatosHoy(); let items = d.comidas.filter(c => (c.tiempo || 'Almuerzo') === tiempo);
+    if (items.length < 2) return alert("Agrega al menos 2 alimentos a este tiempo para crear un combo.");
+    let nombre = prompt(`¿Nombre para esta Receta de ${items.length} alimentos?`); if (!nombre) return;
+    let tKcal = 0, tC = 0, tP = 0, tG = 0; items.forEach(i => { tKcal += i.kcal; tC += i.c; tP += i.p; tG += i.g; });
+    getUsuarioActual().alimentosPersonalizados.push({ nombre: limpiarB(nombre) + " (Combo)", kcal: tKcal, c: tC, p: tP, g: tG }); guardarDatos(); actualizarDatalist(); alert(`¡Combo "${nombre}" guardado!`);
+}
+function toggleFavorito(nombreBase, kcal, c, p, g) { let u = getUsuarioActual(); u.favoritos = u.favoritos || []; const idx = u.favoritos.findIndex(f => normalizarTexto(f.nombre) === normalizarTexto(nombreBase)); if (idx >= 0) u.favoritos.splice(idx, 1); else u.favoritos.push({ nombre: nombreBase, kcal: kcal, c: c, p: p, g: g }); guardarDatos(); renderizarFavoritos(); }
+function renderizarFavoritos() { let favs = getUsuarioActual().favoritos || []; let barra = document.getElementById('barraFavoritos'); let cont = document.getElementById('listaFavoritosChips'); if (favs.length === 0) { barra.classList.add('hidden'); return; } barra.classList.remove('hidden'); cont.innerHTML = ''; favs.forEach((f, idx) => { cont.innerHTML += `<button onclick="agregarFavoritoRapido(${idx})" class="shrink-0 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800/60 text-yellow-800 dark:text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-100 transition-colors flex items-center gap-1.5"><i class="fas fa-plus-circle text-brand-500"></i><span class="truncate max-w-[130px]">${esc(f.nombre.split('(')[0].trim())}</span></button>`; }); }
+function agregarFavoritoRapido(idx) { let f = getUsuarioActual().favoritos[idx]; if (!f) return; let d = getDatosHoy(); d.calorias += f.kcal; d.carbs += f.c; d.prot += f.p; d.gras += f.g; d.comidas.push({ texto: f.nombre, nombreBase: f.nombre, kcalBase: f.kcal, cBase: f.c, pBase: f.p, gBase: f.g, kcal: f.kcal, c: f.c, p: f.p, g: f.g, tiempo: tiempoComidaActual }); guardarDatos(); }
+
+function guardarHabitos() { let d=getDatosHoy(); d.pasos=parseInt(document.getElementById('inpPasos').value)||null; d.sueno=parseFloat(document.getElementById('inpSueno').value)||null; d.energia=document.getElementById('inpEnergia').value||null; guardarDatos(); }
+function guardarMedidas() { let u=getUsuarioActual(); u.perfil.medidas.cintura=parseFloat(document.getElementById('inpCintura').value)||null; u.perfil.medidas.brazo=parseFloat(document.getElementById('inpBrazo').value)||null; u.perfil.medidas.pierna=parseFloat(document.getElementById('inpPierna').value)||null; guardarDatos(); }
+function guardarPeso() { let p=document.getElementById('inputPeso').value; if(p){ getDatosHoy().peso=parseFloat(p); guardarDatos(); document.getElementById('inputPeso').value=''; } }
+
+function sumarAgua(c) { 
+    getDatosHoy().agua=Math.max(0,getDatosHoy().agua+c); 
+    guardarDatos();
+    let el = document.getElementById('aguaTotal');
+    el.classList.add('animate-bounce-sm');
+    setTimeout(() => el.classList.remove('animate-bounce-sm'), 250);
+}
+
+function agregarEjercicioRutina() { let e=document.getElementById('gymEjercicio').value.trim(); let p=parseFloat(document.getElementById('gymPeso').value)||0; let r=parseInt(document.getElementById('gymReps').value)||0; if(!e || r<=0) return; let d=getDatosHoy(); d.rutina.push({e:e, p:p, r:r}); guardarDatos(); document.getElementById('gymEjercicio').value=''; document.getElementById('gymPeso').value=''; document.getElementById('gymReps').value=''; }
+function borrarEjercicioRutina(idx) { if(confirm("¿Borrar serie?")) { getDatosHoy().rutina.splice(idx, 1); guardarDatos(); } }
+function registrarEjercicioManual() { let k=parseInt(document.getElementById('inpGastoExtra').value)||0; if(k>0){ getDatosHoy().ejercicioKcal+=k; document.getElementById('inpGastoExtra').value=''; guardarDatos(); } }
+function calcular1RM() { let p=parseFloat(document.getElementById('rmPeso').value)||0; let r=parseInt(document.getElementById('rmReps').value)||0; if(p<=0 || r<=0) return; document.getElementById('resultado1RM').classList.remove('hidden'); document.getElementById('rmValor').innerText=`${Math.round(p*(1+(r/30)))} kg`; }
+function calcularMetas() { let u = getUsuarioActual(); let m = calcularFormulaMetas(parseInt(document.getElementById('calcEdad').value), document.getElementById('calcGenero').value, parseFloat(document.getElementById('calcPeso').value), parseFloat(document.getElementById('calcAltura').value), parseFloat(document.getElementById('calcActividad').value), parseInt(document.getElementById('calcObjetivo').value)); u.perfil.metaKcal = m.metaKcal; u.perfil.metaProt = m.metaProt; u.perfil.metaGras = m.metaGras; u.perfil.metaCarbs = m.metaCarbs; getDatosHoy().peso = parseFloat(document.getElementById('calcPeso').value); guardarDatos(); alert(`Meta actualizada: ${m.metaKcal} kcal.`); }
+
+// NUEVO: CRONÓMETRO DE DESCANSO GYM
+let gymTimerInterval = null;
+function startGymTimer(seconds) {
+    if(gymTimerInterval) clearInterval(gymTimerInterval);
+    let timeRemaining = seconds;
+    let display = document.getElementById('gymTimerDisplay');
+    display.classList.remove('text-green-500'); display.classList.add('text-red-500');
+    
+    function updateDisplay() {
+        let m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+        let s = (timeRemaining % 60).toString().padStart(2, '0');
+        display.innerText = `${m}:${s}`;
+    }
+    updateDisplay();
+    
+    gymTimerInterval = setInterval(() => {
+        timeRemaining--;
+        if(timeRemaining <= 0) {
+            clearInterval(gymTimerInterval);
+            display.innerText = "¡A DARLE!";
+            display.classList.remove('text-red-500'); display.classList.add('text-green-500');
+            if(typeof confetti === 'function') confetti({particleCount: 50, spread: 40, colors: ['#ef4444', '#000000']});
+        } else {
+            updateDisplay();
+        }
+    }, 1000);
+}
+
+
+function cambiarTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(e => {
+        e.classList.remove('active', 'animate-fade-in'); 
+    }); 
+    let target = document.getElementById(`tab-${tab}`);
+    target.classList.add('active', 'animate-fade-in');
+    
+    document.querySelectorAll('[id^="nav-"]').forEach(e => { e.classList.remove('text-brand-600'); e.classList.add('text-gray-400'); }); 
+    document.getElementById(`nav-${tab}`).classList.remove('text-gray-400'); document.getElementById(`nav-${tab}`).classList.add('text-brand-600');
+    
+    if(tab === 'progreso') { renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); dibujarProgresoYTablas(); }
+    if(tab === 'juegos') { renderizarTriviaMap(); }
+}
+
+function cambiarFecha(dias) { fechaActual.setDate(fechaActual.getDate()+dias); let h=getFechaStr(new Date()); let a=getFechaStr(fechaActual); document.getElementById('fechaDisplay').innerText = a===h ? "Hoy" : (a===getFechaStr(new Date(Date.now()-86400000)) ? "Ayer" : a); document.getElementById('pesoFechaLabel').innerText=document.getElementById('fechaDisplay').innerText; actualizarUI(); }
+
+function actualizarUI() {
+    let u = getUsuarioActual(); let dia = getDatosHoy(); let p = u.perfil; let ex = dia.ejercicioKcal || 0; let mE = p.metaKcal + ex;
+    
+    document.getElementById('caloriasConsumidas').innerText = dia.calorias; document.getElementById('metaCaloriasText').innerText = `/ ${mE} kcal`;
+    document.getElementById('carbTotal').innerText = dia.carbs; document.getElementById('metaCarbs').innerText = `/ ${p.metaCarbs}g`;
+    document.getElementById('protTotal').innerText = dia.prot; document.getElementById('metaProt').innerText = `/ ${p.metaProt}g`;
+    document.getElementById('grasTotal').innerText = dia.gras; document.getElementById('metaGras').innerText = `/ ${p.metaGras}g`;
+    document.getElementById('aguaTotal').innerText = dia.agua;
+    
+    document.getElementById('inpPasos').value = dia.pasos || ''; document.getElementById('inpSueno').value = dia.sueno || ''; document.getElementById('inpEnergia').value = dia.energia || '';
+    document.getElementById('kcalEjercicioText').innerText = ex; if(ex>0) document.getElementById('infoEjercicioBadge').classList.remove('hidden'); else document.getElementById('infoEjercicioBadge').classList.add('hidden');
+    
+    let res = mE - dia.calorias; let bd = document.getElementById('kcalRestantesBadge');
+    if(res>=0) { bd.innerText=`Restan: ${res}`; bd.className="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-400 transition-colors"; } 
+    else { bd.innerText=`Exceso: +${Math.abs(res)}`; bd.className="text-xs font-bold px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-400 transition-colors"; }
+    
+    let pct = Math.min((dia.calorias / mE) * 100, 100); document.getElementById('anilloCalorias').style.strokeDashoffset = 283 - (283 * pct) / 100;
+    if(dia.calorias > mE) { document.getElementById('anilloCalorias').style.stroke = "#ef4444"; document.getElementById('alertaExceso').classList.remove('hidden'); } 
+    else { document.getElementById('anilloCalorias').style.stroke = "rgb(var(--b500))"; document.getElementById('alertaExceso').classList.add('hidden'); }
+
+    if (res <= 50 && res >= -10 && dia.comidas.length > 0 && !dia.celebrado && getFechaStr(fechaActual) === getFechaStr(new Date())) {
+        if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#22c55e', '#facc15', '#ef4444', '#3b82f6'] });
+        dia.celebrado = true; persistir();
+    }
+
+    actualizarAsistenteToxico(dia, p, mE);
+
+    if (dia.retoDelDia) { document.getElementById('btnGirarRuleta').classList.add('hidden'); document.getElementById('cajaRetoDiario').classList.remove('hidden'); document.getElementById('cajaRetoDiario').innerText = dia.retoDelDia; } 
+    else { document.getElementById('btnGirarRuleta').classList.remove('hidden'); document.getElementById('cajaRetoDiario').classList.add('hidden'); }
+
+    const cont = document.getElementById('contenedorComidasAgrupadas'); 
+    if(dia.comidas.length === 0) cont.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Sin registros en este día.</p>'; 
+    else {
+        let h=''; const fN = (u.favoritos||[]).map(f => normalizarTexto(f.nombre));
+        [{i:'Desayuno',ic:'fa-coffee text-amber-500'},{i:'Almuerzo',ic:'fa-sun text-orange-500'},{i:'Cena',ic:'fa-moon text-indigo-500'},{i:'Snacks',ic:'fa-apple-alt text-brand-500'}].forEach(t => {
+            let cL = dia.comidas.map((c,ix) => ({...c, idx:ix})).filter(c => (c.tiempo||'Almuerzo') === t.i);
+            if(cL.length > 0) { 
+                h += `<div class="space-y-2"><div class="flex justify-between items-center text-xs font-bold text-gray-500 dark:text-slate-400 px-1"><span><i class="fas ${t.ic} mr-1"></i> ${t.i}</span><div class="flex items-center gap-3"><span class="text-brand-600">${cL.reduce((a,i)=>a+i.kcal,0)} kcal</span><button onclick="guardarComoReceta('${t.i}')" class="text-indigo-500 hover:text-indigo-400 p-1 transition-colors"><i class="fas fa-save"></i></button></div></div><ul class="space-y-2">`;
+                cL.forEach(c => { 
+                    let esF = fN.includes(normalizarTexto(c.nombreBase||c.texto)); let sC = esF ? 'fas fa-star text-yellow-400' : 'far fa-star text-gray-300 dark:text-slate-600';
+                    let kB=c.kcalBase||c.kcal; let cB=c.cBase!==undefined?c.cBase:c.c; let pB=c.pBase!==undefined?c.pBase:c.p; let gB=c.gBase!==undefined?c.gBase:c.g;
+                    h += `<li class="bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col gap-1 transition-colors"><div class="flex justify-between items-center"><div class="flex items-center gap-2 min-w-0"><button data-n="${esc(c.nombreBase||c.texto)}" onclick="toggleFavorito(this.dataset.n, ${kB}, ${cB}, ${pB}, ${gB})" class="shrink-0 p-0.5"><i class="${sC} text-xs transition-colors"></i></button><span class="text-gray-800 dark:text-slate-100 font-semibold text-xs truncate max-w-[170px]">${esc(c.texto)}</span></div><div class="flex items-center gap-2.5 shrink-0 ml-2"><span class="text-brand-600 font-bold text-xs">${c.kcal} kcal</span><button onclick="borrarComida(${c.idx})" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-trash text-xs"></i></button></div></div><div class="flex gap-3 text-[10px] text-gray-400 pl-6"><span>C: ${c.c}g</span> <span>P: ${c.p}g</span> <span>G: ${c.g}g</span></div></li>`;
+                }); h += `</ul></div>`; 
+            }
+        }); cont.innerHTML = h;
+    }
+    
+    const rut = document.getElementById('listaRutinaHoy'); rut.innerHTML = ''; document.getElementById('conteoEjercicios').innerText = `${dia.rutina.length} series`;
+    dia.rutina.forEach((r, idx) => { rut.innerHTML += `<li class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-xl border border-emerald-100 dark:border-emerald-800 text-xs transition-colors"><span class="font-bold text-emerald-800 dark:text-emerald-300 truncate pr-2">${esc(r.e)}</span><div class="shrink-0 flex items-center gap-3"><span class="text-emerald-700 dark:text-emerald-400 font-medium">${r.p} kg x ${r.r} reps</span><button onclick="borrarEjercicioRutina(${idx})" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-times"></i></button></div></li>`; });
+
+    // RACHA 
+    let rc=0; let fC=new Date(); let hoS=getFechaStr(fC); 
+    let hoT = false;
+    if(u.historial[hoS] && u.historial[hoS].comidas && u.historial[hoS].comidas.length > 0) hoT = true;
+    if(hoT) rc++; 
+    fC.setDate(fC.getDate()-1);
+    
+    for(let i=0; i<365; i++){ 
+        let st = getFechaStr(fC); 
+        let ti = false;
+        if(u.historial[st] && u.historial[st].comidas && u.historial[st].comidas.length > 0) ti = true;
+        
+        if(ti) rc++; 
+        else if(!hoT && i===0) continue; 
+        else break; 
+        fC.setDate(fC.getDate()-1); 
+    }
+    
+    if(rc > u.perfil.mejorRacha) u.perfil.mejorRacha = rc;
+    
+    document.getElementById('rachaDisplay').innerText = rc;
+    if(document.getElementById('rachaDiasTexto')) {
+        document.getElementById('rachaDiasTexto').innerText = `${rc} días`;
+        const iF = document.getElementById('iconoFuegoHeader'); if(hoT) iF.classList.add('fuego-activo'); else iF.classList.remove('fuego-activo');
+        const niv = [{min:0,max:3,t:"Novato",e:"🌱"},{min:3,max:7,t:"Constante",e:"🔥"},{min:7,max:14,t:"Disciplinado",e:"⚡"},{min:14,max:30,t:"Imparable",e:"🏆"},{min:30,max:100,t:"Leyenda",e:"👑"}];
+        let nA = niv[0]; for(let n of niv) if(rc>=n.min) nA=n;
+        document.getElementById('rachaEmojiNivel').innerText = nA.e; document.getElementById('rachaTituloNivel').innerText = nA.t;
+        let rng = nA.max-nA.min; document.getElementById('rachaBarraProgreso').style.width = `${Math.round((Math.min(rc-nA.min, rng)/rng)*100)}%`;
+    }
+}
+
+function renderizarHeatmap() { let u=getUsuarioActual(); let h=''; for(let i=83; i>=0; i--) { let d=new Date(fechaActual); d.setDate(d.getDate()-i); let dt=u.historial[getFechaStr(d)]; let c='bg-gray-200 dark:bg-slate-700'; if(dt && dt.comidas && dt.comidas.length>0) { let df=dt.calorias-(u.perfil.metaKcal); if(df>200) c='bg-red-500'; else if(df>=-100 && df<=100) c='bg-brand-500'; else c='bg-yellow-400'; } h+=`<div class="w-3.5 h-3.5 rounded-sm ${c} opacity-90 transition-colors"></div>`; } document.getElementById('heatmapContainer').innerHTML = h; }
+function renderizarMedallas() { let u=getUsuarioActual(); let rc = parseInt(document.getElementById('rachaDisplay').innerText)||0; document.getElementById('recordRachaText').innerText=`Récord: ${u.perfil.mejorRacha} días`; const m = [{n:"1er Paso", i:"🥗", d:rc>=1},{n:"En Llamas", i:"🔥", d:u.perfil.mejorRacha>=3},{n:"Semana", i:"⚡", d:u.perfil.mejorRacha>=7},{n:"Imparable", i:"👑", d:u.perfil.mejorRacha>=14}]; document.getElementById('gridMedallas').innerHTML = ''; m.forEach(x => { let st=x.d?"bg-amber-50 dark:bg-slate-800 border-amber-300 opacity-100":"bg-gray-50 border-gray-200 opacity-45 grayscale"; document.getElementById('gridMedallas').innerHTML+=`<div class="p-3 rounded-2xl border text-center flex flex-col items-center justify-center ${st} transition-colors"><span class="text-2xl mb-1">${x.i}</span><p class="text-xs font-bold">${x.n}</p></div>`; }); }
+
+function dibujarProgresoYTablas() {
+    let u = getUsuarioActual(); let maxKcal = u.perfil.metaKcal || 2000;
+    const container = document.getElementById('graficoBarras'); const labels = document.getElementById('graficoFechas'); const tabla = document.getElementById('tablaEvolucion');
+    if (!container || !labels || !tabla) return;
+    container.innerHTML = ''; labels.innerHTML = ''; tabla.innerHTML = '';
+    
+    for(let i = 6; i >= 0; i--) {
+        let d = new Date(fechaActual); d.setDate(d.getDate() - i); let str = getFechaStr(d);
+        let dataDia = u.historial[str] || { calorias: 0, peso: null };
+        let height = Math.min((dataDia.calorias / maxKcal) * 100, 100); if(height === 0) height = 3; 
+        let color = dataDia.calorias > maxKcal ? 'bg-red-400' : 'bg-brand-500';
+        container.innerHTML += `<div class="w-full ${color} rounded-t-md transition-all duration-500" style="height: ${height}%"></div>`;
+        
+        let diaNom = d.toLocaleDateString('es-ES', { weekday: 'short' });
+        labels.innerHTML += `<span class="flex-1 text-center capitalize">${diaNom.substring(0,3)}</span>`;
+        let pesoTxt = dataDia.peso ? `${dataDia.peso} kg` : "-";
+        
+        tabla.innerHTML = `
+            <tr class="bg-white dark:bg-slate-900 border-b dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                <td class="px-2 py-2.5 font-semibold text-gray-800 dark:text-slate-200 capitalize">${diaNom.substring(0,3)} ${d.getDate()}</td>
+                <td class="px-2 py-2.5">${pesoTxt}</td>
+                <td class="px-2 py-2.5 font-bold text-center ${dataDia.calorias > maxKcal ? 'text-red-500' : 'text-brand-600'}">${dataDia.calorias}</td>
+            </tr>
+        ` + tabla.innerHTML; 
+    }
+}
+
+// =========================================================
+// LIGA DE AMIGOS CON XP INTEGRADA
+// =========================================================
+function exportarCodigoReto() { 
+    let u=getUsuarioActual(); 
+    let payload = {tipo:"NutriWeb_Reto", n:u.nombre, r:parseInt(document.getElementById('rachaDisplay').innerText)||0, m:u.perfil.mejorRacha, x:u.perfil.triviaXP||0}; 
+    let c=aB64(payload); 
+    navigator.clipboard.writeText(c).then(()=>alert("¡Código copiado con tu XP actual!")).catch(()=>prompt("Copia:",c)); 
+}
+
+function importarCodigoReto() { 
+    let c = document.getElementById('inpCodigoAmigo').value; if(!c) return; 
+    try { 
+        c = c.replace(/\s+/g, ''); 
+        let p = deB64(c); 
+        if(p.tipo!=="NutriWeb_Reto") throw new Error(); 
+        let u=getUsuarioActual(); 
+        let nm=limpiarB(p.n).slice(0,30); if(!nm) throw new Error(); u.perfil.amigosReto[normalizarTexto(nm)]={nombre:nm, racha:parseInt(p.r)||0, mejor:parseInt(p.m)||0, xp:parseInt(p.x)||0}; 
+        guardarDatos(); 
+        document.getElementById('inpCodigoAmigo').value=''; 
+        alert(`¡${p.n} añadido!`); 
+    } catch(e) { alert("Código Inválido. Asegúrate de copiar todo el código sin espacios."); } 
+}
+
+function renderizarRetoGrupal() { 
+    let u=getUsuarioActual(); 
+    let rl=parseInt(document.getElementById('rachaDisplay').innerText)||0; 
+    let l=[{nombre:u.nombre+" (Tú)", racha:rl, mejor:u.perfil.mejorRacha||0, xp:u.perfil.triviaXP||0}]; 
+    if(u.perfil.amigosReto) Object.keys(u.perfil.amigosReto).forEach(k=>l.push(u.perfil.amigosReto[k])); 
+    
+    // Ordenar primero por XP, luego por racha
+    l.sort((a,b) => {
+        if (b.xp !== a.xp) return b.xp - a.xp;
+        return b.racha - a.racha;
+    }); 
+    
+    let h=''; 
+    l.forEach((i,x)=>{ 
+        let ic=x===0?'🥇':x===1?'🥈':x===2?'🥉':'👏'; 
+        let bg=i.nombre.includes("(Tú)")?'bg-indigo-50 dark:bg-indigo-900/30':'bg-gray-50 dark:bg-slate-800'; 
+        h+=`<div class="flex justify-between items-center ${bg} p-2.5 rounded-xl border transition-colors">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">${ic}</span>
+                    <div class="leading-tight">
+                        <span class="font-bold text-sm text-gray-800 dark:text-slate-200 block">${esc(i.nombre)}</span>
+                        <span class="text-[10px] text-green-600 dark:text-green-400 font-bold"><i class="fas fa-fire"></i> ${esc(i.xp)} XP</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="font-black text-orange-500 text-sm">${esc(i.racha)} días 🔥</p>
+                    <p class="text-[10px] text-gray-400">Récord: ${esc(i.mejor)}</p>
+                </div>
+            </div>`; 
+    }); 
+    document.getElementById('listaRetoGrupal').innerHTML=h; 
+}
+
+function exportarBibliotecaComidas() { let lista = getUsuarioActual().alimentosPersonalizados || []; if (lista.length === 0) return alert("Sin comidas nuevas."); let c = aB64({ tipo: "NutriWeb_Comidas", items: lista }); navigator.clipboard.writeText(c).then(() => alert(`Copiadas.`)).catch(() => prompt("Copia:", c)); }
+function importarBibliotecaComidas() { let c = prompt("Pega código:"); if (!c) return; try { c = c.replace(/\s+/g, ''); let p = deB64(c); if (p.tipo !== "NutriWeb_Comidas") throw new Error(); let u = getUsuarioActual(); let ex = obtenerBibliotecaCompleta().map(i => normalizarTexto(i.nombre)); let ag = 0; p.items.forEach(i => { if (i.nombre && i.kcal && !ex.includes(normalizarTexto(i.nombre))) { u.alimentosPersonalizados.push({ nombre: i.nombre, kcal: parseInt(i.kcal)||0, c: parseInt(i.c)||0, p: parseInt(i.p)||0, g: parseInt(i.g)||0 }); ex.push(normalizarTexto(i.nombre)); ag++; } }); guardarDatos(); actualizarDatalist(); alert(`¡${ag} agregadas!`); } catch (e) { alert("Inválido."); } }
+function exportarRespaldo() { let { pin, pinHash, salt, ...resto } = getUsuarioActual(); let c = aB64(resto); navigator.clipboard.writeText(c).then(() => alert("Respaldo copiado (sin PIN).")).catch(() => prompt("Copia:", c)); }
+function importarRespaldo() { let c = prompt("Pega código de respaldo:"); if (!c) return; try { let d = deB64(c), act = getUsuarioActual(); if (!d || typeof d.nombre !== 'string' || !d.perfil || typeof d.perfil !== 'object' || !d.historial || typeof d.historial !== 'object') throw new Error(); d.alimentosPersonalizados = Array.isArray(d.alimentosPersonalizados) ? d.alimentosPersonalizados : []; d.favoritos = Array.isArray(d.favoritos) ? d.favoritos : []; delete d.pin; d.pinHash = act.pinHash; d.salt = act.salt; if (act.pin !== undefined) d.pin = act.pin; if (!confirm("Esto reemplazará tus datos actuales. ¿Continuar?")) return; usuariosDB[usuarioActivoKey] = d; guardarDatos(); entrarAlSistema(usuarioActivoKey); alert("¡Restaurado!"); } catch (e) { alert("Inválido."); } }
+
+// =========================================================
+// MINIJUEGO: TRIVIA ESTILO DUOLINGO CON MAPA
+// =========================================================
+const bancoLecciones = [
+    { id: 1, titulo: "Fundamentos Básicos", desc: "Lo que debes saber para empezar", icono: "🧠", preguntas: [
+        { q: "¿Qué macronutriente es el principal responsable de reparar los músculos?", opts: ["Carbohidratos", "Proteínas", "Grasas"], ans: 1 },
+        { q: "¿Cuántas calorías tiene 1 gramo de proteína?", opts: ["4 kcal", "9 kcal", "7 kcal"], ans: 0 },
+        { q: "Para perder grasa necesitas lograr un...", opts: ["Déficit calórico", "Superávit calórico", "Equilibrio mágico"], ans: 0 },
+        { q: "¿Qué bebida no tiene calorías?", opts: ["Jugo de naranja", "Gaseosa regular", "Agua y Café negro"], ans: 2 }
+    ]},
+    { id: 2, titulo: "Grasas y Carbohidratos", desc: "Rompiendo los miedos a la comida", icono: "🥑", preguntas: [
+        { q: "¿Cuál de estos alimentos es una excelente fuente de grasas saludables?", opts: ["Arroz blanco", "Pechuga de pollo", "Aguacate"], ans: 2 },
+        { q: "¿Cuántas calorías aporta 1 gramo de grasa?", opts: ["4 kcal", "7 kcal", "9 kcal"], ans: 2 },
+        { q: "¿Qué es un carbohidrato complejo?", opts: ["Azúcar de mesa", "Avena", "Miel"], ans: 1 },
+        { q: "Verdadero o Falso: Los carbohidratos engordan por sí solos.", opts: ["Verdadero", "Falso, depende del total de calorías"], ans: 1 }
+    ]},
+    { id: 3, titulo: "Cultura Tica", desc: "Comida de la abuela y nutrición", icono: "☕", preguntas: [
+        { q: "¿Qué clásico tico es una excelente mezcla de carbohidratos y proteína vegetal?", opts: ["Chifrijo", "Gallo Pinto", "Empanada"], ans: 1 },
+        { q: "¿Qué bebida tradicional tiene más calorías por el azúcar añadido?", opts: ["Fresco de Cas con azúcar", "Café negro", "Agua de Pipa natural"], ans: 0 },
+        { q: "El pejibaye es rico principalmente en...", opts: ["Agua y Fibra", "Carbohidratos y Grasas buenas", "Pura Proteína"], ans: 1 },
+        { q: "Si pides un 'Casado', ¿cuál es la mejor forma de hacerlo más 'sano'?", opts: ["Quitarle la ensalada", "Pedir plátano maduro al vapor en vez de frito", "Añadirle doble mayonesa"], ans: 1 }
+    ]},
+    { id: 4, titulo: "Mitos del Entrenamiento", desc: "La verdad del gimnasio", icono: "🏋️", preguntas: [
+        { q: "Sudar muchísimo significa que estás...", opts: ["Quemando mucha grasa", "Perdiendo agua (deshidratación)", "Ganando músculo"], ans: 1 },
+        { q: "Si quieres subir masa muscular, necesitas...", opts: ["Déficit calórico + Cardio", "Superávit calórico + Pesas", "Solo comer ensaladas"], ans: 1 },
+        { q: "¿Hacer 1000 abdominales diarios quema la grasa del abdomen?", opts: ["Sí, directamente", "No, la grasa se pierde de forma global"], ans: 1 },
+        { q: "¿Es obligatorio tomar proteína en polvo para ganar músculo?", opts: ["Sí", "No, puedes comerla de alimentos reales"], ans: 1 }
+    ]}
+];
+
+let leccionActivaId = null;
+let preguntasActuales = [];
+let indicePregunta = 0;
+let vidasTrivia = 3;
+let opcionSeleccionada = null;
+
+function renderizarTriviaMap() {
+    let u = getUsuarioActual();
+    if(!u) return;
+    document.getElementById('mapXP').innerText = u.perfil.triviaXP || 0;
+    
+    // Nivel máximo desbloqueado
+    let nivelUsuario = u.perfil.nivelTrivia || 1;
+    let container = document.getElementById('triviaMapContainer');
+    container.innerHTML = '';
+    
+    bancoLecciones.forEach((lec) => {
+        let isUnlocked = lec.id <= nivelUsuario;
+        let isCurrent = lec.id === nivelUsuario;
+        let isCompleted = lec.id < nivelUsuario;
+        
+        let iconHtml = isUnlocked ? (isCompleted ? '👑' : '🔥') : '🔒';
+        let bgClass = isUnlocked 
+            ? (isCompleted ? 'bg-green-100 border-green-300 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-green-500 border-green-700 text-white') 
+            : 'bg-gray-100 border-gray-300 dark:bg-slate-800 dark:border-slate-700 text-gray-400 dark:text-slate-500 opacity-60 cursor-not-allowed';
+            
+        let clickAction = isUnlocked ? `abrirLeccion(${lec.id})` : `alert('Completa la Lección ${lec.id - 1} primero para desbloquear esta.')`;
+        
+        container.innerHTML += `
+            <button onclick="${clickAction}" class="w-full flex items-center p-4 rounded-2xl border-b-4 ${bgClass} transition-transform active:translate-y-1 mb-3 text-left">
+                <div class="text-3xl mr-4 flex-shrink-0">${lec.icono}</div>
+                <div class="flex-1">
+                    <p class="font-black text-lg">Lección ${lec.id}</p>
+                    <p class="text-xs font-bold opacity-90">${lec.titulo}</p>
+                </div>
+                <div class="text-2xl ml-2">${iconHtml}</div>
+            </button>
+        `;
+    });
+}
+
+function abrirLeccion(id) {
+    leccionActivaId = id;
+    let leccion = bancoLecciones.find(l => l.id === id);
+    
+    document.getElementById('triviaMapScreen').classList.add('hidden');
+    document.getElementById('triviaStart').classList.remove('hidden');
+    
+    document.getElementById('triviaStartIcon').innerText = leccion.icono;
+    document.getElementById('triviaStartTitle').innerText = leccion.titulo;
+    document.getElementById('triviaStartDesc').innerText = leccion.desc;
+}
+
+function volverAlMapa() {
+    document.getElementById('triviaStart').classList.add('hidden');
+    document.getElementById('triviaGame').classList.add('hidden');
+    document.getElementById('triviaEnd').classList.add('hidden');
+    document.getElementById('triviaMapScreen').classList.remove('hidden');
+    renderizarTriviaMap();
+}
+
+function iniciarLeccionTrivia() {
+    let leccion = bancoLecciones.find(l => l.id === leccionActivaId);
+    // Mezclar las preguntas de esa lección
+    preguntasActuales = [...leccion.preguntas].sort(() => 0.5 - Math.random());
+    indicePregunta = 0;
+    vidasTrivia = 3;
+    
+    document.getElementById('triviaStart').classList.add('hidden');
+    document.getElementById('triviaEnd').classList.add('hidden');
+    document.getElementById('triviaGame').classList.remove('hidden');
+    mostrarPregunta();
+}
+
+function mostrarPregunta() {
+    opcionSeleccionada = null;
+    document.getElementById('triviaLives').innerText = vidasTrivia;
+    
+    // Barra de progreso animada
+    let pct = (indicePregunta / preguntasActuales.length) * 100;
+    document.getElementById('triviaProgress').style.width = pct + '%';
+    
+    document.getElementById('triviaFeedback').classList.add('hidden');
+    
+    let qObj = preguntasActuales[indicePregunta];
+    document.getElementById('triviaQuestion').innerText = qObj.q;
+    
+    let optsHtml = '';
+    qObj.opts.forEach((opt, i) => {
+        optsHtml += `<button id="optBtn_${i}" onclick="seleccionarOpcion(${i})" class="w-full text-left p-4 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-bold hover:bg-gray-50 dark:hover:bg-slate-700/50 active:border-b-2 active:translate-y-0.5 transition-all">${opt}</button>`;
+    });
+    
+    optsHtml += `<button id="btnComprobar" onclick="comprobarRespuesta()" class="w-full bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-500 font-black py-3.5 rounded-xl border-b-4 border-gray-400 dark:border-slate-800 cursor-not-allowed transition-all mt-4" disabled>COMPROBAR</button>`;
+    
+    document.getElementById('triviaOptions').innerHTML = optsHtml;
+}
+
+function seleccionarOpcion(i) {
+    opcionSeleccionada = i;
+    let qObj = preguntasActuales[indicePregunta];
+    
+    for(let j=0; j<qObj.opts.length; j++) {
+        let b = document.getElementById(`optBtn_${j}`);
+        b.className = "w-full text-left p-4 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-bold hover:bg-gray-50 dark:hover:bg-slate-700/50 active:border-b-2 active:translate-y-0.5 transition-all";
+    }
+    
+    let btn = document.getElementById(`optBtn_${i}`);
+    btn.className = "w-full text-left p-4 rounded-xl border-2 border-blue-400 border-b-4 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold active:border-b-2 active:translate-y-0.5 transition-all";
+    
+    let btnC = document.getElementById('btnComprobar');
+    btnC.disabled = false;
+    btnC.className = "w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-4";
+}
+
+function comprobarRespuesta() {
+    if(opcionSeleccionada === null) return;
+    let qObj = preguntasActuales[indicePregunta];
+    document.getElementById('btnComprobar').classList.add('hidden'); 
+    
+    let fb = document.getElementById('triviaFeedback');
+    fb.classList.remove('hidden');
+    
+    if(opcionSeleccionada === qObj.ans) {
+        fb.className = "rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center bg-green-500 transition-all shadow-md animate-bounce-sm";
+        document.getElementById('triviaFeedbackIcon').innerHTML = "✔️";
+        document.getElementById('triviaFeedbackText').innerText = "¡Excelente!";
+        
+        let b = document.getElementById(`optBtn_${opcionSeleccionada}`);
+        b.classList.replace('border-blue-400', 'border-green-500');
+        b.classList.replace('text-blue-600', 'text-white');
+        
+        if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 }, colors: ['#22c55e'] });
+    } else {
+        vidasTrivia--;
+        document.getElementById('triviaLives').innerText = vidasTrivia;
+        fb.className = "rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center bg-red-500 transition-all shadow-md animate-bounce-sm";
+        document.getElementById('triviaFeedbackIcon').innerHTML = "❌";
+        document.getElementById('triviaFeedbackText').innerText = `Correcta: ${qObj.opts[qObj.ans]}`;
+        
+        let b = document.getElementById(`optBtn_${opcionSeleccionada}`);
+        b.classList.replace('border-blue-400', 'border-red-500');
+        b.classList.replace('text-blue-600', 'text-red-600');
+        b.classList.replace('bg-blue-50', 'bg-red-50');
+    }
+    
+    for(let j=0; j<qObj.opts.length; j++) {
+        document.getElementById(`optBtn_${j}`).disabled = true;
+    }
+}
+
+function siguientePregunta() {
+    if(vidasTrivia <= 0) { terminarTrivia(false); return; }
+    indicePregunta++;
+    if(indicePregunta >= preguntasActuales.length) terminarTrivia(true);
+    else mostrarPregunta();
+}
+
+function terminarTrivia(exito) {
+    document.getElementById('triviaGame').classList.add('hidden');
+    let end = document.getElementById('triviaEnd');
+    end.classList.remove('hidden');
+    
+    let u = getUsuarioActual();
+    u.perfil.triviaXP = u.perfil.triviaXP || 0;
+    
+    if(exito) {
+        let xpGanada = vidasTrivia * 10 + 20; 
+        u.perfil.triviaXP += xpGanada;
+        
+        // Desbloquear siguiente lección si es la actual
+        if(u.perfil.nivelTrivia === leccionActivaId) {
+            u.perfil.nivelTrivia++;
+        }
+        
+        document.getElementById('triviaEndEmoji').innerText = "🏆";
+        document.getElementById('triviaEndTitle').innerText = "¡Lección Completada!";
+        document.getElementById('triviaEndTitle').className = "font-black text-xl text-yellow-500";
+        document.getElementById('triviaEndDesc').innerText = `Has ganado +${xpGanada} XP. Total: ${u.perfil.triviaXP} XP`;
+        if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    } else {
+        document.getElementById('triviaEndEmoji').innerText = "💔";
+        document.getElementById('triviaEndTitle').innerText = "¡Te quedaste sin vidas!";
+        document.getElementById('triviaEndTitle').className = "font-black text-xl text-red-500";
+        document.getElementById('triviaEndDesc').innerText = "Repasa tus conceptos y vuelve a intentarlo.";
+    }
+    
+    guardarDatos();
+    actualizarXP();
+}
+
+function salirTrivia() {
+    if(confirm("¿Seguro que quieres salir? Perderás tu progreso en esta lección.")) volverAlMapa();
+}
+
+function actualizarXP() {
+    let u = getUsuarioActual();
+    if(u && document.getElementById('mapXP')) {
+        document.getElementById('mapXP').innerText = u.perfil.triviaXP || 0;
+    }
+}
+
+inicializarPWA(); etiquetarBotones(); new MutationObserver(etiquetarBotones).observe(document.body, { childList: true, subtree: true }); if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) entrarAlSistema(usuarioActivoKey); else renderizarPerfilesRapidos();
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#16a34a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NutriWeb">
+    <title>NutriWeb - Tu Diario Nutricional</title>
+    
+    <!-- ENLACE DE NETLIFY PARA QUE SE PUEDA INSTALAR (PWA) -->
+    <link rel="manifest" href="manifest.json">
+    
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Enlace al archivo CSS externo -->
+    <link rel="stylesheet" href="style.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { 
+                extend: { 
+                    colors: { brand: { 50: 'rgb(var(--b50) / <alpha-value>)', 100: 'rgb(var(--b100) / <alpha-value>)', 200: 'rgb(var(--b200) / <alpha-value>)', 300: 'rgb(var(--b300) / <alpha-value>)', 400: 'rgb(var(--b400) / <alpha-value>)', 500: 'rgb(var(--b500) / <alpha-value>)', 600: 'rgb(var(--b600) / <alpha-value>)', 700: 'rgb(var(--b700) / <alpha-value>)', 800: 'rgb(var(--b800) / <alpha-value>)', 900: 'rgb(var(--b900) / <alpha-value>)', 950: 'rgb(var(--b950) / <alpha-value>)' } },
+                    animation: { 
+                        'fade-in': 'fadeIn 0.3s ease-out forwards', 
+                        'bounce-sm': 'bounceSm 0.25s ease-in-out' 
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        bounceSm: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.2)' } }
+                    }
+                } 
+            }
+        }
+    </script>
+</head>
+<body id="cuerpoApp" class="bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200">
+
+    <!-- LOGIN Y REGISTRO -->
+    <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-4 bg-gradient-to-br from-brand-500 to-brand-800 transition-all">
+        <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-fade-in">
+            <div class="bg-slate-900 text-white p-6 text-center relative">
+                <div class="w-14 h-14 bg-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg"><i class="fas fa-leaf text-2xl text-white"></i></div>
+                <h1 class="text-2xl font-black tracking-tight">NutriWeb</h1>
+                <p class="text-xs text-slate-400 mt-1">Tu central de nutrición y disciplina</p>
+            </div>
+
+            <div class="flex border-b border-gray-200 dark:border-slate-800">
+                <button onclick="switchAuthTab('login')" id="tabBtnLogin" class="flex-1 py-3.5 text-sm font-bold text-brand-600 border-b-2 border-brand-500 bg-brand-50/50 dark:bg-slate-800 transition-colors">Entrar</button>
+                <button onclick="switchAuthTab('register')" id="tabBtnRegister" class="flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors">Crear Cuenta</button>
+            </div>
+
+            <div id="formLogin" class="p-6 space-y-4">
+                <div id="listaUsuariosRapidos" class="hidden space-y-2 pb-2 border-b border-gray-100 dark:border-slate-800">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Perfiles:</p>
+                    <div id="botonesPerfiles" class="flex flex-wrap gap-2"></div>
+                </div>
+                <div><label for="loginUser" class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Nombre</label><input type="text" id="loginUser" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 transition-all"></div>
+                <div><label for="loginPin" class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">PIN (4 números)</label><input type="password" id="loginPin" maxlength="4" inputmode="numeric" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-center text-lg font-bold tracking-widest focus:ring-2 focus:ring-brand-500 transition-all" onkeypress="if(event.key === 'Enter') iniciarSesion()"></div>
+                <button onclick="iniciarSesion()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition-transform active:scale-95">Ingresar <i class="fas fa-arrow-right ml-1"></i></button>
+            </div>
+
+            <div id="formRegister" class="hidden p-6 space-y-3 max-h-[75vh] overflow-y-auto">
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label for="regUser" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nombre *</label><input type="text" id="regUser" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
+                    <div><label for="regPin" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">PIN *</label><input type="password" id="regPin" maxlength="4" inputmode="numeric" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center font-bold transition-all"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label for="regEdad" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Edad *</label><input type="number" id="regEdad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
+                    <div><label for="regGenero" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Género</label><select id="regGenero" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label for="regPeso" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Peso (kg) *</label><input type="number" id="regPeso" step="0.1" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
+                    <div><label for="regAltura" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Altura (cm)*</label><input type="number" id="regAltura" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm transition-all"></div>
+                </div>
+                <div><label for="regActividad" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Actividad</label><select id="regActividad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55">Moderado</option><option value="1.725">Fuerte</option></select></div>
+                <div><label for="regObjetivo" class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Objetivo</label><select id="regObjetivo" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400"><option value="-500">Perder grasa (-500 kcal)</option><option value="-250">Definición suave (-250 kcal)</option><option value="0" selected>Mantener mi peso</option><option value="250">Ganar masa</option></select></div>
+                <button onclick="registrarUsuario()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg mt-2 transition-transform active:scale-95">Crear Perfil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="mainApp" class="hidden pb-24">
+
+        <!-- BARRA SUPERIOR -->
+        <div class="bg-brand-600 dark:bg-slate-900 text-white p-3.5 sticky top-0 z-20 shadow-md border-b border-transparent dark:border-slate-800 transition-colors">
+            <div class="flex justify-between items-center max-w-md mx-auto">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-brand-800 dark:bg-brand-600 flex items-center justify-center font-bold text-sm uppercase transition-colors" id="userAvatar">U</div>
+                    <span class="font-bold text-sm truncate max-w-[75px]" id="userNameHeader">Usuario</span>
+                </div>
+                <div class="flex items-center gap-1 bg-brand-700/60 dark:bg-slate-800 px-2 py-1 rounded-xl shadow-inner">
+                    <button onclick="cambiarFecha(-1)" class="p-1.5 hover:text-brand-200 transition-colors"><i class="fas fa-chevron-left text-xs"></i></button>
+                    <span class="font-bold text-xs px-1.5" id="fechaDisplay">Hoy</span>
+                    <button onclick="cambiarFecha(1)" class="p-1.5 hover:text-brand-200 transition-colors"><i class="fas fa-chevron-right text-xs"></i></button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="cambiarTab('progreso')" class="flex items-center gap-1 bg-black/20 hover:bg-black/30 px-2.5 py-1 rounded-full font-bold text-orange-200 text-xs transition-colors"><i class="fas fa-fire text-orange-400" id="iconoFuegoHeader"></i> <span id="rachaDisplay">0</span></button>
+                    <button onclick="toggleDarkMode()" class="text-brand-100 hover:text-white text-sm p-1 transition-colors"><i class="fas fa-moon" id="darkModeIcon"></i></button>
+                    <button onclick="cerrarSesion()" class="text-brand-200 hover:text-white text-sm p-1 transition-colors"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-md mx-auto p-4">
+            
+            <!-- PESTAÑA 1: DIARIO -->
+            <div id="tab-diario" class="tab-content active space-y-4 animate-fade-in">
+                
+                <div id="bannerInstalar" class="hidden bg-slate-900 dark:bg-slate-800 text-white p-3.5 rounded-2xl shadow-sm flex items-center justify-between animate-fade-in">
+                    <div class="flex items-center gap-3"><div class="w-9 h-9 bg-brand-500 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-mobile-alt text-white"></i></div>
+                        <div><p class="text-xs font-bold">Instala NutriWeb</p><p class="text-[11px] text-slate-400">Menú opciones → "Agregar a inicio"</p></div>
+                    </div>
+                    <button onclick="cerrarBannerInstalar()" class="text-slate-400 hover:text-white p-1"><i class="fas fa-times"></i></button>
+                </div>
+
+                <!-- ASISTENTE TÓXICO -->
+                <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 p-4 rounded-2xl shadow-sm border border-red-200 dark:border-slate-700 relative overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <div class="absolute -right-3 -top-3 opacity-10 text-5xl"><i class="fas fa-skull"></i></div>
+                    <div class="flex gap-2.5 items-start relative z-10">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-md"><i class="fas fa-robot text-sm"></i></div>
+                        <div><p class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-0.5">Asistente Tóxico</p><p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium" id="mensajeAsistente">Analizando tus malas decisiones...</p></div>
+                    </div>
+                </div>
+
+                <!-- RULETA -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 text-center space-y-2 transition-colors">
+                    <h3 class="font-bold text-gray-700 dark:text-slate-200 text-xs uppercase"><i class="fas fa-dice text-purple-500"></i> Reto Sorpresa del Día</h3>
+                    <div id="cajaRetoDiario" class="text-sm font-semibold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 py-3 px-2 rounded-xl hidden animate-fade-in"></div>
+                    <button id="btnGirarRuleta" onclick="girarRuleta()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all active:scale-95">🎲 Girar Ruleta del Sufrimiento</button>
+                </div>
+
+                <div id="alertaExceso" class="hidden bg-red-100 dark:bg-red-950/80 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-3.5 rounded-r-xl shadow-sm animate-fade-in">
+                    <p class="font-bold text-xs"><i class="fas fa-exclamation-triangle"></i> ¡Atención! Has superado tu meta de calorías para hoy.</p>
+                </div>
+
+                <!-- BALANCE DIARIO -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm text-center relative border border-transparent dark:border-slate-800 transition-colors">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-gray-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Balance</h2>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-400 transition-colors" id="kcalRestantesBadge">Restan: 2000</span>
+                    </div>
+
+                    <div class="relative w-36 h-36 mx-auto">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" class="text-gray-200 dark:text-slate-800 transition-colors" stroke-width="10"></circle>
+                            <circle id="anilloCalorias" cx="50" cy="50" r="45" fill="none" stroke="rgb(var(--b500))" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="283" class="ring-progress"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-3xl font-black text-gray-800 dark:text-white transition-colors" id="caloriasConsumidas">0</span>
+                            <span class="text-[11px] text-gray-400" id="metaCaloriasText">/ 2000 kcal</span>
+                        </div>
+                    </div>
+                    <div id="infoEjercicioBadge" class="hidden mt-2 text-[11px] font-semibold text-orange-500 animate-fade-in"><i class="fas fa-running"></i> +<span id="kcalEjercicioText">0</span> kcal extra</div>
+                    
+                    <div class="grid grid-cols-3 gap-2 mt-4 text-sm border-t dark:border-slate-800 pt-3.5 transition-colors">
+                        <div class="bg-blue-50/70 dark:bg-blue-950/40 p-2 rounded-xl transition-colors"><p class="text-blue-600 dark:text-blue-400 font-bold"><span id="carbTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaCarbs">/ 250g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Carbs</p></div>
+                        <div class="bg-red-50/70 dark:bg-red-950/40 p-2 rounded-xl transition-colors"><p class="text-red-600 dark:text-red-400 font-bold"><span id="protTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaProt">/ 100g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Proteína</p></div>
+                        <div class="bg-yellow-50/70 dark:bg-yellow-950/40 p-2 rounded-xl transition-colors"><p class="text-yellow-600 dark:text-yellow-400 font-bold"><span id="grasTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaGras">/ 65g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Grasas</p></div>
+                    </div>
+                </div>
+
+                <!-- ENTRADA DE ALIMENTOS -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm space-y-3 border border-transparent dark:border-slate-800 transition-colors">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-bold text-gray-700 dark:text-slate-200"><i class="fas fa-utensils text-brand-500"></i> Registrar Alimento</label>
+                        <div class="flex items-center gap-3">
+                            <button onclick="copiarDiaAnterior()" class="text-[10px] bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-2 py-1 rounded font-bold transition-colors hover:bg-gray-200"><i class="fas fa-copy"></i> Copiar ayer</button>
+                            <button onclick="toggleModoManual()" id="btnToggleModo" class="text-xs text-blue-600 dark:text-blue-400 font-bold hover:underline">Manual</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-4 gap-1.5 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl transition-colors">
+                        <button onclick="seleccionarTiempoComida('Desayuno')" id="tc-Desayuno" class="tc-btn py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm transition-all">Desayuno</button>
+                        <button onclick="seleccionarTiempoComida('Almuerzo')" id="tc-Almuerzo" class="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400 transition-all">Almuerzo</button>
+                        <button onclick="seleccionarTiempoComida('Cena')" id="tc-Cena" class="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400 transition-all">Cena</button>
+                        <button onclick="seleccionarTiempoComida('Snacks')" id="tc-Snacks" class="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400 transition-all">Snacks</button>
+                    </div>
+
+                    <div id="barraFavoritos" class="hidden space-y-1 animate-fade-in"><div id="listaFavoritosChips" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div></div>
+
+                    <div id="modoBusqueda" class="space-y-2 animate-fade-in">
+                        <div class="flex gap-2">
+                            <input type="text" id="inputComida" list="sugerenciasAlimentos" placeholder="Busca alimentos..." class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all" onkeypress="if(event.key === 'Enter') registrarComidaLocal()">
+                            <!-- BOTÓN DE BÚSQUEDA EN INTERNET -->
+                            <button onclick="buscarEnInternet()" class="bg-indigo-100 hover:bg-indigo-200 dark:bg-indigo-900/50 dark:hover:bg-indigo-800 text-indigo-600 dark:text-indigo-400 px-4 rounded-xl transition-colors shadow-sm" title="Buscar en Base de Datos Mundial (Internet)"><i class="fas fa-globe text-lg"></i></button>
+                        </div>
+                        
+                        <!-- CONTENEDOR RESULTADOS INTERNET -->
+                        <div id="resultadosInternet" class="hidden mt-2 p-3 border border-indigo-200/60 dark:border-indigo-800/60 rounded-xl bg-indigo-50/30 dark:bg-indigo-950/20 transition-all"></div>
+                        
+                        <datalist id="sugerenciasAlimentos"></datalist>
+                        
+                        <div class="flex gap-2">
+                            <select id="selectMedida" class="flex-1 px-3 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-slate-200 transition-all"><option value="1">1 porción estándar</option><option value="0.25">1/4 (Un cuarto)</option><option value="0.5">1/2 (Mitad)</option><option value="1.5">1.5</option><option value="2">2 (Doble)</option></select>
+                            <button onclick="registrarComidaLocal()" class="bg-brand-500 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-md hover:bg-brand-600 transition-all active:scale-95"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <button onclick="sugerirQueComer()" class="w-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold py-2 rounded-xl text-xs mt-1 transition-colors hover:bg-blue-100">🤖 ¿Qué me alcanza comer?</button>
+                        <div id="cajaSugerenciasCena" class="hidden mt-2 p-2 border border-blue-200/60 dark:border-slate-700 rounded-xl space-y-1.5 animate-fade-in"></div>
+                    </div>
+
+                    <div id="modoManual" class="hidden space-y-2 pt-1 animate-fade-in">
+                        <input type="text" id="manNombre" placeholder="Nombre" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm transition-all">
+                        <div class="grid grid-cols-4 gap-2"><input type="number" id="manKcal" placeholder="Kcal" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm text-center border dark:border-slate-700 transition-all"><input type="number" id="manCarbs" placeholder="C" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm text-center border dark:border-slate-700 transition-all"><input type="number" id="manProt" placeholder="P" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm text-center border dark:border-slate-700 transition-all"><input type="number" id="manGras" placeholder="G" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm text-center border dark:border-slate-700 transition-all"></div>
+                        <select id="manMedida" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-xs border dark:border-slate-700 transition-all"><option value="1">1 porción (valores arriba)</option><option value="0.5">1/2 (Mitad)</option><option value="2">2 (Doble)</option></select>
+                        <button onclick="registrarComidaManual()" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all active:scale-95">Guardar y Aprender</button>
+                    </div>
+                </div>
+
+                <!-- HÁBITOS Y AGUA -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
+                    <div class="grid grid-cols-3 gap-3 text-center">
+                        <div><label for="inpPasos" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pasos</label><input type="number" id="inpPasos" placeholder="8000" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs py-2 px-1 text-center font-bold text-gray-700 dark:text-slate-200 transition-colors"></div>
+                        <div><label for="inpSueno" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Sueño (hr)</label><input type="number" id="inpSueno" step="0.5" placeholder="7.5" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs py-2 px-1 text-center font-bold text-gray-700 dark:text-slate-200 transition-colors"></div>
+                        <div><label for="inpEnergia" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Energía</label><select id="inpEnergia" onchange="guardarHabitos()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-lg py-1 px-1 text-center cursor-pointer transition-colors"><option value="">...</option><option value="😴">😴 Baja</option><option value="😐">😐 Normal</option><option value="⚡">⚡ Alta</option></select></div>
+                    </div>
+                    <div class="flex justify-between items-center gap-2 pt-2 border-t dark:border-slate-800 transition-colors">
+                        <button onclick="sumarAgua(-250)" class="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 px-3.5 py-2 rounded-xl font-bold text-sm transition-colors active:scale-95">-250</button>
+                        <div class="text-center flex-1"><span id="aguaTotal" class="text-2xl font-black text-blue-500 inline-block transition-transform duration-200">0</span><span class="text-xs text-gray-400 ml-1">ml</span></div>
+                        <button onclick="sumarAgua(250)" class="bg-blue-100 dark:bg-blue-950 text-blue-600 px-3.5 py-2 rounded-xl font-bold text-sm transition-colors active:scale-95">+250</button>
+                        <button onclick="sumarAgua(500)" class="bg-blue-500 text-white px-3.5 py-2 rounded-xl font-bold text-sm transition-colors active:scale-95">+500</button>
+                    </div>
+                </div>
+
+                <!-- HISTORIAL COMIDAS -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
+                    <div class="flex justify-between items-center border-b dark:border-slate-800 pb-2 transition-colors"><h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm">Comidas de Hoy</h3></div>
+                    <div id="contenedorComidasAgrupadas" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 2: LOGROS -->
+            <div id="tab-progreso" class="tab-content space-y-5">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-3 transition-colors">
+                    <h2 class="font-black text-gray-800 dark:text-slate-100 text-sm uppercase mb-1"><i class="fas fa-th text-brand-500"></i> Tu Historial en Píxeles</h2>
+                    <p class="text-[10px] text-gray-500 dark:text-slate-400 mb-2">Mantén la cadena verde. Rojo = pasaste. Amarillo = déficit extremo. Gris = vagancia.</p>
+                    <div class="flex flex-wrap gap-1.5" id="heatmapContainer"></div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 transition-colors">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-4"><i class="fas fa-chart-bar text-brand-500"></i> Calorías (Últimos 7 Días)</h2>
+                    <div id="graficoBarras" class="h-44 flex items-end justify-between gap-1.5 border-b border-gray-200 dark:border-slate-800 pb-2 transition-colors"></div>
+                    <div id="graficoFechas" class="flex justify-between text-xs text-gray-400 mt-2"></div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 transition-colors">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-3"><i class="fas fa-history text-brand-500"></i> Evolución Semanal</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                            <thead class="text-xs text-gray-700 dark:text-slate-300 uppercase bg-gray-50 dark:bg-slate-800 transition-colors">
+                                <tr><th class="px-2 py-2 rounded-l-lg">Día</th><th class="px-2 py-2">Peso</th><th class="px-2 py-2 text-center rounded-r-lg">Calorías</th></tr>
+                            </thead>
+                            <tbody id="tablaEvolucion"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-3 transition-colors">
+                    <div class="flex justify-between items-center mb-1">
+                        <h2 class="font-black text-gray-800 dark:text-slate-100 text-sm uppercase"><i class="fas fa-users text-indigo-500"></i> Liga de Amigos</h2>
+                        <button onclick="exportarCodigoReto()" class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-3 py-1.5 rounded-full transition-colors hover:bg-indigo-200"><i class="fas fa-share"></i> Mi Código</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="inpCodigoAmigo" placeholder="Pega código de amigo" class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs transition-colors">
+                        <button onclick="importarCodigoReto()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-3 py-2 rounded-xl text-xs transition-colors">Añadir</button>
+                    </div>
+                    <div id="listaRetoGrupal" class="space-y-2 mt-4"></div>
+                </div>
+
+                <div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white p-4 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="flex items-center gap-3 relative z-10"><div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl" id="rachaEmojiNivel">🌱</div><div><div class="flex items-center gap-2"><span class="font-black text-base" id="rachaDiasTexto">0 días</span><span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-black/25" id="rachaTituloNivel">Novato</span></div></div></div>
+                    <div class="mt-3 relative z-10"><div class="w-full h-1.5 bg-black/20 rounded-full overflow-hidden"><div id="rachaBarraProgreso" class="h-full bg-white rounded-full transition-all duration-500 ease-out" style="width: 0%"></div></div></div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 transition-colors">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-trophy text-yellow-500"></i> Medallas</h2>
+                        <span class="text-xs font-bold text-orange-500" id="recordRachaText">Récord: 0</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2.5" id="gridMedallas"></div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 3: GYM -->
+            <div id="tab-gym" class="tab-content space-y-5">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm border-b dark:border-slate-800 pb-2 transition-colors"><i class="fas fa-ruler-combined text-blue-500"></i> Medidas y Peso (<span id="pesoFechaLabel">Hoy</span>)</h2>
+                    <div class="flex gap-2 items-end">
+                        <div class="flex-1"><label for="inputPeso" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Peso (kg)</label><input type="number" id="inputPeso" step="0.1" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold transition-colors"></div>
+                        <button onclick="guardarPeso()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors">Guardar</button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 border-t dark:border-slate-800 pt-3 transition-colors">
+                        <div><label for="inpCintura" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cintura (cm)</label><input type="number" id="inpCintura" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
+                        <div><label for="inpBrazo" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Brazo (cm)</label><input type="number" id="inpBrazo" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
+                        <div><label for="inpPierna" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pierna (cm)</label><input type="number" id="inpPierna" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center transition-colors"></div>
+                    </div>
+                </div>
+                
+                <!-- NUEVO: CRONÓMETRO DE DESCANSO -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 transition-colors text-center space-y-3">
+                    <h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm border-b dark:border-slate-800 pb-2 mb-2 transition-colors"><i class="fas fa-stopwatch text-red-500"></i> Cronómetro de Descanso</h3>
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="startGymTimer(60)" class="flex-1 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold py-2 rounded-xl text-xs transition-colors">60s</button>
+                        <button onclick="startGymTimer(90)" class="flex-1 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold py-2 rounded-xl text-xs transition-colors">90s</button>
+                        <button onclick="startGymTimer(120)" class="flex-1 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold py-2 rounded-xl text-xs transition-colors">120s</button>
+                    </div>
+                    <div class="text-center mt-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                        <span id="gymTimerDisplay" class="text-4xl font-black text-red-500 dark:text-red-400">00:00</span>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-3 transition-colors">
+                    <div class="flex justify-between items-center border-b dark:border-slate-800 pb-2 transition-colors"><h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm"><i class="fas fa-clipboard-list text-emerald-500"></i> Rutina de Hoy</h3><span class="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 px-2 py-0.5 rounded-full transition-colors" id="conteoEjercicios">0 series</span></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="gymEjercicio" placeholder="Ej: Press Banca" class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs transition-colors">
+                        <input type="number" id="gymPeso" placeholder="kg/lb" class="w-16 px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs text-center transition-colors">
+                        <input type="number" id="gymReps" placeholder="Reps" class="w-16 px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs text-center transition-colors">
+                        <button onclick="agregarEjercicioRutina()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 rounded-xl text-xs transition-colors active:scale-95">+</button>
+                    </div>
+                    <ul id="listaRutinaHoy" class="space-y-1.5 mt-2"></ul>
+                    <div class="flex justify-between items-center gap-2 pt-3 border-t dark:border-slate-800 mt-2 transition-colors">
+                        <span class="text-xs font-bold text-gray-600 dark:text-slate-300">Calorías extra:</span>
+                        <input type="number" id="inpGastoExtra" placeholder="kcal" class="w-20 px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center font-bold text-orange-500 transition-colors">
+                        <button onclick="registrarEjercicioManual()" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition-colors active:scale-95">Sumar</button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 transition-colors">
+                    <h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm border-b dark:border-slate-800 pb-2 mb-3 transition-colors"><i class="fas fa-calculator text-indigo-500"></i> Calculadora 1RM</h3>
+                    <div class="flex gap-2 items-center">
+                        <input type="number" id="rmPeso" placeholder="Peso" class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs text-center transition-colors">
+                        <span class="text-xs font-bold text-gray-400">X</span>
+                        <input type="number" id="rmReps" placeholder="Reps" class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs text-center transition-colors">
+                        <button onclick="calcular1RM()" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors active:scale-95">Calcular</button>
+                    </div>
+                    <div id="resultado1RM" class="hidden mt-3 text-center p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl animate-fade-in"><p class="text-[10px] text-indigo-600 font-bold">1RM Estimado:</p><p class="text-2xl font-black text-indigo-700 dark:text-indigo-300" id="rmValor">0</p></div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 4: PERFIL -->
+            <div id="tab-perfil" class="tab-content space-y-5">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm border-b dark:border-slate-800 pb-2 transition-colors"><i class="fas fa-palette text-pink-500"></i> Identidad y Tema</h2>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-2xl transition-colors" id="avatarPreview">U</div>
+                        <div class="flex-1"><label for="inpAvatarEmoji" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Avatar (Emoji)</label><input type="text" id="inpAvatarEmoji" maxlength="2" placeholder="😎" onchange="guardarIdentidad()" class="w-16 text-center bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-lg py-1 px-1 transition-colors"></div>
+                    </div>
+                    <div>
+                        <label for="selTemaColor" class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tema de Color</label>
+                        <select id="selTemaColor" onchange="guardarIdentidad()" class="w-full bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm py-2 px-3 font-semibold cursor-pointer transition-colors">
+                            <option value="">🌳 Defecto (Verde)</option><option value="theme-ocean">🌊 Océano (Azul)</option><option value="theme-fire">🔥 Fuego (Naranja)</option><option value="theme-cyber">👾 Cyberpunk (Morado)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm space-y-3 border-l-4 border-brand-500 transition-colors">
+                    <div class="flex justify-between items-center"><h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-share-alt text-brand-600"></i> Biblioteca de Comidas</h2><span class="text-xs font-bold text-brand-600 bg-brand-50 dark:bg-brand-950 px-2 py-0.5 rounded-full transition-colors" id="contadorPersonalizadas">0 creadas</span></div>
+                    <div class="flex gap-2">
+                        <button onclick="exportarBibliotecaComidas()" class="flex-1 bg-brand-100 dark:bg-brand-950 text-brand-800 dark:text-brand-300 font-bold py-2.5 px-2 rounded-xl text-xs transition-colors hover:bg-brand-200"><i class="fas fa-copy"></i> Copiar mías</button>
+                        <button onclick="importarBibliotecaComidas()" class="flex-1 bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold py-2.5 px-2 rounded-xl text-xs transition-colors hover:bg-blue-200"><i class="fas fa-plus-circle"></i> Pegar amigo</button>
+                    </div>
+                    <button onclick="importarCSV()" class="w-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 font-bold py-2.5 px-2 rounded-xl text-xs transition-colors hover:bg-emerald-200 mt-2"><i class="fas fa-file-excel mr-1"></i> Importar lista masiva (Excel/CSV)</button>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 transition-colors">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-4"><i class="fas fa-sliders-h text-brand-500"></i> Actualizar Metas</h2>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex gap-3">
+                            <div class="flex-1"><label for="calcEdad" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Edad</label><input type="number" id="calcEdad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
+                            <div class="flex-1"><label for="calcGenero" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Género</label><select id="calcGenero" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="flex-1"><label for="calcPeso" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Peso (kg)</label><input type="number" id="calcPeso" step="0.1" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
+                            <div class="flex-1"><label for="calcAltura" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Altura (cm)</label><input type="number" id="calcAltura" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors"></div>
+                        </div>
+                        <div>
+                            <label for="calcActividad" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Actividad</label>
+                            <select id="calcActividad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs transition-colors">
+                                <option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55">Moderado</option><option value="1.725">Fuerte</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="calcObjetivo" class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Objetivo</label>
+                            <select id="calcObjetivo" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold text-xs transition-colors">
+                                <option value="0">Mantener peso</option><option value="-250">Déficit ligero</option><option value="-500">Déficit normal</option><option value="250">Superávit</option>
+                            </select>
+                        </div>
+                        <button onclick="calcularMetas()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl mt-2 text-sm transition-colors active:scale-95">Guardar Cambios</button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm space-y-3 border border-transparent dark:border-slate-800 transition-colors">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-cloud-download-alt text-purple-500"></i> Respaldo de Cuenta</h2>
+                    <div class="flex gap-2">
+                        <button onclick="exportarRespaldo()" class="flex-1 bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold py-2.5 rounded-xl text-xs transition-colors hover:bg-purple-200"><i class="fas fa-copy"></i> Copiar cuenta</button>
+                        <button onclick="importarRespaldo()" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold py-2.5 rounded-xl text-xs transition-colors hover:bg-gray-200"><i class="fas fa-paste"></i> Restaurar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PESTAÑA 5: JUEGOS (TRIVIA / DUOLINGO STYLE) -->
+            <div id="tab-juegos" class="tab-content space-y-5 animate-fade-in">
+                
+                <!-- Pantalla 1: Mapa de Lecciones -->
+                <div id="triviaMapScreen" class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-black text-gray-800 dark:text-slate-100 text-sm uppercase"><i class="fas fa-map-marked-alt text-green-500"></i> Ruta de Aprendizaje</h2>
+                        <span class="text-xs font-bold text-orange-500"><i class="fas fa-fire"></i> XP: <span id="mapXP">0</span></span>
+                    </div>
+                    <div id="triviaMapContainer" class="space-y-2">
+                        <!-- El mapa se inyecta via JS -->
+                    </div>
+                </div>
+
+                <!-- Pantalla 2: Inicio de la Lección Seleccionada -->
+                <div id="triviaStart" class="hidden text-center space-y-4 bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <button onclick="volverAlMapa()" class="text-gray-400 hover:text-gray-600 block text-left mb-2 transition-colors"><i class="fas fa-arrow-left"></i> Volver</button>
+                    <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto text-4xl shadow-sm" id="triviaStartIcon">🦉</div>
+                    <h2 class="font-black text-xl text-gray-800 dark:text-slate-100" id="triviaStartTitle">Título de Lección</h2>
+                    <p class="text-sm text-gray-600 dark:text-slate-300 font-medium" id="triviaStartDesc">Descripción.</p>
+                    <button onclick="iniciarLeccionTrivia()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-4">EMPEZAR LECCIÓN</button>
+                </div>
+
+                <!-- Pantalla 3: Juego / Preguntas -->
+                <div id="triviaGame" class="hidden space-y-4 bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <button onclick="salirTrivia()" class="text-gray-400 hover:text-gray-600 transition-colors"><i class="fas fa-times"></i></button>
+                        <div class="flex-1 h-3 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden relative">
+                            <div id="triviaProgress" class="h-full bg-green-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div class="font-bold text-red-500"><i class="fas fa-heart"></i> <span id="triviaLives">3</span></div>
+                    </div>
+                    
+                    <h3 class="font-bold text-lg text-gray-800 dark:text-slate-100 mt-4" id="triviaQuestion">¿Pregunta?</h3>
+                    
+                    <div id="triviaOptions" class="space-y-2.5 mt-4">
+                        <!-- Opciones dinámicas -->
+                    </div>
+                    
+                    <!-- Feedback inferior estilo Duolingo -->
+                    <div id="triviaFeedback" class="hidden rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center transition-all shadow-md">
+                        <div class="flex items-center gap-3">
+                            <div id="triviaFeedbackIcon" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-lg"></div>
+                            <span id="triviaFeedbackText">¡Correcto!</span>
+                        </div>
+                        <button id="triviaNextBtn" onclick="siguientePregunta()" class="bg-white text-gray-900 px-4 py-2.5 rounded-xl text-sm font-black active:scale-95 shadow-sm transition-transform">CONTINUAR</button>
+                    </div>
+                </div>
+
+                <!-- Pantalla 4: Final de Lección -->
+                <div id="triviaEnd" class="hidden text-center space-y-4 bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 animate-fade-in">
+                    <div class="text-6xl mb-2 drop-shadow-md" id="triviaEndEmoji">🏆</div>
+                    <h2 class="font-black text-xl text-gray-800 dark:text-slate-100" id="triviaEndTitle">¡Lección Completada!</h2>
+                    <p class="text-sm font-bold text-gray-600 dark:text-slate-400" id="triviaEndDesc">Has ganado +15 XP.</p>
+                    <button onclick="volverAlMapa()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-4">CONTINUAR AL MAPA</button>
+                </div>
+                
+            </div>
+
+        </div>
+
+        <!-- BARRA NAVEGACIÓN INFERIOR -->
+        <div class="fixed bottom-0 w-full bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 flex justify-around p-2.5 pb-4 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] transition-colors">
+            <button onclick="cambiarTab('diario')" id="nav-diario" class="flex-1 flex flex-col items-center text-brand-600 cursor-pointer transition-colors"><i class="fas fa-book-open text-xl mb-1"></i><span class="text-[10px] font-bold">Diario</span></button>
+            <button onclick="cambiarTab('progreso')" id="nav-progreso" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer transition-colors"><i class="fas fa-trophy text-xl mb-1"></i><span class="text-[10px] font-bold">Logros</span></button>
+            <button onclick="cambiarTab('gym')" id="nav-gym" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer transition-colors"><i class="fas fa-dumbbell text-xl mb-1"></i><span class="text-[10px] font-bold">Gym</span></button>
+            <button onclick="cambiarTab('juegos')" id="nav-juegos" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer transition-colors"><i class="fas fa-gamepad text-xl mb-1"></i><span class="text-[10px] font-bold">Juegos</span></button>
+            <button onclick="cambiarTab('perfil')" id="nav-perfil" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer transition-colors"><i class="fas fa-user-cog text-xl mb-1"></i><span class="text-[10px] font-bold">Perfil</span></button>
+        </div>
+    </div>
+
+    <!-- Enlace al archivo JS externo -->
+    <script src="app.js"></script>
+</body>
+</html>
+
+{
+  "name": "NutriWeb",
+  "short_name": "NutriWeb",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#16a34a",
+  "theme_color": "#16a34a",
+  "description": "Tu Diario Nutricional, Logros y Retos",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1146/1146284.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+:root { --b50: 240 253 244; --b100: 220 252 231; --b200: 187 247 208; --b300: 134 239 172; --b400: 74 222 128; --b500: 34 197 94; --b600: 22 163 74; --b700: 21 128 61; --b800: 22 101 52; --b900: 20 83 45; --b950: 5 46 22; }
+.theme-ocean { --b50: 240 249 255; --b100: 224 242 254; --b200: 186 230 253; --b300: 125 211 252; --b400: 56 189 248; --b500: 14 165 233; --b600: 2 132 199; --b700: 3 105 161; --b800: 7 89 133; --b900: 12 74 110; --b950: 8 47 73; }
+.theme-fire { --b50: 255 247 237; --b100: 255 237 213; --b200: 254 215 170; --b300: 253 186 116; --b400: 251 146 60; --b500: 249 115 22; --b600: 234 88 12; --b700: 194 65 12; --b800: 154 52 18; --b900: 124 45 18; --b950: 67 20 7; }
+.theme-cyber { --b50: 250 245 255; --b100: 243 232 255; --b200: 233 213 255; --b300: 216 180 254; --b400: 192 132 252; --b500: 168 85 247; --b600: 147 51 234; --b700: 126 34 206; --b800: 107 33 168; --b900: 88 28 135; --b950: 59 7 100; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+.tab-content { display: none; } .tab-content.active { display: block; }
+.ring-progress { transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease; }
+.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+@keyframes pulseGlow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+.fuego-activo { animation: pulseGlow 2s infinite ease-in-out; }
+
+// Service Worker vacío para habilitar PWA
+self.addEventListener('fetch', function(event) {});
+
+/*    /index.html   200
