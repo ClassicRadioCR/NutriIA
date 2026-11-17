@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -24,11 +23,13 @@
                     colors: { brand: { 50: 'rgb(var(--b50) / <alpha-value>)', 100: 'rgb(var(--b100) / <alpha-value>)', 200: 'rgb(var(--b200) / <alpha-value>)', 300: 'rgb(var(--b300) / <alpha-value>)', 400: 'rgb(var(--b400) / <alpha-value>)', 500: 'rgb(var(--b500) / <alpha-value>)', 600: 'rgb(var(--b600) / <alpha-value>)', 700: 'rgb(var(--b700) / <alpha-value>)', 800: 'rgb(var(--b800) / <alpha-value>)', 900: 'rgb(var(--b900) / <alpha-value>)', 950: 'rgb(var(--b950) / <alpha-value>)' } },
                     animation: { 
                         'fade-in': 'fadeIn 0.3s ease-out forwards', 
-                        'bounce-sm': 'bounceSm 0.25s ease-in-out' 
+                        'bounce-sm': 'bounceSm 0.25s ease-in-out',
+                        'shake': 'shake 0.35s ease-in-out'
                     },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        bounceSm: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.2)' } }
+                        bounceSm: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.2)' } },
+                        shake: { '0%, 100%': { transform: 'translateX(0)' }, '25%': { transform: 'translateX(-5px)' }, '75%': { transform: 'translateX(5px)' } }
                     }
                 } 
             }
@@ -46,6 +47,8 @@
         .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes pulseGlow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
         .fuego-activo { animation: pulseGlow 2s infinite ease-in-out; }
+        @keyframes floatNode { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
+        .node-active-float { animation: floatNode 2.2s infinite ease-in-out; }
     </style>
 </head>
 <body id="cuerpoApp" class="bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200">
@@ -400,55 +403,104 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA 5: JUEGOS (TRIVIA / DUOLINGO STYLE) -->
+            <!-- PESTAÑA 5: JUEGOS (CAMINO DE APRENDIZAJE ESTILO DUOLINGO) -->
             <div id="tab-juegos" class="tab-content space-y-5 animate-fade-in">
-                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
-                    <div class="flex justify-between items-center mb-2">
-                        <h2 class="font-black text-gray-800 dark:text-slate-100 text-sm uppercase"><i class="fas fa-brain text-green-500"></i> Nutri-Reto</h2>
-                        <span class="text-xs font-bold text-orange-500"><i class="fas fa-fire"></i> XP: <span id="triviaXP">0</span></span>
-                    </div>
-                    
-                    <!-- Pantalla de Inicio de Trivia -->
-                    <div id="triviaStart" class="text-center space-y-4">
-                        <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto text-4xl shadow-sm">🦉</div>
-                        <p class="text-sm text-gray-600 dark:text-slate-300 font-medium">Demuestra lo que sabes de nutrición y compite por tener el mayor XP en la Liga de Amigos.</p>
-                        <button onclick="iniciarTrivia()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all">EMPEZAR LECCIÓN</button>
-                    </div>
-
-                    <!-- Pantalla de Juego -->
-                    <div id="triviaGame" class="hidden space-y-4">
-                        <div class="flex items-center gap-3">
-                            <button onclick="salirTrivia()" class="text-gray-400 hover:text-gray-600 transition-colors"><i class="fas fa-times"></i></button>
-                            <div class="flex-1 h-3 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden relative">
-                                <div id="triviaProgress" class="h-full bg-green-500 rounded-full transition-all duration-300" style="width: 0%"></div>
-                            </div>
-                            <div class="font-bold text-red-500"><i class="fas fa-heart"></i> <span id="triviaLives">3</span></div>
-                        </div>
-                        
-                        <h3 class="font-bold text-lg text-gray-800 dark:text-slate-100 mt-4" id="triviaQuestion">¿Pregunta?</h3>
-                        
-                        <div id="triviaOptions" class="space-y-2.5 mt-4">
-                            <!-- Opciones dinámicas -->
-                        </div>
-                        
-                        <!-- Feedback inferior estilo Duolingo -->
-                        <div id="triviaFeedback" class="hidden rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center transition-all shadow-md">
-                            <div class="flex items-center gap-3">
-                                <div id="triviaFeedbackIcon" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-lg"></div>
-                                <span id="triviaFeedbackText">¡Correcto!</span>
-                            </div>
-                            <button id="triviaNextBtn" onclick="siguientePregunta()" class="bg-white text-gray-900 px-4 py-2.5 rounded-xl text-sm font-black active:scale-95 shadow-sm transition-transform">CONTINUAR</button>
+                
+                <!-- BARRA DE ESTADÍSTICAS SUPERIOR DEL JUEGO -->
+                <div class="bg-white dark:bg-slate-900 px-4 py-3 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 flex justify-between items-center transition-colors">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl">🦉</span>
+                        <div>
+                            <h2 class="font-black text-gray-800 dark:text-slate-100 text-xs uppercase tracking-wide">Nutri-Reto</h2>
+                            <p class="text-[10px] font-bold text-gray-400" id="duoNivelTexto">Nivel 1 • Aprendiz</p>
                         </div>
                     </div>
-
-                    <!-- Pantalla Final -->
-                    <div id="triviaEnd" class="hidden text-center space-y-4 animate-fade-in">
-                        <div class="text-6xl mb-2 drop-shadow-md" id="triviaEndEmoji">🏆</div>
-                        <h2 class="font-black text-xl text-gray-800 dark:text-slate-100" id="triviaEndTitle">¡Lección Completada!</h2>
-                        <p class="text-sm font-bold text-gray-600 dark:text-slate-400" id="triviaEndDesc">Has ganado +15 XP.</p>
-                        <button onclick="volverTriviaStart()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-4">CONTINUAR</button>
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/50 px-2.5 py-1 rounded-full">
+                            <i class="fas fa-bolt text-amber-500 text-xs"></i>
+                            <span class="text-xs font-black text-amber-600 dark:text-amber-400" id="triviaXP">0</span>
+                            <span class="text-[10px] font-bold text-amber-500">XP</span>
+                        </div>
+                        <div class="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800/50 px-2.5 py-1 rounded-full">
+                            <i class="fas fa-crown text-yellow-500 text-xs"></i>
+                            <span class="text-xs font-black text-yellow-600 dark:text-yellow-400" id="duoCoronas">0</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- PANTALLA 1: MAPA / RUTA DE UNIDADES ESTILO DUOLINGO -->
+                <div id="triviaStart" class="space-y-6 pb-4">
+                    <!-- Contenedor dinámico donde se dibujan las Unidades y Nodos -->
+                    <div id="duoRutaContenedor" class="space-y-6"></div>
+                </div>
+
+                <!-- PANTALLA 2: LECCIÓN ACTIVA -->
+                <div id="triviaGame" class="hidden bg-white dark:bg-slate-900 p-5 rounded-3xl shadow-md border border-transparent dark:border-slate-800 space-y-4 transition-colors">
+                    <!-- Barra superior de lección -->
+                    <div class="flex items-center gap-3">
+                        <button onclick="salirTrivia()" class="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 transition-colors p-1"><i class="fas fa-times text-lg"></i></button>
+                        <div class="flex-1 h-3.5 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden relative p-0.5">
+                            <div id="triviaProgress" class="h-full bg-green-500 rounded-full transition-all duration-300 relative" style="width: 0%">
+                                <div class="w-full h-1 bg-white/30 rounded-full mt-0.5"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 font-black text-red-500 text-sm"><i class="fas fa-heart"></i> <span id="triviaLives">3</span></div>
+                    </div>
+
+                    <!-- Etiqueta de tipo de ejercicio y racha en vivo -->
+                    <div class="flex justify-between items-center pt-1">
+                        <span id="duoTipoEjercicioBadge" class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300"><i class="fas fa-star mr-1"></i> Concepto Clave</span>
+                        <span id="duoComboBadge" class="hidden text-[11px] font-black text-orange-500 animate-bounce-sm">🔥 ¡Racha x2!</span>
+                    </div>
+                    
+                    <!-- Enunciado de la pregunta -->
+                    <h3 class="font-extrabold text-base text-gray-800 dark:text-slate-100 leading-snug" id="triviaQuestion">¿Pregunta?</h3>
+                    
+                    <!-- Área interactiva (Opciones, Emparejar o Armar Frase) -->
+                    <div id="triviaOptions" class="space-y-2.5 mt-3">
+                        <!-- Opciones dinámicas -->
+                    </div>
+                    
+                    <!-- Feedback inferior estilo Duolingo con explicación -->
+                    <div id="triviaFeedback" class="hidden rounded-2xl p-4 mt-4 text-white transition-all shadow-lg space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div id="triviaFeedbackIcon" class="w-8 h-8 bg-white/25 rounded-full flex items-center justify-center text-base shrink-0 mt-0.5"></div>
+                            <div class="flex-1">
+                                <p id="triviaFeedbackText" class="font-black text-sm">¡Correcto!</p>
+                                <p id="triviaFeedbackExp" class="text-xs text-white/90 font-medium mt-1 leading-relaxed"></p>
+                            </div>
+                        </div>
+                        <button id="triviaNextBtn" onclick="siguientePregunta()" class="w-full bg-white text-gray-900 py-3 rounded-xl text-sm font-black uppercase tracking-wide active:scale-95 shadow-sm transition-transform">CONTINUAR</button>
+                    </div>
+                </div>
+
+                <!-- PANTALLA 3: RESUMEN DE LECCIÓN COMPLETADA -->
+                <div id="triviaEnd" class="hidden bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-md border border-transparent dark:border-slate-800 text-center space-y-5 animate-fade-in">
+                    <div class="text-6xl mb-1 drop-shadow-md" id="triviaEndEmoji">🏆</div>
+                    <div>
+                        <h2 class="font-black text-2xl text-gray-800 dark:text-slate-100" id="triviaEndTitle">¡Lección Completada!</h2>
+                        <p class="text-xs font-bold text-gray-500 dark:text-slate-400 mt-1" id="triviaEndDesc">Has ganado +25 XP.</p>
+                    </div>
+
+                    <!-- Tarjetas de estadísticas de la partida -->
+                    <div id="duoStatsGrid" class="grid grid-cols-3 gap-2 pt-2">
+                        <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 p-3 rounded-2xl">
+                            <p class="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase">XP Ganada</p>
+                            <p class="text-lg font-black text-amber-500 mt-0.5" id="statXpGanada">+25</p>
+                        </div>
+                        <div class="bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-800/60 p-3 rounded-2xl">
+                            <p class="text-[10px] font-black text-green-600 dark:text-green-400 uppercase">Precisión</p>
+                            <p class="text-lg font-black text-green-500 mt-0.5" id="statPrecision">100%</p>
+                        </div>
+                        <div class="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 p-3 rounded-2xl">
+                            <p class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase">Mejor Racha</p>
+                            <p class="text-lg font-black text-blue-500 mt-0.5" id="statMejorCombo">5 🔥</p>
+                        </div>
+                    </div>
+
+                    <button onclick="volverTriviaStart()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-2xl shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all uppercase tracking-wide text-sm">VOLVER AL CAMINO</button>
+                </div>
+
             </div>
 
         </div>
@@ -779,7 +831,7 @@
             if (!n || p.length !== 4) return alert("Nombre y PIN 4 dígitos requeridos."); if (!e || !w || !a) return alert("Faltan datos corporales."); if (e < 10 || e > 110 || w < 25 || w > 400 || a < 100 || a > 250) return alert("Revisa edad, peso y altura."); 
             n = limpiarB(n); if (!n) return alert("Nombre inválido."); let k = normalizarTexto(n); if (usuariosDB[k]) return alert("Usuario ya existe."); 
             let m = calcularFormulaMetas(e, g, w, a, ac, o); 
-            const salt = nuevoSalt(); usuariosDB[k] = { nombre: n, salt, pinHash: await hashPin(p, salt), perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '', triviaXP: 0 }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] }; 
+            const salt = nuevoSalt(); usuariosDB[k] = { nombre: n, salt, pinHash: await hashPin(p, salt), perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '', triviaXP: 0, duoProgreso: 0, duoCofres: [] }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] }; 
             localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); entrarAlSistema(k); 
         }
         
@@ -793,7 +845,7 @@
             let u = getUsuarioActual(); 
             
             u.alimentosPersonalizados = u.alimentosPersonalizados || []; u.favoritos = u.favoritos || [];
-            let pDef = { edad: 25, genero: 'm', altura: 170, actividad: 1.2, objetivo: 0, metaKcal: 2000, metaCarbs: 250, metaProt: 100, metaGras: 65, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: u.nombre.charAt(0), tema: '', triviaXP: 0 };
+            let pDef = { edad: 25, genero: 'm', altura: 170, actividad: 1.2, objetivo: 0, metaKcal: 2000, metaCarbs: 250, metaProt: 100, metaGras: 65, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: u.nombre.charAt(0), tema: '', triviaXP: 0, duoProgreso: 0, duoCofres: [] };
             for(let ky in pDef) { if(u.perfil[ky] === undefined) u.perfil[ky] = pDef[ky]; }
             if(!u.perfil.medidas) u.perfil.medidas = { cintura: null, brazo: null, pierna: null };
             Object.keys(u.historial).forEach(f => {
@@ -888,7 +940,7 @@
             document.getElementById(`nav-${tab}`).classList.remove('text-gray-400'); document.getElementById(`nav-${tab}`).classList.add('text-brand-600');
             
             if(tab === 'progreso') { renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); dibujarProgresoYTablas(); }
-            if(tab === 'juegos') { actualizarXP(); }
+            if(tab === 'juegos') { actualizarXP(); renderizarRutaDuo(); }
         }
         
         function cambiarFecha(dias) { fechaActual.setDate(fechaActual.getDate()+dias); let h=getFechaStr(new Date()); let a=getFechaStr(fechaActual); document.getElementById('fechaDisplay').innerText = a===h ? "Hoy" : (a===getFechaStr(new Date(Date.now()-86400000)) ? "Ayer" : a); document.getElementById('pesoFechaLabel').innerText=document.getElementById('fechaDisplay').innerText; actualizarUI(); }
@@ -1067,30 +1119,285 @@
         function importarRespaldo() { let c = prompt("Pega código de respaldo:"); if (!c) return; try { let d = deB64(c), act = getUsuarioActual(); if (!d || typeof d.nombre !== 'string' || !d.perfil || typeof d.perfil !== 'object' || !d.historial || typeof d.historial !== 'object') throw new Error(); d.alimentosPersonalizados = Array.isArray(d.alimentosPersonalizados) ? d.alimentosPersonalizados : []; d.favoritos = Array.isArray(d.favoritos) ? d.favoritos : []; delete d.pin; d.pinHash = act.pinHash; d.salt = act.salt; if (act.pin !== undefined) d.pin = act.pin; if (!confirm("Esto reemplazará tus datos actuales. ¿Continuar?")) return; usuariosDB[usuarioActivoKey] = d; guardarDatos(); entrarAlSistema(usuarioActivoKey); alert("¡Restaurado!"); } catch (e) { alert("Inválido."); } }
 
         // =========================================================
-        // MINIJUEGO: TRIVIA ESTILO DUOLINGO
+        // MINIJUEGO EXTENSO ESTILO DUOLINGO: CAMINO NUTRI-RETO
         // =========================================================
+        
+        // Estructura de Unidades (Etapas) y Nodos
+        const duoUnidades = [
+            {
+                id: 1,
+                titulo: "Unidad 1: Fundamentos y Macros",
+                subtitulo: "Domina proteínas, carbohidratos y grasas",
+                colorBg: "bg-green-500",
+                colorBorder: "border-green-700",
+                colorText: "text-green-600",
+                nodos: [
+                    { idx: 0, titulo: "Proteína Pura", icono: "fa-drumstick-bite", tipo: "leccion", tema: "macros_prot" },
+                    { idx: 1, titulo: "Energía y Carbs", icono: "fa-bread-slice", tipo: "leccion", tema: "macros_carbs" },
+                    { idx: 2, titulo: "Cofre Nutritivo", icono: "fa-box-open", tipo: "cofre", xpBonus: 30 },
+                    { idx: 3, titulo: "Grasas Buenas", icono: "fa-seedling", tipo: "leccion", tema: "macros_grasas" },
+                    { idx: 4, titulo: "Trofeo Unidad 1", icono: "fa-trophy", tipo: "trofeo", tema: "macros_mix" }
+                ]
+            },
+            {
+                id: 2,
+                titulo: "Unidad 2: Calorías y Balance",
+                subtitulo: "El secreto detrás de subir o bajar de peso",
+                colorBg: "bg-blue-500",
+                colorBorder: "border-blue-700",
+                colorText: "text-blue-600",
+                nodos: [
+                    { idx: 5, titulo: "Déficit Calórico", icono: "fa-fire-alt", tipo: "leccion", tema: "balance_deficit" },
+                    { idx: 6, titulo: "Superávit Limpio", icono: "fa-arrow-trend-up", tipo: "leccion", tema: "balance_superavit" },
+                    { idx: 7, titulo: "Cofre Energético", icono: "fa-gem", tipo: "cofre", xpBonus: 40 },
+                    { idx: 8, titulo: "Densidad Calórica", icono: "fa-balance-scale", tipo: "leccion", tema: "balance_densidad" },
+                    { idx: 9, titulo: "Trofeo Unidad 2", icono: "fa-trophy", tipo: "trofeo", tema: "balance_mix" }
+                ]
+            },
+            {
+                id: 3,
+                titulo: "Unidad 3: Mitos vs Ciencia",
+                subtitulo: "Destruye creencias falsas del gimnasio",
+                colorBg: "bg-purple-500",
+                colorBorder: "border-purple-700",
+                colorText: "text-purple-600",
+                nodos: [
+                    { idx: 10, titulo: "Sudor y Grasa", icono: "fa-tint", tipo: "leccion", tema: "mitos_sudor" },
+                    { idx: 11, titulo: "Horarios y Ayuno", icono: "fa-clock", tipo: "leccion", tema: "mitos_ayuno" },
+                    { idx: 12, titulo: "Cofre Sabio", icono: "fa-gift", tipo: "cofre", xpBonus: 50 },
+                    { idx: 13, titulo: "Suplementos", icono: "fa-flask", tipo: "leccion", tema: "mitos_suple" },
+                    { idx: 14, titulo: "Trofeo Unidad 3", icono: "fa-trophy", tipo: "trofeo", tema: "mitos_mix" }
+                ]
+            },
+            {
+                id: 4,
+                titulo: "Unidad 4: Nutrición Tica",
+                subtitulo: "Aprende a calcular platos de Costa Rica",
+                colorBg: "bg-orange-500",
+                colorBorder: "border-orange-700",
+                colorText: "text-orange-600",
+                nodos: [
+                    { idx: 15, titulo: "Gallo Pinto Power", icono: "fa-utensils", tipo: "leccion", tema: "tica_pinto" },
+                    { idx: 16, titulo: "Casados y Picadillos", icono: "fa-plate-wheat", tipo: "leccion", tema: "tica_casado" },
+                    { idx: 17, titulo: "Cofre Pura Vida", icono: "fa-sun", tipo: "cofre", xpBonus: 60 },
+                    { idx: 18, titulo: "Antojos y Bebidas", icono: "fa-mug-hot", tipo: "leccion", tema: "tica_antojos" },
+                    { idx: 19, titulo: "Trofeo Unidad 4", icono: "fa-trophy", tipo: "trofeo", tema: "tica_mix" }
+                ]
+            },
+            {
+                id: 5,
+                titulo: "Unidad 5: Élite Gym & Salud",
+                subtitulo: "Recuperación, hidratación y rendimiento",
+                colorBg: "bg-rose-500",
+                colorBorder: "border-rose-700",
+                colorText: "text-rose-600",
+                nodos: [
+                    { idx: 20, titulo: "Hidratación Celular", icono: "fa-glass-water", tipo: "leccion", tema: "gym_agua" },
+                    { idx: 21, titulo: "Sueño y Músculo", icono: "fa-bed", tipo: "leccion", tema: "gym_sueno" },
+                    { idx: 22, titulo: "Cofre Maestro", icono: "fa-crown", tipo: "cofre", xpBonus: 80 },
+                    { idx: 23, titulo: "Sobrecarga Progresiva", icono: "fa-dumbbell", tipo: "leccion", tema: "gym_fuerza" },
+                    { idx: 24, titulo: "Maestro NutriWeb", icono: "fa-medal", tipo: "trofeo", tema: "todo_mix" }
+                ]
+            }
+        ];
+
+        // Banco ampliado de preguntas con múltiples mecánicas: 'choice', 'match', 'order'
         const bancoPreguntas = [
-            { q: "¿Qué macronutriente es el principal responsable de reparar y construir los músculos?", opts: ["Carbohidratos", "Proteínas", "Grasas"], ans: 1 },
-            { q: "¿Cuántas calorías tiene 1 gramo de proteína?", opts: ["4 kcal", "9 kcal", "7 kcal"], ans: 0 },
-            { q: "Para perder grasa necesitas lograr un...", opts: ["Déficit calórico", "Superávit calórico", "Equilibrio mágico"], ans: 0 },
-            { q: "¿Cuál de estos alimentos es una excelente fuente de grasas saludables?", opts: ["Arroz blanco", "Pechuga de pollo", "Aguacate"], ans: 2 },
-            { q: "Verdadero o Falso: Sudar muchísimo significa que estás quemando mucha grasa.", opts: ["Verdadero", "Falso"], ans: 1 },
-            { q: "¿Qué clásico tico es una excelente mezcla de carbohidratos y proteína vegetal?", opts: ["Chifrijo", "Gallo Pinto", "Empanada de carne"], ans: 1 },
-            { q: "¿Cuál de estas opciones NO rompe el ayuno intermitente?", opts: ["Café con azúcar", "Jugo de naranja", "Café negro sin azúcar"], ans: 2 },
-            { q: "Si quieres subir tu masa muscular de forma limpia, ¿qué es lo ideal?", opts: ["Déficit calórico + Cardio", "Superávit ligero + Pesas", "Comer sin límite + Pesas"], ans: 1 },
-            { q: "¿Qué alimento tiene mayor densidad calórica (más calorías en menos espacio)?", opts: ["Nueces y semillas", "Lechuga", "Fresas"], ans: 0 },
-            { q: "¿Cuántas calorías aporta 1 gramo de grasa?", opts: ["4 kcal", "7 kcal", "9 kcal"], ans: 2 }
+            // --- MACROS ---
+            { tema: "macros_prot", tipo: "choice", q: "¿Qué macronutriente es el principal responsable de reparar y construir los músculos?", opts: ["Carbohidratos", "Proteínas", "Grasas"], ans: 1, exp: "Las proteínas aportan aminoácidos esenciales que reconstruyen las fibras musculares tras entrenar." },
+            { tema: "macros_prot", tipo: "choice", q: "¿Cuántas calorías tiene 1 gramo de proteína?", opts: ["4 kcal", "9 kcal", "7 kcal"], ans: 0, exp: "Tanto las proteínas como los carbohidratos aportan 4 kcal por cada gramo." },
+            { tema: "macros_prot", tipo: "match", q: "Une cada alimento con su aporte principal:", pairs: [["Pechuga de pollo", "Proteína magra"], ["Aceite de oliva", "Grasa saludable"], ["Arroz blanco", "Carbohidrato"]], exp: "Identificar el macro dominante de cada alimento te permite armar platos balanceados." },
+            { tema: "macros_carbs", tipo: "choice", q: "¿Cuál es la función principal de los carbohidratos en el cuerpo?", opts: ["Producir hormonas", "Dar energía rápida al cerebro y músculos", "Construir huesos"], ans: 1, exp: "La glucosa proveniente de los carbohidratos es el combustible favorito del cuerpo para entrenar intenso." },
+            { tema: "macros_carbs", tipo: "order", q: "Ordena la frase sobre los carbohidratos complejos:", words: ["La", "avena", "aporta", "energía", "sostenida", "y", "fibra"], exp: "Los carbohidratos complejos como la avena se digieren lento y evitan picos bruscos de azúcar." },
+            { tema: "macros_grasas", tipo: "choice", q: "¿Cuántas calorías aporta 1 gramo de grasa?", opts: ["4 kcal", "7 kcal", "9 kcal"], ans: 2, exp: "Las grasas son el macronutriente más denso en energía: 9 kcal por gramo." },
+            { tema: "macros_grasas", tipo: "choice", q: "¿Cuál de estos alimentos es una excelente fuente de grasas saludables?", opts: ["Arroz blanco", "Pechuga de pollo", "Aguacate"], ans: 2, exp: "El aguacate es rico en ácidos grasos monoinsaturados que benefician el corazón y las hormonas." },
+            { tema: "macros_mix", tipo: "match", q: "Conecta cada macro con sus calorías por gramo:", pairs: [["1g de Proteína", "4 kcal"], ["1g de Grasa", "9 kcal"], ["1g de Alcohol", "7 kcal"]], exp: "Conocer los valores calóricos ayuda a entender por qué las comidas grasosas suman calorías tan rápido." },
+
+            // --- BALANCE Y CALORÍAS ---
+            { tema: "balance_deficit", tipo: "choice", q: "Para perder grasa corporal de forma sostenible necesitas lograr un...", opts: ["Déficit calórico", "Superávit calórico", "Ayuno de 3 días"], ans: 0, exp: "Consumir ligeramente menos calorías de las que gastas obliga al cuerpo a usar sus reservas de grasa." },
+            { tema: "balance_deficit", tipo: "order", q: "Arma la regla de oro de la pérdida de grasa:", words: ["Gastar", "más", "calorías", "de", "las", "que", "consumes"], exp: "Sin déficit calórico no hay pérdida de peso, sin importar qué tan 'limpio' comas." },
+            { tema: "balance_superavit", tipo: "choice", q: "Si quieres subir tu masa muscular de forma limpia, ¿qué es lo ideal?", opts: ["Déficit calórico + Cardio", "Superávit ligero + Pesas", "Comer comida rápida sin límite"], ans: 1, exp: "Un superávit controlado (+250 a +350 kcal) junto con entrenamiento de fuerza maximiza músculo y minimiza grasa." },
+            { tema: "balance_densidad", tipo: "choice", q: "¿Qué alimento tiene mayor densidad calórica (más calorías en menos volumen)?", opts: ["Nueces y semillas", "Lechuga", "Fresas"], ans: 0, exp: "Un pequeño puñado de nueces tiene ~150 kcal, mientras que llenar un tazón de lechuga apenas llega a 15 kcal." },
+            { tema: "balance_mix", tipo: "match", q: "Relaciona el objetivo con la estrategia calórica:", pairs: [["Perder grasa", "Déficit calórico"], ["Ganar músculo", "Superávit ligero"], ["Mantener peso", "Normocalórica"]], exp: "Ajustar las calorías según tu meta es el primer paso en cualquier plan nutricional." },
+
+            // --- MITOS ---
+            { tema: "mitos_sudor", tipo: "choice", q: "Verdadero o Falso: Sudar muchísimo significa que estás quemando mucha grasa.", opts: ["Verdadero", "Falso"], ans: 1, exp: "El sudor es solo agua y minerales para enfriar el cuerpo. Al hidratarte recuperas ese peso." },
+            { tema: "mitos_sudor", tipo: "choice", q: "¿Se puede quemar grasa únicamente del abdomen haciendo 500 abdominales al día?", opts: ["Sí, quema grasa localizada", "No, la grasa se pierde de forma general", "Solo si usas faja térmica"], ans: 1, exp: "La pérdida de grasa localizada no existe; el cuerpo decide de dónde tomar reservas según tu genética." },
+            { tema: "mitos_ayuno", tipo: "choice", q: "¿Cuál de estas opciones NO rompe el ayuno intermitente?", opts: ["Café con azúcar", "Jugo de naranja", "Café negro sin azúcar"], ans: 2, exp: "El café negro, el té sin azúcar y el agua tienen prácticamente 0 calorías y no alteran el ayuno." },
+            { tema: "mitos_ayuno", tipo: "choice", q: "¿Comer carbohidratos después de las 7:00 PM engorda automáticamente?", opts: ["Sí, se vuelven grasa de noche", "No, importa el total calórico del día", "Solo si comes frutas"], ans: 1, exp: "Tu cuerpo no tiene un reloj que convierta la comida en grasa de noche; lo que cuenta es el balance diario." },
+            { tema: "mitos_suple", tipo: "choice", q: "¿Para qué sirve principalmente la Creatina Monohidratada?", opts: ["Para quemar grasa abdominal", "Para mejorar fuerza, explosividad y recuperación", "Para reemplazar comidas"], ans: 1, exp: "La creatina es el suplemento con mayor respaldo científico para rendimiento y fuerza muscular." },
+            { tema: "mitos_mix", tipo: "order", q: "Ordena esta verdad sobre los suplementos:", words: ["Los", "suplementos", "complementan", "una", "buena", "alimentación"], exp: "Ningún polvo mágico compensa una mala dieta o falta de descanso." },
+
+            // --- NUTRICIÓN TICA ---
+            { tema: "tica_pinto", tipo: "choice", q: "¿Qué clásico tico combina arroz y frijoles logrando una proteína completa?", opts: ["Chifrijo", "Gallo Pinto", "Empanada arreglada"], ans: 1, exp: "La combinación de cereal (arroz) + leguminosa (frijoles) aporta todos los aminoácidos esenciales." },
+            { tema: "tica_pinto", tipo: "choice", q: "¿Cuántas calorías aproximadas tiene 1 taza de Gallo Pinto solo?", opts: ["100 kcal", "260 kcal", "600 kcal"], ans: 1, exp: "Una taza aporta alrededor de 260 kcal, con buena fibra y carbohidratos complejos." },
+            { tema: "tica_casado", tipo: "choice", q: "En un Casado tradicional, ¿qué cambio reduce más calorías sin quitar proteína?", opts: ["Quitar la ensalada", "Pedir la carne a la plancha y reducir el arroz", "Quitar los frijoles"], ans: 1, exp: "Evitar frituras y moderar la porción de arroz mantiene la saciedad con muchas menos calorías." },
+            { tema: "tica_antojos", tipo: "choice", q: "¿Cuál de estas bebidas ticas tiene MENOS calorías?", opts: ["Horchata (1 vaso)", "Fresco de Tamarindo con azúcar", "Café negro chorreado sin azúcar"], ans: 2, exp: "El café negro chorreado tiene apenas ~5 kcal, mientras que los frescos azucarados superan las 110 kcal." },
+            { tema: "tica_mix", tipo: "match", q: "Empareja cada comida tica con sus calorías aproximadas:", pairs: [["Huevo entero (1)", "72 kcal"], ["Gallo Pinto (1 taza)", "260 kcal"], ["Casado tradicional", "750 kcal"]], exp: "Conocer las calorías de tus comidas habituales te da libertad para disfrutarlas sin culpa." },
+
+            // --- GYM Y SALUD ---
+            { tema: "gym_agua", tipo: "choice", q: "¿Qué ocurre cuando tienes apenas un 2% de deshidratación al entrenar?", opts: ["Quemas más calorías", "Baja tu fuerza y concentración", "Ganas más resistencia"], ans: 1, exp: "El agua es clave para transportar nutrientes y mantener el rendimiento muscular." },
+            { tema: "gym_sueno", tipo: "choice", q: "¿Cuándo ocurre realmente el crecimiento y reparación muscular?", opts: ["Mientras levantas las pesas", "Mientras duermes y descansas", "Al tomar pre-entreno"], ans: 1, exp: "En el gym estimulas el músculo, pero creces durante el sueño profundo gracias a la hormona de crecimiento." },
+            { tema: "gym_fuerza", tipo: "order", q: "Ordena el principio clave para ganar músculo:", words: ["Aumentar", "peso", "o", "repeticiones", "con", "el", "tiempo"], exp: "La sobrecarga progresiva obliga al cuerpo a adaptarse volviéndose más fuerte." },
+            { tema: "todo_mix", tipo: "match", q: "Desafío Final: Une cada pilar con su impacto:", pairs: [["Proteína suficiente", "Preserva músculo"], ["Dormir 7-8 horas", "Recupera hormonas"], ["Déficit calórico", "Reduce grasa"]], exp: "¡Dominas los pilares esenciales de la transformación física!" }
         ];
 
         let preguntasActuales = [];
         let indicePregunta = 0;
         let vidasTrivia = 3;
         let opcionSeleccionada = null;
+        let nodoJugando = null;
+        let comboActual = 0;
+        let mejorComboPartida = 0;
+        let respuestasCorrectas = 0;
 
-        function iniciarTrivia() {
-            preguntasActuales = [...bancoPreguntas].sort(() => 0.5 - Math.random()).slice(0, 5);
+        // Variables para mecánica de emparejar (Match)
+        let matchIzqSel = null;
+        let matchDerSel = null;
+        let matchParesResueltos = 0;
+        let matchTotalPares = 0;
+
+        // Variables para mecánica de ordenar frase (Order)
+        let orderPalabrasElegidas = [];
+
+        function renderizarRutaDuo() {
+            const cont = document.getElementById('duoRutaContenedor');
+            if (!cont) return;
+            const u = getUsuarioActual();
+            const progreso = u.perfil.duoProgreso || 0;
+            const cofresAbiertos = u.perfil.duoCofres || [];
+
+            // Actualizar coronas y nivel en cabecera
+            if (document.getElementById('duoCoronas')) document.getElementById('duoCoronas').innerText = progreso;
+            const nivelNum = Math.floor(progreso / 5) + 1;
+            const titulosNivel = ["Aprendiz", "Constante", "Estratega", "Experto Tico", "Maestro Fit", "Leyenda"];
+            const tituloNiv = titulosNivel[Math.min(nivelNum - 1, titulosNivel.length - 1)];
+            if (document.getElementById('duoNivelTexto')) document.getElementById('duoNivelTexto').innerText = `Nivel ${nivelNum} • ${tituloNiv}`;
+
+            let html = '';
+
+            duoUnidades.forEach((unidad) => {
+                // Encabezado de Unidad estilo Duolingo
+                html += `
+                <div class="space-y-4">
+                    <div class="${unidad.colorBg} text-white p-4 rounded-2xl shadow-md border-b-4 ${unidad.colorBorder} flex justify-between items-center">
+                        <div>
+                            <h3 class="font-black text-sm tracking-tight">${unidad.titulo}</h3>
+                            <p class="text-[11px] text-white/90 font-medium mt-0.5">${unidad.subtitulo}</p>
+                        </div>
+                        <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-base shrink-0">
+                            <i class="fas fa-book-reader"></i>
+                        </div>
+                    </div>
+
+                    <!-- Camino en zigzag de nodos -->
+                    <div class="flex flex-col items-center space-y-4 py-2 relative">
+                `;
+
+                // Desplazamientos horizontales para efecto serpentina estilo Duolingo
+                const offsets = ['translate-x-0', '-translate-x-10', '-translate-x-14', '-translate-x-6', 'translate-x-6'];
+
+                unidad.nodos.forEach((nodo, i) => {
+                    const offsetClass = offsets[i % offsets.length];
+                    const completado = nodo.idx < progreso || (nodo.tipo === 'cofre' && cofresAbiertos.includes(nodo.idx));
+                    const desbloqueado = nodo.idx <= progreso;
+                    const esActual = nodo.idx === progreso;
+
+                    let btnClasses = "";
+                    let iconColor = "text-white";
+                    let badgeHtml = "";
+
+                    if (nodo.tipo === 'cofre') {
+                        if (completado) {
+                            btnClasses = "bg-amber-400 border-amber-600 opacity-80";
+                        } else if (desbloqueado) {
+                            btnClasses = "bg-amber-400 hover:bg-amber-300 border-amber-600 node-active-float cursor-pointer ring-4 ring-amber-200 dark:ring-amber-900/50";
+                            badgeHtml = `<span class="absolute -top-6 bg-amber-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm whitespace-nowrap animate-bounce">¡ABRIR!</span>`;
+                        } else {
+                            btnClasses = "bg-gray-200 dark:bg-slate-800 border-gray-300 dark:border-slate-700 cursor-not-allowed";
+                            iconColor = "text-gray-400 dark:text-slate-600";
+                        }
+                    } else {
+                        if (completado) {
+                            btnClasses = "bg-yellow-400 hover:bg-yellow-300 border-yellow-600 cursor-pointer";
+                        } else if (esActual) {
+                            btnClasses = `${unidad.colorBg} border-b-4 ${unidad.colorBorder} node-active-float cursor-pointer ring-4 ring-green-200 dark:ring-slate-700`;
+                            badgeHtml = `<span class="absolute -top-6 bg-white dark:bg-slate-800 ${unidad.colorText} dark:text-white border border-gray-200 dark:border-slate-700 text-[9px] font-black px-2.5 py-0.5 rounded-full shadow-sm whitespace-nowrap">EMPEZAR</span>`;
+                        } else {
+                            btnClasses = "bg-gray-200 dark:bg-slate-800 border-gray-300 dark:border-slate-700 cursor-not-allowed";
+                            iconColor = "text-gray-400 dark:text-slate-600";
+                        }
+                    }
+
+                    const clickAction = desbloqueado 
+                        ? (nodo.tipo === 'cofre' ? `abrirCofreDuo(${nodo.idx}, ${nodo.xpBonus})` : `iniciarLeccionNodo(${nodo.idx}, '${nodo.tema}')`)
+                        : `alert('Completa las lecciones anteriores para desbloquear este nivel 🔒')`;
+
+                    html += `
+                        <div class="relative flex flex-col items-center ${offsetClass}">
+                            ${badgeHtml}
+                            <button onclick="${clickAction}" class="w-16 h-16 rounded-full border-b-4 ${btnClasses} flex items-center justify-center shadow-md active:border-b-0 active:translate-y-1 transition-all">
+                                <i class="fas ${completado && nodo.tipo !== 'cofre' ? 'fa-check' : nodo.icono} text-2xl ${iconColor}"></i>
+                            </button>
+                            <span class="text-[11px] font-bold mt-1.5 ${desbloqueado ? 'text-gray-700 dark:text-slate-200' : 'text-gray-400 dark:text-slate-600'}">${nodo.titulo}</span>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+
+            // Botón de práctica libre infinita al final del camino
+            html += `
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-200 dark:border-slate-800 text-center space-y-2 shadow-sm">
+                    <p class="text-xs font-bold text-gray-600 dark:text-slate-300">¿Quieres repasar todo lo aprendido?</p>
+                    <button onclick="iniciarLeccionNodo(-1, 'todo_mix')" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-black py-3 rounded-xl border-b-4 border-indigo-700 active:border-b-0 active:translate-y-1 transition-all text-xs uppercase tracking-wider">
+                        <i class="fas fa-dumbbell mr-1"></i> Práctica Libre (+15 XP)
+                    </button>
+                </div>
+            `;
+
+            cont.innerHTML = html;
+        }
+
+        function abrirCofreDuo(idx, xpBonus) {
+            const u = getUsuarioActual();
+            u.perfil.duoCofres = u.perfil.duoCofres || [];
+            if (u.perfil.duoCofres.includes(idx)) {
+                alert("Ya reclamaste este cofre 📦");
+                return;
+            }
+            u.perfil.duoCofres.push(idx);
+            u.perfil.triviaXP = (u.perfil.triviaXP || 0) + xpBonus;
+            if (idx === (u.perfil.duoProgreso || 0)) {
+                u.perfil.duoProgreso = idx + 1;
+            }
+            if (typeof confetti === 'function') confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 } });
+            guardarDatos();
+            actualizarXP();
+            renderizarRutaDuo();
+            alert(`🎉 ¡Cofre abierto! Ganaste +${xpBonus} XP extra.`);
+        }
+
+        function iniciarLeccionNodo(idxNodo, tema) {
+            nodoJugando = idxNodo;
+            
+            // Filtrar preguntas del tema seleccionado y completar hasta 6 preguntas
+            let delTema = bancoPreguntas.filter(p => p.tema === tema);
+            let otras = bancoPreguntas.filter(p => p.tema !== tema).sort(() => 0.5 - Math.random());
+            
+            let seleccion = [...delTema.sort(() => 0.5 - Math.random())];
+            while (seleccion.length < 6 && otras.length > 0) {
+                seleccion.push(otras.pop());
+            }
+            preguntasActuales = seleccion.slice(0, 6);
+
             indicePregunta = 0;
             vidasTrivia = 3;
+            comboActual = 0;
+            mejorComboPartida = 0;
+            respuestasCorrectas = 0;
+
             document.getElementById('triviaStart').classList.add('hidden');
             document.getElementById('triviaEnd').classList.add('hidden');
             document.getElementById('triviaGame').classList.remove('hidden');
@@ -1105,36 +1412,98 @@
             let pct = (indicePregunta / preguntasActuales.length) * 100;
             document.getElementById('triviaProgress').style.width = pct + '%';
             
+            // Badge de combo
+            const comboBadge = document.getElementById('duoComboBadge');
+            if (comboActual >= 2) {
+                comboBadge.innerText = `🔥 ¡Racha x${comboActual}!`;
+                comboBadge.classList.remove('hidden');
+            } else {
+                comboBadge.classList.add('hidden');
+            }
+
             document.getElementById('triviaFeedback').classList.add('hidden');
             
             let qObj = preguntasActuales[indicePregunta];
             document.getElementById('triviaQuestion').innerText = qObj.q;
-            
-            let optsHtml = '';
-            qObj.opts.forEach((opt, i) => {
-                optsHtml += `<button id="optBtn_${i}" onclick="seleccionarOpcion(${i})" class="w-full text-left p-4 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-bold hover:bg-gray-50 dark:hover:bg-slate-700/50 active:border-b-2 active:translate-y-0.5 transition-all">${opt}</button>`;
-            });
-            
-            optsHtml += `<button id="btnComprobar" onclick="comprobarRespuesta()" class="w-full bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-500 font-black py-3.5 rounded-xl border-b-4 border-gray-400 dark:border-slate-800 cursor-not-allowed transition-all mt-4" disabled>COMPROBAR</button>`;
-            
-            document.getElementById('triviaOptions').innerHTML = optsHtml;
+
+            const tipoBadge = document.getElementById('duoTipoEjercicioBadge');
+            const contOpts = document.getElementById('triviaOptions');
+            contOpts.innerHTML = '';
+
+            // --- MECÁNICA 1: SELECCIÓN MÚLTIPLE / V-F ---
+            if (!qObj.tipo || qObj.tipo === 'choice') {
+                tipoBadge.innerHTML = `<i class="fas fa-check-circle mr-1"></i> Selección Única`;
+                let optsHtml = '';
+                qObj.opts.forEach((opt, i) => {
+                    optsHtml += `<button id="optBtn_${i}" onclick="seleccionarOpcion(${i})" class="w-full text-left p-4 rounded-2xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-bold text-sm hover:bg-gray-50 dark:hover:bg-slate-700/50 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-3">
+                        <span class="w-6 h-6 rounded-lg border border-gray-300 dark:border-slate-600 flex items-center justify-center text-xs text-gray-400 font-black">${i + 1}</span>
+                        <span>${esc(opt)}</span>
+                    </button>`;
+                });
+                optsHtml += `<button id="btnComprobar" onclick="comprobarRespuesta()" class="w-full bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-500 font-black py-3.5 rounded-2xl border-b-4 border-gray-400 dark:border-slate-800 cursor-not-allowed transition-all mt-4 uppercase tracking-wide text-sm" disabled>COMPROBAR</button>`;
+                contOpts.innerHTML = optsHtml;
+            }
+            // --- MECÁNICA 2: EMPAREJAR PARES (MATCH) ---
+            else if (qObj.tipo === 'match') {
+                tipoBadge.innerHTML = `<i class="fas fa-link mr-1"></i> Conecta los Pares`;
+                matchIzqSel = null;
+                matchDerSel = null;
+                matchParesResueltos = 0;
+                matchTotalPares = qObj.pairs.length;
+
+                const izqItems = qObj.pairs.map((p, idx) => ({ txt: p[0], id: idx })).sort(() => 0.5 - Math.random());
+                const derItems = qObj.pairs.map((p, idx) => ({ txt: p[1], id: idx })).sort(() => 0.5 - Math.random());
+
+                let gridHtml = `<div class="grid grid-cols-2 gap-2.5">`;
+                gridHtml += `<div class="space-y-2">`;
+                izqItems.forEach((item, i) => {
+                    gridHtml += `<button id="mIzq_${i}" data-id="${item.id}" onclick="seleccionarMatch('izq', ${i}, ${item.id})" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-xs font-bold text-gray-700 dark:text-slate-200 transition-all min-h-[54px] flex items-center justify-center text-center">${esc(item.txt)}</button>`;
+                });
+                gridHtml += `</div><div class="space-y-2">`;
+                derItems.forEach((item, i) => {
+                    gridHtml += `<button id="mDer_${i}" data-id="${item.id}" onclick="seleccionarMatch('der', ${i}, ${item.id})" class="w-full p-3 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-xs font-bold text-gray-700 dark:text-slate-200 transition-all min-h-[54px] flex items-center justify-center text-center">${esc(item.txt)}</button>`;
+                });
+                gridHtml += `</div></div>`;
+                contOpts.innerHTML = gridHtml;
+            }
+            // --- MECÁNICA 3: ORDENAR LA FRASE (ORDER) ---
+            else if (qObj.tipo === 'order') {
+                tipoBadge.innerHTML = `<i class="fas fa-sort-alpha-down mr-1"></i> Ordena el Concepto`;
+                orderPalabrasElegidas = [];
+                const barajadas = qObj.words.map((w, idx) => ({ w, idx })).sort(() => 0.5 - Math.random());
+
+                let orderHtml = `
+                    <div id="orderZonaRespuesta" class="min-h-[64px] p-3 rounded-2xl bg-gray-50 dark:bg-slate-800/60 border-2 border-dashed border-gray-300 dark:border-slate-700 flex flex-wrap gap-2 items-center">
+                        <span class="text-xs text-gray-400 italic">Toca las palabras de abajo en orden...</span>
+                    </div>
+                    <div id="orderBancoPalabras" class="flex flex-wrap gap-2 justify-center pt-2">
+                `;
+                barajadas.forEach((item) => {
+                    orderHtml += `<button id="wBtn_${item.idx}" onclick="togglePalabraOrder(${item.idx}, '${esc(item.w)}')" class="px-3.5 py-2 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-xs font-extrabold text-gray-700 dark:text-slate-200 active:translate-y-0.5 transition-all">${esc(item.w)}</button>`;
+                });
+                orderHtml += `</div>
+                    <button id="btnComprobarOrder" onclick="comprobarOrder()" class="w-full bg-gray-300 dark:bg-slate-700 text-gray-500 font-black py-3.5 rounded-2xl border-b-4 border-gray-400 dark:border-slate-800 cursor-not-allowed transition-all mt-3 uppercase tracking-wide text-sm" disabled>COMPROBAR</button>
+                `;
+                contOpts.innerHTML = orderHtml;
+            }
         }
 
+        // --- LÓGICA MECÁNICA 1: CHOICE ---
         function seleccionarOpcion(i) {
             opcionSeleccionada = i;
             let qObj = preguntasActuales[indicePregunta];
             
             for(let j=0; j<qObj.opts.length; j++) {
                 let b = document.getElementById(`optBtn_${j}`);
-                b.className = "w-full text-left p-4 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-bold hover:bg-gray-50 dark:hover:bg-slate-700/50 active:border-b-2 active:translate-y-0.5 transition-all";
+                b.className = "w-full text-left p-4 rounded-2xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-bold text-sm hover:bg-gray-50 dark:hover:bg-slate-700/50 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-3";
             }
             
             let btn = document.getElementById(`optBtn_${i}`);
-            btn.className = "w-full text-left p-4 rounded-xl border-2 border-blue-400 border-b-4 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold active:border-b-2 active:translate-y-0.5 transition-all";
+            btn.className = "w-full text-left p-4 rounded-2xl border-2 border-blue-400 border-b-4 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-3";
             
             let btnC = document.getElementById('btnComprobar');
             btnC.disabled = false;
-            btnC.className = "w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-4";
+            btnC.className = "w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-2xl border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-4 uppercase tracking-wide text-sm";
         }
 
         function comprobarRespuesta() {
@@ -1142,42 +1511,144 @@
             let qObj = preguntasActuales[indicePregunta];
             document.getElementById('btnComprobar').classList.add('hidden'); 
             
-            let fb = document.getElementById('triviaFeedback');
-            fb.classList.remove('hidden');
-            
+            for(let j=0; j<qObj.opts.length; j++) {
+                document.getElementById(`optBtn_${j}`).disabled = true;
+            }
+
             if(opcionSeleccionada === qObj.ans) {
-                fb.className = "rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center bg-green-500 transition-all shadow-md animate-bounce-sm";
-                document.getElementById('triviaFeedbackIcon').innerHTML = "✔️";
-                document.getElementById('triviaFeedbackText').innerText = "¡Excelente!";
-                
                 let b = document.getElementById(`optBtn_${opcionSeleccionada}`);
                 b.classList.replace('border-blue-400', 'border-green-500');
                 b.classList.replace('text-blue-600', 'text-green-600');
-                
-                if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 }, colors: ['#22c55e'] });
+                mostrarFeedbackDuo(true, "¡Excelente!", qObj.exp || "");
             } else {
-                vidasTrivia--;
-                document.getElementById('triviaLives').innerText = vidasTrivia;
-                fb.className = "rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center bg-red-500 transition-all shadow-md animate-bounce-sm";
-                document.getElementById('triviaFeedbackIcon').innerHTML = "❌";
-                document.getElementById('triviaFeedbackText').innerText = `Correcta: ${qObj.opts[qObj.ans]}`;
-                
                 let b = document.getElementById(`optBtn_${opcionSeleccionada}`);
                 b.classList.replace('border-blue-400', 'border-red-500');
                 b.classList.replace('text-blue-600', 'text-red-600');
                 b.classList.replace('bg-blue-50', 'bg-red-50');
+                mostrarFeedbackDuo(false, `Correcta: ${qObj.opts[qObj.ans]}`, qObj.exp || "");
             }
-            
-            for(let j=0; j<qObj.opts.length; j++) {
-                document.getElementById(`optBtn_${j}`).disabled = true;
+        }
+
+        // --- LÓGICA MECÁNICA 2: MATCH ---
+        function seleccionarMatch(lado, btnIdx, pairId) {
+            const btn = document.getElementById(lado === 'izq' ? `mIzq_${btnIdx}` : `mDer_${btnIdx}`);
+            if (!btn || btn.disabled) return;
+
+            if (lado === 'izq') {
+                if (matchIzqSel) matchIzqSel.btn.classList.remove('border-blue-400', 'bg-blue-50', 'dark:bg-blue-900/30', 'text-blue-600');
+                matchIzqSel = { btn, pairId };
+                btn.classList.add('border-blue-400', 'bg-blue-50', 'dark:bg-blue-900/30', 'text-blue-600');
+            } else {
+                if (matchDerSel) matchDerSel.btn.classList.remove('border-blue-400', 'bg-blue-50', 'dark:bg-blue-900/30', 'text-blue-600');
+                matchDerSel = { btn, pairId };
+                btn.classList.add('border-blue-400', 'bg-blue-50', 'dark:bg-blue-900/30', 'text-blue-600');
+            }
+
+            if (matchIzqSel && matchDerSel) {
+                const b1 = matchIzqSel.btn;
+                const b2 = matchDerSel.btn;
+                if (matchIzqSel.pairId === matchDerSel.pairId) {
+                    // Pareja correcta
+                    [b1, b2].forEach(b => {
+                        b.disabled = true;
+                        b.className = "w-full p-3 rounded-xl border-2 border-green-400 bg-green-50 dark:bg-green-900/30 text-xs font-bold text-green-600 dark:text-green-400 opacity-60 transition-all min-h-[54px] flex items-center justify-center text-center";
+                    });
+                    matchParesResueltos++;
+                    if (matchParesResueltos === matchTotalPares) {
+                        let qObj = preguntasActuales[indicePregunta];
+                        mostrarFeedbackDuo(true, "¡Todos los pares conectados!", qObj.exp || "");
+                    }
+                } else {
+                    // Pareja incorrecta
+                    [b1, b2].forEach(b => b.classList.add('border-red-500', 'bg-red-50', 'text-red-600', 'animate-shake'));
+                    vidasTrivia--;
+                    comboActual = 0;
+                    document.getElementById('triviaLives').innerText = vidasTrivia;
+                    setTimeout(() => {
+                        [b1, b2].forEach(b => b.classList.remove('border-red-500', 'bg-red-50', 'text-red-600', 'animate-shake', 'border-blue-400', 'bg-blue-50', 'dark:bg-blue-900/30', 'text-blue-600'));
+                        if (vidasTrivia <= 0) {
+                            let qObj = preguntasActuales[indicePregunta];
+                            mostrarFeedbackDuo(false, "¡Sin vidas!", qObj.exp || "");
+                        }
+                    }, 400);
+                }
+                matchIzqSel = null;
+                matchDerSel = null;
+            }
+        }
+
+        // --- LÓGICA MECÁNICA 3: ORDER ---
+        function togglePalabraOrder(idx, word) {
+            const pos = orderPalabrasElegidas.findIndex(x => x.idx === idx);
+            const btnBanco = document.getElementById(`wBtn_${idx}`);
+            if (pos >= 0) {
+                orderPalabrasElegidas.splice(pos, 1);
+                btnBanco.classList.remove('opacity-30', 'pointer-events-none');
+            } else {
+                orderPalabrasElegidas.push({ idx, word });
+                btnBanco.classList.add('opacity-30', 'pointer-events-none');
+            }
+            renderizarZonaOrder();
+        }
+
+        function renderizarZonaOrder() {
+            const zona = document.getElementById('orderZonaRespuesta');
+            const btnC = document.getElementById('btnComprobarOrder');
+            if (orderPalabrasElegidas.length === 0) {
+                zona.innerHTML = `<span class="text-xs text-gray-400 italic">Toca las palabras de abajo en orden...</span>`;
+                btnC.disabled = true;
+                btnC.className = "w-full bg-gray-300 dark:bg-slate-700 text-gray-500 font-black py-3.5 rounded-2xl border-b-4 border-gray-400 dark:border-slate-800 cursor-not-allowed transition-all mt-3 uppercase tracking-wide text-sm";
+            } else {
+                zona.innerHTML = orderPalabrasElegidas.map(item => 
+                    `<button onclick="togglePalabraOrder(${item.idx}, '${esc(item.word)}')" class="px-3 py-1.5 rounded-xl bg-blue-500 text-white text-xs font-extrabold shadow-sm active:scale-95 transition-transform">${esc(item.word)}</button>`
+                ).join('');
+                btnC.disabled = false;
+                btnC.className = "w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-2xl border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-3 uppercase tracking-wide text-sm";
+            }
+        }
+
+        function comprobarOrder() {
+            const qObj = preguntasActuales[indicePregunta];
+            document.getElementById('btnComprobarOrder').classList.add('hidden');
+            const fraseUsuario = orderPalabrasElegidas.map(x => x.word).join(' ');
+            const fraseCorrecta = qObj.words.join(' ');
+            const esCorrecto = normalizarTexto(fraseUsuario) === normalizarTexto(fraseCorrecta);
+            mostrarFeedbackDuo(esCorrecto, esCorrecto ? "¡Orden perfecto!" : `Era: "${fraseCorrecta}"`, qObj.exp || "");
+        }
+
+        // --- FEEDBACK UNIFICADO ESTILO DUOLINGO ---
+        function mostrarFeedbackDuo(esCorrecto, titulo, explicacion) {
+            const fb = document.getElementById('triviaFeedback');
+            fb.classList.remove('hidden');
+            document.getElementById('triviaFeedbackExp').innerText = explicacion;
+
+            if (esCorrecto) {
+                respuestasCorrectas++;
+                comboActual++;
+                if (comboActual > mejorComboPartida) mejorComboPartida = comboActual;
+                fb.className = "rounded-2xl p-4 mt-4 text-white bg-green-500 transition-all shadow-lg space-y-3 animate-bounce-sm";
+                document.getElementById('triviaFeedbackIcon').innerHTML = "✔️";
+                document.getElementById('triviaFeedbackText').innerText = comboActual >= 3 ? `${titulo} (🔥 ${comboActual} seguidas)` : titulo;
+                if (typeof confetti === 'function') confetti({ particleCount: 35, spread: 55, origin: { y: 0.8 }, colors: ['#22c55e', '#facc15'] });
+            } else {
+                comboActual = 0;
+                if (vidasTrivia > 0) vidasTrivia--;
+                document.getElementById('triviaLives').innerText = vidasTrivia;
+                fb.className = "rounded-2xl p-4 mt-4 text-white bg-red-500 transition-all shadow-lg space-y-3 animate-shake";
+                document.getElementById('triviaFeedbackIcon').innerHTML = "❌";
+                document.getElementById('triviaFeedbackText').innerText = titulo;
             }
         }
 
         function siguientePregunta() {
             if(vidasTrivia <= 0) { terminarTrivia(false); return; }
             indicePregunta++;
-            if(indicePregunta >= preguntasActuales.length) terminarTrivia(true);
-            else mostrarPregunta();
+            if(indicePregunta >= preguntasActuales.length) {
+                document.getElementById('triviaProgress').style.width = '100%';
+                terminarTrivia(true);
+            } else {
+                mostrarPregunta();
+            }
         }
 
         function terminarTrivia(exito) {
@@ -1186,23 +1657,43 @@
             end.classList.remove('hidden');
             let u = getUsuarioActual();
             u.perfil.triviaXP = u.perfil.triviaXP || 0;
+            u.perfil.duoProgreso = u.perfil.duoProgreso || 0;
             
+            const totalPreg = preguntasActuales.length || 1;
+            const precision = Math.round((respuestasCorrectas / totalPreg) * 100);
+
             if(exito) {
-                let xpGanada = vidasTrivia * 5 + 10; 
+                let xpGanada = (vidasTrivia * 5) + 15 + (mejorComboPartida * 2);
+                if (nodoJugando === -1) xpGanada = 15; // Práctica libre
+
                 u.perfil.triviaXP += xpGanada;
+
+                // Desbloquear siguiente nodo si completó el nodo actual
+                if (nodoJugando !== null && nodoJugando === u.perfil.duoProgreso) {
+                    u.perfil.duoProgreso = nodoJugando + 1;
+                }
+
                 document.getElementById('triviaEndEmoji').innerText = "🏆";
                 document.getElementById('triviaEndTitle').innerText = "¡Lección Completada!";
-                document.getElementById('triviaEndTitle').className = "font-black text-xl text-yellow-500";
-                document.getElementById('triviaEndDesc').innerText = `Has ganado +${xpGanada} XP. Total: ${u.perfil.triviaXP} XP`;
-                if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                document.getElementById('triviaEndTitle').className = "font-black text-2xl text-yellow-500";
+                document.getElementById('triviaEndDesc').innerText = `¡Subiste de nivel! Total acumulado: ${u.perfil.triviaXP} XP`;
+                
+                document.getElementById('duoStatsGrid').classList.remove('hidden');
+                document.getElementById('statXpGanada').innerText = `+${xpGanada}`;
+                document.getElementById('statPrecision').innerText = `${precision}%`;
+                document.getElementById('statMejorCombo').innerText = `${mejorComboPartida} 🔥`;
+
+                if (typeof confetti === 'function') confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } });
             } else {
                 document.getElementById('triviaEndEmoji').innerText = "💔";
                 document.getElementById('triviaEndTitle').innerText = "¡Te quedaste sin vidas!";
-                document.getElementById('triviaEndTitle').className = "font-black text-xl text-red-500";
-                document.getElementById('triviaEndDesc').innerText = "Repasa tus conceptos y vuelve a intentarlo.";
+                document.getElementById('triviaEndTitle').className = "font-black text-2xl text-red-500";
+                document.getElementById('triviaEndDesc').innerText = "Repasa las explicaciones y vuelve a intentarlo.";
+                document.getElementById('duoStatsGrid').classList.add('hidden');
             }
             guardarDatos();
             actualizarXP();
+            renderizarRutaDuo();
         }
 
         function salirTrivia() {
@@ -1213,6 +1704,7 @@
             document.getElementById('triviaGame').classList.add('hidden');
             document.getElementById('triviaEnd').classList.add('hidden');
             document.getElementById('triviaStart').classList.remove('hidden');
+            renderizarRutaDuo();
         }
         
         function actualizarXP() {
@@ -1222,7 +1714,7 @@
             }
         }
 
-        inicializarPWA(); etiquetarBotones(); new MutationObserver(etiquetarBotones).observe(document.body, { childList: true, subtree: true }); if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) entrarAlSistema(usuarioActivoKey); else renderizarPerfilesRapidos();
+        inicializarPWA(); etiquetarBotones(); new MutationObserver(etiquetarBotones).observe(document.body, { childList: true, subtree: true }); if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) { entrarAlSistema(usuarioActivoKey); renderizarRutaDuo(); } else renderizarPerfilesRapidos();
     </script>
 </body>
 </html>
