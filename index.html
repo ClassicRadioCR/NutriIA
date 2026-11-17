@@ -395,6 +395,58 @@
                     </div>
                 </div>
             </div>
+
+            <!-- PESTAÑA 5: JUEGOS (TRIVIA / DUOLINGO STYLE) -->
+            <div id="tab-juegos" class="tab-content space-y-5 animate-fade-in">
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4 transition-colors">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="font-black text-gray-800 dark:text-slate-100 text-sm uppercase"><i class="fas fa-brain text-green-500"></i> Nutri-Reto</h2>
+                        <span class="text-xs font-bold text-orange-500"><i class="fas fa-fire"></i> XP: <span id="triviaXP">0</span></span>
+                    </div>
+                    
+                    <!-- Pantalla de Inicio de Trivia -->
+                    <div id="triviaStart" class="text-center space-y-4">
+                        <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto text-4xl shadow-sm">🦉</div>
+                        <p class="text-sm text-gray-600 dark:text-slate-300 font-medium">Demuestra lo que sabes de nutrición y compite por tener el mayor XP en la Liga de Amigos.</p>
+                        <button onclick="iniciarTrivia()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all">EMPEZAR LECCIÓN</button>
+                    </div>
+
+                    <!-- Pantalla de Juego -->
+                    <div id="triviaGame" class="hidden space-y-4">
+                        <div class="flex items-center gap-3">
+                            <button onclick="salirTrivia()" class="text-gray-400 hover:text-gray-600 transition-colors"><i class="fas fa-times"></i></button>
+                            <div class="flex-1 h-3 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden relative">
+                                <div id="triviaProgress" class="h-full bg-green-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <div class="font-bold text-red-500"><i class="fas fa-heart"></i> <span id="triviaLives">3</span></div>
+                        </div>
+                        
+                        <h3 class="font-bold text-lg text-gray-800 dark:text-slate-100 mt-4" id="triviaQuestion">¿Pregunta?</h3>
+                        
+                        <div id="triviaOptions" class="space-y-2.5 mt-4">
+                            <!-- Opciones dinámicas -->
+                        </div>
+                        
+                        <!-- Feedback inferior estilo Duolingo -->
+                        <div id="triviaFeedback" class="hidden rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center transition-all shadow-md">
+                            <div class="flex items-center gap-3">
+                                <div id="triviaFeedbackIcon" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-lg"></div>
+                                <span id="triviaFeedbackText">¡Correcto!</span>
+                            </div>
+                            <button id="triviaNextBtn" onclick="siguientePregunta()" class="bg-white text-gray-900 px-4 py-2.5 rounded-xl text-sm font-black active:scale-95 shadow-sm transition-transform">CONTINUAR</button>
+                        </div>
+                    </div>
+
+                    <!-- Pantalla Final -->
+                    <div id="triviaEnd" class="hidden text-center space-y-4 animate-fade-in">
+                        <div class="text-6xl mb-2 drop-shadow-md" id="triviaEndEmoji">🏆</div>
+                        <h2 class="font-black text-xl text-gray-800 dark:text-slate-100" id="triviaEndTitle">¡Lección Completada!</h2>
+                        <p class="text-sm font-bold text-gray-600 dark:text-slate-400" id="triviaEndDesc">Has ganado +15 XP.</p>
+                        <button onclick="volverTriviaStart()" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl shadow-lg border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-4">CONTINUAR</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- BARRA NAVEGACIÓN INFERIOR -->
@@ -402,6 +454,7 @@
             <button onclick="cambiarTab('diario')" id="nav-diario" class="flex-1 flex flex-col items-center text-brand-600 cursor-pointer transition-colors"><i class="fas fa-book-open text-xl mb-1"></i><span class="text-[10px] font-bold">Diario</span></button>
             <button onclick="cambiarTab('progreso')" id="nav-progreso" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer transition-colors"><i class="fas fa-trophy text-xl mb-1"></i><span class="text-[10px] font-bold">Logros</span></button>
             <button onclick="cambiarTab('gym')" id="nav-gym" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer transition-colors"><i class="fas fa-dumbbell text-xl mb-1"></i><span class="text-[10px] font-bold">Gym</span></button>
+            <button onclick="cambiarTab('juegos')" id="nav-juegos" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer transition-colors"><i class="fas fa-gamepad text-xl mb-1"></i><span class="text-[10px] font-bold">Juegos</span></button>
             <button onclick="cambiarTab('perfil')" id="nav-perfil" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer transition-colors"><i class="fas fa-user-cog text-xl mb-1"></i><span class="text-[10px] font-bold">Perfil</span></button>
         </div>
     </div>
@@ -432,28 +485,139 @@
             } 
         }
 
-        // --- BIBLIOTECA BASE (INCLUYE HUEVO FRITO Y CHORIZO) ---
+        // --- SÚPER BIBLIOTECA BASE (CON SECCIÓN TICA COMPLETA) ---
         const bibliotecaBase = [
+            // BÁSICOS GYM Y SUPLEMENTOS
             { nombre: "Creatina Monohidratada (5g)", kcal: 0, c: 0, p: 0, g: 0 },
+            { nombre: "Pre-entreno en polvo (1 scoop)", kcal: 15, c: 3, p: 0, g: 0 },
             { nombre: "Batido de proteína Whey (1 scoop en agua)", kcal: 120, c: 3, p: 24, g: 1 },
+            { nombre: "Barra de proteína (promedio 60g)", kcal: 220, c: 22, p: 20, g: 7 },
+            { nombre: "Proats (Avena + Whey Protein)", kcal: 350, c: 45, p: 35, g: 6 },
+            { nombre: "Rice Cakes / Tortita de arroz (1 unidad)", kcal: 35, c: 7, p: 1, g: 0 },
+
+            // COMIDA TÍPICA COSTARRICENSE Y PICADILLOS
+            { nombre: "Gallo Pinto (1 taza)", kcal: 260, c: 46, p: 7, g: 5 },
+            { nombre: "Casado tradicional (promedio)", kcal: 750, c: 90, p: 35, g: 25 },
+            { nombre: "Olla de carne (1 plato)", kcal: 350, c: 40, p: 25, g: 10 },
+            { nombre: "Chifrijo (1 tazón mediano)", kcal: 650, c: 55, p: 35, g: 30 },
+            { nombre: "Picadillo de papa con chorizo (1 taza)", kcal: 320, c: 25, p: 12, g: 20 },
+            { nombre: "Picadillo de chayote con elote (1 taza)", kcal: 120, c: 18, p: 4, g: 4 },
+            { nombre: "Picadillo de vainica con carne (1 taza)", kcal: 180, c: 12, p: 15, g: 9 },
+            { nombre: "Picadillo de arracache (1 taza)", kcal: 250, c: 30, p: 8, g: 10 },
+            { nombre: "Picadillo de plátano verde (1 taza)", kcal: 210, c: 40, p: 4, g: 5 },
+            { nombre: "Gallito de salchichón (1 tortilla + salchichón)", kcal: 210, c: 14, p: 7, g: 14 },
+            { nombre: "Gallito de papa (1 tortilla + picadillo)", kcal: 150, c: 20, p: 4, g: 6 },
+            { nombre: "Pejibaye con mayonesa (1 unidad)", kcal: 135, c: 15, p: 2, g: 8 },
+            { nombre: "Pejibaye solo (1 unidad)", kcal: 90, c: 15, p: 2, g: 3 },
+            { nombre: "Empanada arreglada (carne, repollo, mayo/ketchup)", kcal: 450, c: 35, p: 15, g: 28 },
+            { nombre: "Empanada de carne frita (1 unidad)", kcal: 300, c: 25, p: 10, g: 18 },
+            { nombre: "Empanada de chiverre (1 unidad horneada)", kcal: 220, c: 35, p: 3, g: 8 },
+            { nombre: "Tamal de cerdo (1 unidad)", kcal: 450, c: 45, p: 12, g: 25 },
+            { nombre: "Tamal asado (1 porción)", kcal: 280, c: 45, p: 5, g: 9 },
+            { nombre: "Chorreada de maíz (1 unidad)", kcal: 200, c: 30, p: 5, g: 7 },
+            { nombre: "Tortilla aliñada con queso (1 unidad)", kcal: 220, c: 20, p: 8, g: 12 },
+            { nombre: "Cajeta de coco (1 unidad pequeña)", kcal: 120, c: 20, p: 1, g: 5 },
+
+            // HUEVOS Y LÁCTEOS
             { nombre: "Huevo entero (1 unidad)", kcal: 72, c: 0, p: 6, g: 5 },
             { nombre: "Huevo frito en aceite (1 unidad)", kcal: 90, c: 0, p: 6, g: 7 },
             { nombre: "Clara de huevo (1 unidad)", kcal: 17, c: 0, p: 4, g: 0 },
-            { nombre: "Chorizo de cerdo (1 unidad / 60g)", kcal: 220, c: 1, p: 9, g: 20 },
+            { nombre: "Leche descremada (1 vaso 250ml)", kcal: 85, c: 12, p: 8, g: 0 },
+            { nombre: "Leche entera (1 vaso 250ml)", kcal: 150, c: 12, p: 8, g: 8 },
+            { nombre: "Yogurt Griego sin azúcar (1 taza)", kcal: 100, c: 6, p: 15, g: 0 },
+            { nombre: "Queso Turrialba / Fresco (30g)", kcal: 85, c: 1, p: 6, g: 6 },
+            { nombre: "Queso Palmito (30g)", kcal: 90, c: 1, p: 7, g: 6 },
+            { nombre: "Queso Mozzarella (30g)", kcal: 85, c: 1, p: 6, g: 6 },
+            { nombre: "Queso Cottage / Skyr (1 taza)", kcal: 180, c: 8, p: 25, g: 5 },
+            { nombre: "Natilla (1 cucharada)", kcal: 60, c: 2, p: 1, g: 6 },
+            { nombre: "Mantequilla (1 cucharada)", kcal: 100, c: 0, p: 0, g: 11 },
+
+            // CARNES, AVES Y EMBUTIDOS
             { nombre: "Pechuga de pollo a la plancha (100g)", kcal: 165, c: 0, p: 31, g: 4 },
+            { nombre: "Muslo de pollo sin piel (100g)", kcal: 175, c: 0, p: 24, g: 8 },
             { nombre: "Carne de res magra / Bistec (100g)", kcal: 215, c: 0, p: 27, g: 11 },
+            { nombre: "Carne molida magra 90/10 (100g)", kcal: 176, c: 0, p: 20, g: 10 },
+            { nombre: "Lomo de cerdo (100g)", kcal: 143, c: 0, p: 26, g: 4 },
+            { nombre: "Chuleta de cerdo (100g)", kcal: 230, c: 0, p: 24, g: 14 },
+            { nombre: "Chorizo de cerdo (1 unidad / 60g)", kcal: 220, c: 1, p: 9, g: 20 },
+            { nombre: "Salchichón (1 rodaja gruesa)", kcal: 150, c: 2, p: 6, g: 13 },
+            { nombre: "Tocino / Tocineta (2 lonjas)", kcal: 85, c: 0, p: 6, g: 7 },
+            { nombre: "Jamón de pavo (1 rebanada)", kcal: 30, c: 1, p: 5, g: 1 },
+
+            // PESCADOS Y MARISCOS
             { nombre: "Atún en agua (1 lata escurrida)", kcal: 110, c: 0, p: 24, g: 1 },
+            { nombre: "Salmón a la plancha (150g)", kcal: 310, c: 0, p: 34, g: 19 },
+            { nombre: "Tilapia a la plancha (150g)", kcal: 190, c: 0, p: 39, g: 4 },
+            { nombre: "Corvina a la plancha (150g)", kcal: 160, c: 0, p: 35, g: 2 },
+            { nombre: "Ceviche de pescado (1 taza)", kcal: 140, c: 10, p: 20, g: 2 },
+
+            // GRANOS, CEREALES, PANES Y HARINAS
             { nombre: "Arroz blanco cocido (1 taza)", kcal: 205, c: 45, p: 4, g: 0 },
+            { nombre: "Arroz integral cocido (1 taza)", kcal: 215, c: 45, p: 5, g: 2 },
             { nombre: "Frijoles negros cocidos (1 taza)", kcal: 230, c: 40, p: 16, g: 1 },
+            { nombre: "Frijoles rojos cocidos (1 taza)", kcal: 225, c: 40, p: 15, g: 1 },
+            { nombre: "Frijoles molidos (1/2 taza)", kcal: 120, c: 18, p: 6, g: 3 },
+            { nombre: "Lentejas cocidas (1 taza)", kcal: 230, c: 40, p: 18, g: 1 },
+            { nombre: "Garbanzos cocidos (1 taza)", kcal: 269, c: 45, p: 15, g: 4 },
             { nombre: "Avena en hojuelas (1 taza cruda)", kcal: 300, c: 54, p: 10, g: 6 },
+            { nombre: "Pasta blanca cocida (1 taza)", kcal: 220, c: 43, p: 8, g: 1 },
+            { nombre: "Pan cuadrado blanco (1 rebanada)", kcal: 70, c: 13, p: 2, g: 1 },
             { nombre: "Pan cuadrado integral (1 rebanada)", kcal: 80, c: 15, p: 4, g: 1 },
             { nombre: "Tortilla de maíz (1 unidad)", kcal: 60, c: 12, p: 1, g: 1 },
+            { nombre: "Tortilla de harina (1 unidad)", kcal: 90, c: 15, p: 2, g: 2 },
+            { nombre: "Galletas de soda (4 unidades)", kcal: 100, c: 15, p: 2, g: 3 },
+
+            // TUBÉRCULOS Y VERDURAS HARINOSAS
             { nombre: "Papa cocida (1 unidad mediana)", kcal: 130, c: 30, p: 3, g: 0 },
+            { nombre: "Camote cocido (1 unidad mediana)", kcal: 112, c: 26, p: 2, g: 0 },
+            { nombre: "Yuca hervida (1 taza)", kcal: 330, c: 78, p: 3, g: 1 },
+            { nombre: "Plátano maduro cocido (1 tajada/50g)", kcal: 65, c: 17, p: 1, g: 0 },
+            { nombre: "Patacones / Tostones (3 unidades)", kcal: 150, c: 25, p: 2, g: 5 },
+
+            // FRUTAS LOCALES Y CLÁSICAS
+            { nombre: "Mandarina (1 unidad)", kcal: 47, c: 12, p: 1, g: 0 },
+            { nombre: "Cas (1 unidad)", kcal: 30, c: 7, p: 1, g: 0 },
+            { nombre: "Jocotes (5 unidades)", kcal: 60, c: 15, p: 1, g: 0 },
+            { nombre: "Mamón chino (10 unidades)", kcal: 70, c: 17, p: 1, g: 0 },
             { nombre: "Banano (1 unidad mediana)", kcal: 105, c: 27, p: 1, g: 0 },
             { nombre: "Manzana (1 unidad mediana)", kcal: 95, c: 25, p: 0, g: 0 },
+            { nombre: "Fresa (1 taza)", kcal: 50, c: 11, p: 1, g: 0 },
+            { nombre: "Papaya (1 taza)", kcal: 62, c: 16, p: 1, g: 0 },
+            { nombre: "Piña (1 taza)", kcal: 82, c: 22, p: 1, g: 0 },
+            { nombre: "Mango (1 unidad mediana)", kcal: 200, c: 50, p: 1, g: 1 },
+            { nombre: "Sandía (1 taza)", kcal: 46, c: 11, p: 1, g: 0 },
+
+            // VEGETALES
+            { nombre: "Tomate (1 unidad)", kcal: 22, c: 5, p: 1, g: 0 },
+            { nombre: "Zanahoria (1 unidad)", kcal: 25, c: 6, p: 1, g: 0 },
+            { nombre: "Brócoli cocido (1 taza)", kcal: 55, c: 11, p: 4, g: 0 },
+            { nombre: "Espinaca cruda (2 tazas)", kcal: 14, c: 2, p: 2, g: 0 },
+            { nombre: "Lechuga (2 tazas)", kcal: 10, c: 2, p: 1, g: 0 },
             { nombre: "Aguacate (entero)", kcal: 320, c: 16, p: 4, g: 30 },
+            { nombre: "Aguacate (1/4 de unidad)", kcal: 80, c: 4, p: 1, g: 7 },
+
+            // GRASAS, SEMILLAS Y SALSAS
             { nombre: "Mantequilla de maní (1 cucharada)", kcal: 95, c: 3, p: 4, g: 8 },
-            { nombre: "Café negro sin azúcar", kcal: 5, c: 0, p: 0, g: 0 }
+            { nombre: "Almendras (1 puñado 25g)", kcal: 145, c: 5, p: 5, g: 12 },
+            { nombre: "Aceite de oliva (1 cucharada)", kcal: 119, c: 0, p: 0, g: 14 },
+            { nombre: "Mayonesa (1 cucharada)", kcal: 90, c: 0, p: 0, g: 10 },
+            { nombre: "Ketchup / Salsa de tomate (1 cucharada)", kcal: 15, c: 4, p: 0, g: 0 },
+            { nombre: "Salsa Lizano (1 cucharada)", kcal: 15, c: 3, p: 0, g: 0 },
+
+            // COMIDA RÁPIDA (FAST FOOD)
+            { nombre: "Pizza Pepperoni (1 porción regular)", kcal: 280, c: 28, p: 12, g: 13 },
+            { nombre: "Hamburguesa clásica (1 unidad)", kcal: 350, c: 33, p: 16, g: 14 },
+            { nombre: "Papas fritas (porción regular)", kcal: 365, c: 48, p: 4, g: 17 },
+
+            // BEBIDAS TICAS Y GENERALES
+            { nombre: "Agua dulce (1 taza)", kcal: 90, c: 23, p: 0, g: 0 },
+            { nombre: "Fresco de Cas con azúcar (1 vaso)", kcal: 110, c: 28, p: 0, g: 0 },
+            { nombre: "Fresco de Tamarindo con azúcar (1 vaso)", kcal: 120, c: 30, p: 0, g: 0 },
+            { nombre: "Horchata (1 vaso)", kcal: 180, c: 35, p: 3, g: 4 },
+            { nombre: "Café negro sin azúcar", kcal: 5, c: 0, p: 0, g: 0 },
+            { nombre: "Gaseosa Regular (355ml)", kcal: 140, c: 39, p: 0, g: 0 },
+            { nombre: "Gaseosa Zero / Light (355ml)", kcal: 0, c: 0, p: 0, g: 0 },
+            { nombre: "Cerveza Regular (355ml)", kcal: 153, c: 13, p: 2, g: 0 }
         ];
 
         function obtenerBibliotecaCompleta() { return [...(getUsuarioActual().alimentosPersonalizados || []), ...bibliotecaBase]; }
@@ -469,7 +633,7 @@
         }
 
         // =========================================================
-        // NUEVAS FUNCIONES: BÚSQUEDA MUNDIAL (API) Y CSV
+        // FUNCIONES: BÚSQUEDA MUNDIAL (API) Y CSV
         // =========================================================
 
         async function buscarEnInternet() {
@@ -578,7 +742,6 @@
             }
         }
 
-
         // =========================================================
         // RESTO DE LAS FUNCIONES DEL SISTEMA
         // =========================================================
@@ -600,7 +763,7 @@
             if (!n || p.length !== 4) return alert("Nombre y PIN 4 dígitos requeridos."); if (!e || !w || !a) return alert("Faltan datos corporales."); 
             let k = normalizarTexto(n); if (usuariosDB[k]) return alert("Usuario ya existe."); 
             let m = calcularFormulaMetas(e, g, w, a, ac, o); 
-            usuariosDB[k] = { nombre: n, pin: p, perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '' }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] }; 
+            usuariosDB[k] = { nombre: n, pin: p, perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '', triviaXP: 0 }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] }; 
             localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); entrarAlSistema(k); 
         }
         
@@ -611,7 +774,7 @@
             let u = getUsuarioActual(); 
             
             u.alimentosPersonalizados = u.alimentosPersonalizados || []; u.favoritos = u.favoritos || [];
-            let pDef = { edad: 25, genero: 'm', altura: 170, actividad: 1.2, objetivo: 0, metaKcal: 2000, metaCarbs: 250, metaProt: 100, metaGras: 65, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: u.nombre.charAt(0), tema: '' };
+            let pDef = { edad: 25, genero: 'm', altura: 170, actividad: 1.2, objetivo: 0, metaKcal: 2000, metaCarbs: 250, metaProt: 100, metaGras: 65, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: u.nombre.charAt(0), tema: '', triviaXP: 0 };
             for(let ky in pDef) { if(u.perfil[ky] === undefined) u.perfil[ky] = pDef[ky]; }
             if(!u.perfil.medidas) u.perfil.medidas = { cintura: null, brazo: null, pierna: null };
             Object.keys(u.historial).forEach(f => {
@@ -626,7 +789,7 @@
             actualizarIconoDarkMode();
             
             let hr = new Date().getHours(); if (hr < 11) seleccionarTiempoComida('Desayuno'); else if (hr < 15) seleccionarTiempoComida('Almuerzo'); else if (hr < 18) seleccionarTiempoComida('Snacks'); else seleccionarTiempoComida('Cena');
-            actualizarDatalist(); renderizarFavoritos(); actualizarUI();
+            actualizarDatalist(); renderizarFavoritos(); actualizarUI(); actualizarXP();
         }
         function cerrarSesion() { usuarioActivoKey = null; localStorage.removeItem('nutriWeb_CurrentUser'); document.getElementById('loginPin').value = ''; document.getElementById('mainApp').classList.add('hidden'); document.getElementById('authScreen').classList.remove('hidden'); renderizarPerfilesRapidos(); document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200"; }
 
@@ -706,6 +869,7 @@
             document.getElementById(`nav-${tab}`).classList.remove('text-gray-400'); document.getElementById(`nav-${tab}`).classList.add('text-brand-600');
             
             if(tab === 'progreso') { renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); dibujarProgresoYTablas(); }
+            if(tab === 'juegos') { actualizarXP(); }
         }
         
         function cambiarFecha(dias) { fechaActual.setDate(fechaActual.getDate()+dias); let h=getFechaStr(new Date()); let a=getFechaStr(fechaActual); document.getElementById('fechaDisplay').innerText = a===h ? "Hoy" : (a===getFechaStr(new Date(Date.now()-86400000)) ? "Ayer" : a); document.getElementById('pesoFechaLabel').innerText=document.getElementById('fechaDisplay').innerText; actualizarUI(); }
@@ -821,22 +985,223 @@
             }
         }
 
-        function exportarCodigoReto() { let u=getUsuarioActual(); let payload = {tipo:"NutriWeb_Reto", n:u.nombre, r:parseInt(document.getElementById('rachaDisplay').innerText)||0, m:u.perfil.mejorRacha}; let c=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); navigator.clipboard.writeText(c).then(()=>alert("¡Código copiado!")).catch(()=>prompt("Copia:",c)); }
+        // =========================================================
+        // LIGA DE AMIGOS CON XP INTEGRADA
+        // =========================================================
+        function exportarCodigoReto() { 
+            let u=getUsuarioActual(); 
+            let payload = {tipo:"NutriWeb_Reto", n:u.nombre, r:parseInt(document.getElementById('rachaDisplay').innerText)||0, m:u.perfil.mejorRacha, x:u.perfil.triviaXP||0}; 
+            let c=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); 
+            navigator.clipboard.writeText(c).then(()=>alert("¡Código copiado con tu XP actual!")).catch(()=>prompt("Copia:",c)); 
+        }
+        
         function importarCodigoReto() { 
             let c = document.getElementById('inpCodigoAmigo').value; if(!c) return; 
             try { 
                 c = c.replace(/\s+/g, ''); 
                 let p = JSON.parse(decodeURIComponent(escape(atob(c)))); 
                 if(p.tipo!=="NutriWeb_Reto") throw new Error(); 
-                let u=getUsuarioActual(); u.perfil.amigosReto[normalizarTexto(p.n)]={nombre:p.n, racha:p.r, mejor:p.m}; guardarDatos(); document.getElementById('inpCodigoAmigo').value=''; alert(`¡${p.n} añadido!`); 
+                let u=getUsuarioActual(); 
+                u.perfil.amigosReto[normalizarTexto(p.n)]={nombre:p.n, racha:p.r, mejor:p.m, xp:p.x||0}; 
+                guardarDatos(); 
+                document.getElementById('inpCodigoAmigo').value=''; 
+                alert(`¡${p.n} añadido!`); 
             } catch(e) { alert("Código Inválido. Asegúrate de copiar todo el código sin espacios."); } 
         }
-        function renderizarRetoGrupal() { let u=getUsuarioActual(); let rl=parseInt(document.getElementById('rachaDisplay').innerText)||0; let l=[{nombre:u.nombre+" (Tú)", racha:rl, mejor:u.perfil.mejorRacha||0}]; if(u.perfil.amigosReto) Object.keys(u.perfil.amigosReto).forEach(k=>l.push(u.perfil.amigosReto[k])); l.sort((a,b)=>b.racha-a.racha); let h=''; l.forEach((i,x)=>{ let ic=x===0?'🥇':x===1?'🥈':x===2?'🥉':'👏'; let bg=i.nombre.includes("(Tú)")?'bg-indigo-50 dark:bg-indigo-900/30':'bg-gray-50 dark:bg-slate-800'; h+=`<div class="flex justify-between items-center ${bg} p-2.5 rounded-xl border transition-colors"><div class="flex items-center gap-2"><span class="text-xl">${ic}</span><span class="font-bold text-sm text-gray-800 dark:text-slate-200">${i.nombre}</span></div><div class="text-right"><p class="font-black text-orange-500 text-sm">${i.racha} días 🔥</p><p class="text-[10px] text-gray-400">Récord: ${i.mejor}</p></div></div>`; }); document.getElementById('listaRetoGrupal').innerHTML=h; }
+        
+        function renderizarRetoGrupal() { 
+            let u=getUsuarioActual(); 
+            let rl=parseInt(document.getElementById('rachaDisplay').innerText)||0; 
+            let l=[{nombre:u.nombre+" (Tú)", racha:rl, mejor:u.perfil.mejorRacha||0, xp:u.perfil.triviaXP||0}]; 
+            if(u.perfil.amigosReto) Object.keys(u.perfil.amigosReto).forEach(k=>l.push(u.perfil.amigosReto[k])); 
+            
+            // Ordenar primero por XP, luego por racha
+            l.sort((a,b) => {
+                if (b.xp !== a.xp) return b.xp - a.xp;
+                return b.racha - a.racha;
+            }); 
+            
+            let h=''; 
+            l.forEach((i,x)=>{ 
+                let ic=x===0?'🥇':x===1?'🥈':x===2?'🥉':'👏'; 
+                let bg=i.nombre.includes("(Tú)")?'bg-indigo-50 dark:bg-indigo-900/30':'bg-gray-50 dark:bg-slate-800'; 
+                h+=`<div class="flex justify-between items-center ${bg} p-2.5 rounded-xl border transition-colors">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl">${ic}</span>
+                            <div class="leading-tight">
+                                <span class="font-bold text-sm text-gray-800 dark:text-slate-200 block">${i.nombre}</span>
+                                <span class="text-[10px] text-green-600 dark:text-green-400 font-bold"><i class="fas fa-fire"></i> ${i.xp} XP</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-black text-orange-500 text-sm">${i.racha} días 🔥</p>
+                            <p class="text-[10px] text-gray-400">Récord: ${i.mejor}</p>
+                        </div>
+                    </div>`; 
+            }); 
+            document.getElementById('listaRetoGrupal').innerHTML=h; 
+        }
 
         function exportarBibliotecaComidas() { let lista = getUsuarioActual().alimentosPersonalizados || []; if (lista.length === 0) return alert("Sin comidas nuevas."); let c = btoa(unescape(encodeURIComponent(JSON.stringify({ tipo: "NutriWeb_Comidas", items: lista })))); navigator.clipboard.writeText(c).then(() => alert(`Copiadas.`)).catch(() => prompt("Copia:", c)); }
         function importarBibliotecaComidas() { let c = prompt("Pega código:"); if (!c) return; try { c = c.replace(/\s+/g, ''); let p = JSON.parse(decodeURIComponent(escape(atob(c)))); if (p.tipo !== "NutriWeb_Comidas") throw new Error(); let u = getUsuarioActual(); let ex = obtenerBibliotecaCompleta().map(i => normalizarTexto(i.nombre)); let ag = 0; p.items.forEach(i => { if (i.nombre && i.kcal && !ex.includes(normalizarTexto(i.nombre))) { u.alimentosPersonalizados.push({ nombre: i.nombre, kcal: parseInt(i.kcal)||0, c: parseInt(i.c)||0, p: parseInt(i.p)||0, g: parseInt(i.g)||0 }); ex.push(normalizarTexto(i.nombre)); ag++; } }); guardarDatos(); actualizarDatalist(); alert(`¡${ag} agregadas!`); } catch (e) { alert("Inválido."); } }
         function exportarRespaldo() { let c = btoa(unescape(encodeURIComponent(JSON.stringify(getUsuarioActual())))); navigator.clipboard.writeText(c).then(() => alert("Respaldo copiado.")).catch(() => prompt("Copia:", c)); }
         function importarRespaldo() { let c = prompt("Pega código de respaldo:"); if (!c) return; try { c = c.replace(/\s+/g, ''); let d = JSON.parse(decodeURIComponent(escape(atob(c)))); if (!d.nombre) throw new Error(); usuariosDB[usuarioActivoKey] = d; guardarDatos(); entrarAlSistema(usuarioActivoKey); alert("¡Restaurado!"); } catch (e) { alert("Inválido."); } }
+
+        // =========================================================
+        // MINIJUEGO: TRIVIA ESTILO DUOLINGO
+        // =========================================================
+        const bancoPreguntas = [
+            { q: "¿Qué macronutriente es el principal responsable de reparar y construir los músculos?", opts: ["Carbohidratos", "Proteínas", "Grasas"], ans: 1 },
+            { q: "¿Cuántas calorías tiene 1 gramo de proteína?", opts: ["4 kcal", "9 kcal", "7 kcal"], ans: 0 },
+            { q: "Para perder grasa necesitas lograr un...", opts: ["Déficit calórico", "Superávit calórico", "Equilibrio mágico"], ans: 0 },
+            { q: "¿Cuál de estos alimentos es una excelente fuente de grasas saludables?", opts: ["Arroz blanco", "Pechuga de pollo", "Aguacate"], ans: 2 },
+            { q: "Verdadero o Falso: Sudar muchísimo significa que estás quemando mucha grasa.", opts: ["Verdadero", "Falso"], ans: 1 },
+            { q: "¿Qué clásico tico es una excelente mezcla de carbohidratos y proteína vegetal?", opts: ["Chifrijo", "Gallo Pinto", "Empanada de carne"], ans: 1 },
+            { q: "¿Cuál de estas opciones NO rompe el ayuno intermitente?", opts: ["Café con azúcar", "Jugo de naranja", "Café negro sin azúcar"], ans: 2 },
+            { q: "Si quieres subir tu masa muscular de forma limpia, ¿qué es lo ideal?", opts: ["Déficit calórico + Cardio", "Superávit ligero + Pesas", "Comer sin límite + Pesas"], ans: 1 },
+            { q: "¿Qué alimento tiene mayor densidad calórica (más calorías en menos espacio)?", opts: ["Nueces y semillas", "Lechuga", "Fresas"], ans: 0 },
+            { q: "¿Cuántas calorías aporta 1 gramo de grasa?", opts: ["4 kcal", "7 kcal", "9 kcal"], ans: 2 }
+        ];
+
+        let preguntasActuales = [];
+        let indicePregunta = 0;
+        let vidasTrivia = 3;
+        let opcionSeleccionada = null;
+
+        function iniciarTrivia() {
+            preguntasActuales = [...bancoPreguntas].sort(() => 0.5 - Math.random()).slice(0, 5);
+            indicePregunta = 0;
+            vidasTrivia = 3;
+            document.getElementById('triviaStart').classList.add('hidden');
+            document.getElementById('triviaEnd').classList.add('hidden');
+            document.getElementById('triviaGame').classList.remove('hidden');
+            mostrarPregunta();
+        }
+
+        function mostrarPregunta() {
+            opcionSeleccionada = null;
+            document.getElementById('triviaLives').innerText = vidasTrivia;
+            
+            // Barra de progreso animada
+            let pct = (indicePregunta / preguntasActuales.length) * 100;
+            document.getElementById('triviaProgress').style.width = pct + '%';
+            
+            document.getElementById('triviaFeedback').classList.add('hidden');
+            
+            let qObj = preguntasActuales[indicePregunta];
+            document.getElementById('triviaQuestion').innerText = qObj.q;
+            
+            let optsHtml = '';
+            qObj.opts.forEach((opt, i) => {
+                optsHtml += `<button id="optBtn_${i}" onclick="seleccionarOpcion(${i})" class="w-full text-left p-4 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-bold hover:bg-gray-50 dark:hover:bg-slate-700/50 active:border-b-2 active:translate-y-0.5 transition-all">${opt}</button>`;
+            });
+            
+            optsHtml += `<button id="btnComprobar" onclick="comprobarRespuesta()" class="w-full bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-500 font-black py-3.5 rounded-xl border-b-4 border-gray-400 dark:border-slate-800 cursor-not-allowed transition-all mt-4" disabled>COMPROBAR</button>`;
+            
+            document.getElementById('triviaOptions').innerHTML = optsHtml;
+        }
+
+        function seleccionarOpcion(i) {
+            opcionSeleccionada = i;
+            let qObj = preguntasActuales[indicePregunta];
+            
+            for(let j=0; j<qObj.opts.length; j++) {
+                let b = document.getElementById(`optBtn_${j}`);
+                b.className = "w-full text-left p-4 rounded-xl border-2 border-gray-200 dark:border-slate-700 border-b-4 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 font-bold hover:bg-gray-50 dark:hover:bg-slate-700/50 active:border-b-2 active:translate-y-0.5 transition-all";
+            }
+            
+            let btn = document.getElementById(`optBtn_${i}`);
+            btn.className = "w-full text-left p-4 rounded-xl border-2 border-blue-400 border-b-4 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold active:border-b-2 active:translate-y-0.5 transition-all";
+            
+            let btnC = document.getElementById('btnComprobar');
+            btnC.disabled = false;
+            btnC.className = "w-full bg-green-500 hover:bg-green-600 text-white font-black py-3.5 rounded-xl border-b-4 border-green-700 active:border-b-0 active:translate-y-1 transition-all mt-4";
+        }
+
+        function comprobarRespuesta() {
+            if(opcionSeleccionada === null) return;
+            let qObj = preguntasActuales[indicePregunta];
+            document.getElementById('btnComprobar').classList.add('hidden'); 
+            
+            let fb = document.getElementById('triviaFeedback');
+            fb.classList.remove('hidden');
+            
+            if(opcionSeleccionada === qObj.ans) {
+                fb.className = "rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center bg-green-500 transition-all shadow-md animate-bounce-sm";
+                document.getElementById('triviaFeedbackIcon').innerHTML = "✔️";
+                document.getElementById('triviaFeedbackText').innerText = "¡Excelente!";
+                
+                let b = document.getElementById(`optBtn_${opcionSeleccionada}`);
+                b.classList.replace('border-blue-400', 'border-green-500');
+                b.classList.replace('text-blue-600', 'text-green-600');
+                
+                if (typeof confetti === 'function') confetti({ particleCount: 40, spread: 60, origin: { y: 0.8 }, colors: ['#22c55e'] });
+            } else {
+                vidasTrivia--;
+                document.getElementById('triviaLives').innerText = vidasTrivia;
+                fb.className = "rounded-xl p-4 mt-4 text-white font-bold flex justify-between items-center bg-red-500 transition-all shadow-md animate-bounce-sm";
+                document.getElementById('triviaFeedbackIcon').innerHTML = "❌";
+                document.getElementById('triviaFeedbackText').innerText = `Correcta: ${qObj.opts[qObj.ans]}`;
+                
+                let b = document.getElementById(`optBtn_${opcionSeleccionada}`);
+                b.classList.replace('border-blue-400', 'border-red-500');
+                b.classList.replace('text-blue-600', 'text-red-600');
+                b.classList.replace('bg-blue-50', 'bg-red-50');
+            }
+            
+            for(let j=0; j<qObj.opts.length; j++) {
+                document.getElementById(`optBtn_${j}`).disabled = true;
+            }
+        }
+
+        function siguientePregunta() {
+            if(vidasTrivia <= 0) { terminarTrivia(false); return; }
+            indicePregunta++;
+            if(indicePregunta >= preguntasActuales.length) terminarTrivia(true);
+            else mostrarPregunta();
+        }
+
+        function terminarTrivia(exito) {
+            document.getElementById('triviaGame').classList.add('hidden');
+            let end = document.getElementById('triviaEnd');
+            end.classList.remove('hidden');
+            let u = getUsuarioActual();
+            u.perfil.triviaXP = u.perfil.triviaXP || 0;
+            
+            if(exito) {
+                let xpGanada = vidasTrivia * 5 + 10; 
+                u.perfil.triviaXP += xpGanada;
+                document.getElementById('triviaEndEmoji').innerText = "🏆";
+                document.getElementById('triviaEndTitle').innerText = "¡Lección Completada!";
+                document.getElementById('triviaEndTitle').className = "font-black text-xl text-yellow-500";
+                document.getElementById('triviaEndDesc').innerText = `Has ganado +${xpGanada} XP. Total: ${u.perfil.triviaXP} XP`;
+                if (typeof confetti === 'function') confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else {
+                document.getElementById('triviaEndEmoji').innerText = "💔";
+                document.getElementById('triviaEndTitle').innerText = "¡Te quedaste sin vidas!";
+                document.getElementById('triviaEndTitle').className = "font-black text-xl text-red-500";
+                document.getElementById('triviaEndDesc').innerText = "Repasa tus conceptos y vuelve a intentarlo.";
+            }
+            guardarDatos();
+            actualizarXP();
+        }
+
+        function salirTrivia() {
+            if(confirm("¿Seguro que quieres salir? Perderás tu progreso en esta lección.")) volverTriviaStart();
+        }
+
+        function volverTriviaStart() {
+            document.getElementById('triviaGame').classList.add('hidden');
+            document.getElementById('triviaEnd').classList.add('hidden');
+            document.getElementById('triviaStart').classList.remove('hidden');
+        }
+        
+        function actualizarXP() {
+            let u = getUsuarioActual();
+            if(u && document.getElementById('triviaXP')) {
+                document.getElementById('triviaXP').innerText = u.perfil.triviaXP || 0;
+            }
+        }
 
         inicializarPWA(); if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) entrarAlSistema(usuarioActivoKey); else renderizarPerfilesRapidos();
     </script>
