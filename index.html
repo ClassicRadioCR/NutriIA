@@ -9,23 +9,18 @@
     <meta name="apple-mobile-web-app-title" content="NutriWeb">
     <title>NutriWeb - Tu Diario Nutricional</title>
     
-    <!-- Tailwind CSS y Confetti -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: { brand: { 100: 'var(--b100)', 200: 'var(--b200)', 400: 'var(--b400)', 500: 'var(--b500)', 600: 'var(--b600)', 800: 'var(--b800)', 900: 'var(--b900)' } }
-                }
-            }
+            theme: { extend: { colors: { brand: { 100: 'var(--b100)', 200: 'var(--b200)', 400: 'var(--b400)', 500: 'var(--b500)', 600: 'var(--b600)', 800: 'var(--b800)', 900: 'var(--b900)' } } } }
         }
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { /* Tema Verde Defecto */ --b100: #dcfce7; --b200: #bbf7d0; --b400: #4ade80; --b500: #22c55e; --b600: #16a34a; --b800: #166534; --b900: #14532d; }
+        :root { --b100: #dcfce7; --b200: #bbf7d0; --b400: #4ade80; --b500: #22c55e; --b600: #16a34a; --b800: #166534; --b900: #14532d; }
         .theme-ocean { --b100: #e0f2fe; --b200: #bae6fd; --b400: #38bdf8; --b500: #0ea5e9; --b600: #0284c7; --b800: #075985; --b900: #0c4a6e; }
         .theme-fire { --b100: #ffedd5; --b200: #fed7aa; --b400: #fb923c; --b500: #f97316; --b600: #ea580c; --b800: #9a3412; --b900: #7c2d12; }
         .theme-cyber { --b100: #f3e8ff; --b200: #e9d5ff; --b400: #c084fc; --b500: #a855f7; --b600: #9333ea; --b800: #6b21a8; --b900: #581c87; }
@@ -40,15 +35,12 @@
 <body id="cuerpoApp" class="bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200">
 
     <!-- ===================================================================== -->
-    <!-- PANTALLA DE BIENVENIDA, REGISTRO E INICIO DE SESIÓN                   -->
+    <!-- LOGIN Y REGISTRO                                                      -->
     <!-- ===================================================================== -->
     <div id="authScreen" class="min-h-screen flex flex-col justify-center items-center p-4 bg-gradient-to-br from-brand-500 to-brand-800">
         <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden">
-            
             <div class="bg-slate-900 text-white p-6 text-center relative">
-                <div class="w-14 h-14 bg-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                    <i class="fas fa-leaf text-2xl text-white"></i>
-                </div>
+                <div class="w-14 h-14 bg-brand-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg"><i class="fas fa-leaf text-2xl text-white"></i></div>
                 <h1 class="text-2xl font-black tracking-tight">NutriWeb</h1>
                 <p class="text-xs text-slate-400 mt-1">Tu central de nutrición y disciplina</p>
             </div>
@@ -58,44 +50,40 @@
                 <button onclick="switchAuthTab('register')" id="tabBtnRegister" class="flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200">Crear Cuenta</button>
             </div>
 
+            <!-- Formulario Login -->
             <div id="formLogin" class="p-6 space-y-4">
                 <div id="listaUsuariosRapidos" class="hidden space-y-2 pb-2 border-b border-gray-100 dark:border-slate-800">
-                    <p class="text-xs font-bold text-gray-400 uppercase">Perfiles en este dispositivo:</p>
+                    <p class="text-xs font-bold text-gray-400 uppercase">Perfiles:</p>
                     <div id="botonesPerfiles" class="flex flex-wrap gap-2"></div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Tu Usuario o Nombre</label>
-                    <input type="text" id="loginUser" placeholder="Ej: Carlos" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">PIN de acceso (4 números)</label>
-                    <input type="password" id="loginPin" maxlength="4" inputmode="numeric" placeholder="••••" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-center text-lg font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-500" onkeypress="if(event.key === 'Enter') iniciarSesion()">
-                </div>
-                <button onclick="iniciarSesion()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all">Ingresar a mi diario <i class="fas fa-arrow-right ml-1"></i></button>
+                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Nombre</label><input type="text" id="loginUser" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-brand-500"></div>
+                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">PIN (4 números)</label><input type="password" id="loginPin" maxlength="4" inputmode="numeric" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-center text-lg font-bold tracking-widest focus:ring-2 focus:ring-brand-500" onkeypress="if(event.key === 'Enter') iniciarSesion()"></div>
+                <button onclick="iniciarSesion()" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl shadow-lg">Ingresar <i class="fas fa-arrow-right ml-1"></i></button>
             </div>
 
+            <!-- Formulario Registro -->
             <div id="formRegister" class="hidden p-6 space-y-3 max-h-[75vh] overflow-y-auto">
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nombre *</label><input type="text" id="regUser" placeholder="Ej: Ana" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"></div>
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">PIN (4 dígitos) *</label><input type="password" id="regPin" maxlength="4" inputmode="numeric" placeholder="1234" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center font-bold"></div>
+                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nombre *</label><input type="text" id="regUser" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"></div>
+                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">PIN *</label><input type="password" id="regPin" maxlength="4" inputmode="numeric" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center font-bold"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Edad *</label><input type="number" id="regEdad" placeholder="28" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"></div>
+                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Edad *</label><input type="number" id="regEdad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"></div>
                     <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Género</label><select id="regGenero" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="m">Hombre</option><option value="f">Mujer</option></select></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Peso (kg) *</label><input type="number" id="regPeso" step="0.1" placeholder="72.5" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"></div>
-                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Altura (cm) *</label><input type="number" id="regAltura" placeholder="170" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"></div>
+                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Peso (kg) *</label><input type="number" id="regPeso" step="0.1" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"></div>
+                    <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Altura (cm)*</label><input type="number" id="regAltura" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"></div>
                 </div>
-                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nivel de Actividad</label><select id="regActividad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="1.2" selected>Sedentario (Trabajo sentado)</option><option value="1.375">Ligero (1-3 días/sem)</option><option value="1.55">Moderado (3-5 días/sem)</option><option value="1.725">Fuerte (6-7 días/sem)</option></select></div>
-                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Tu Objetivo Principal</label><select id="regObjetivo" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400"><option value="-500">Perder grasa (-500 kcal)</option><option value="-250">Definición suave (-250 kcal)</option><option value="0" selected>Mantener mi peso</option><option value="250">Ganar masa muscular (+250 kcal)</option></select></div>
-                <button onclick="registrarUsuario()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-2 transition-all">Crear Perfil y Calcular Metas</button>
+                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Actividad</label><select id="regActividad" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm"><option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55">Moderado</option><option value="1.725">Fuerte</option></select></div>
+                <div><label class="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Objetivo</label><select id="regObjetivo" class="w-full p-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400"><option value="-500">Perder grasa (-500 kcal)</option><option value="-250">Definición suave (-250 kcal)</option><option value="0" selected>Mantener mi peso</option><option value="250">Ganar masa</option></select></div>
+                <button onclick="registrarUsuario()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg mt-2">Crear Perfil</button>
             </div>
         </div>
     </div>
 
     <!-- ===================================================================== -->
-    <!-- APLICACIÓN PRINCIPAL (OCULTA HASTA INICIAR SESIÓN)                    -->
+    <!-- APP PRINCIPAL                                                         -->
     <!-- ===================================================================== -->
     <div id="mainApp" class="hidden pb-24">
 
@@ -112,32 +100,32 @@
                     <button onclick="cambiarFecha(1)" class="p-1.5 hover:text-brand-200"><i class="fas fa-chevron-right text-xs"></i></button>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="cambiarTab('progreso')" class="flex items-center gap-1 bg-black/20 hover:bg-black/30 px-2.5 py-1 rounded-full font-bold text-orange-200 text-xs transition-colors"><i class="fas fa-fire text-orange-400" id="iconoFuegoHeader"></i> <span id="rachaDisplay">0</span></button>
+                    <button onclick="cambiarTab('progreso')" class="flex items-center gap-1 bg-black/20 hover:bg-black/30 px-2.5 py-1 rounded-full font-bold text-orange-200 text-xs"><i class="fas fa-fire text-orange-400" id="iconoFuegoHeader"></i> <span id="rachaDisplay">0</span></button>
                     <button onclick="toggleDarkMode()" class="text-brand-100 hover:text-white text-sm p-1"><i class="fas fa-moon" id="darkModeIcon"></i></button>
                     <button onclick="cerrarSesion()" class="text-brand-200 hover:text-white text-sm p-1"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
         </div>
 
-        <!-- CONTENEDOR PRINCIPAL -->
+        <!-- CONTENIDO CENTRAL -->
         <div class="max-w-md mx-auto p-4">
-
+            
             <!-- PESTAÑA 1: DIARIO -->
             <div id="tab-diario" class="tab-content active space-y-4">
                 
+                <div id="bannerInstalar" class="hidden bg-slate-900 dark:bg-slate-800 text-white p-3.5 rounded-2xl shadow-sm flex items-center justify-between">
+                    <div class="flex items-center gap-3"><div class="w-9 h-9 bg-brand-500 rounded-xl flex items-center justify-center shrink-0"><i class="fas fa-mobile-alt text-white"></i></div>
+                        <div><p class="text-xs font-bold">Instala NutriWeb</p><p class="text-[11px] text-slate-400">Menú opciones → "Agregar a inicio"</p></div>
+                    </div>
+                    <button onclick="cerrarBannerInstalar()" class="text-slate-400 hover:text-white p-1"><i class="fas fa-times"></i></button>
+                </div>
+
                 <!-- ASISTENTE TÓXICO 🤖 -->
                 <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 p-4 rounded-2xl shadow-sm border border-red-200 dark:border-slate-700 relative overflow-hidden">
                     <div class="absolute -right-3 -top-3 opacity-10 text-5xl"><i class="fas fa-skull"></i></div>
-                    <div class="flex justify-between items-start gap-2 relative z-10">
-                        <div class="flex gap-2.5 items-start">
-                            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-md">
-                                <i class="fas fa-robot text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-0.5">Asistente Tóxico</p>
-                                <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium" id="mensajeAsistente">Analizando tus malas decisiones...</p>
-                            </div>
-                        </div>
+                    <div class="flex gap-2.5 items-start relative z-10">
+                        <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-md"><i class="fas fa-robot text-sm"></i></div>
+                        <div><p class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-0.5">Asistente Tóxico</p><p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium" id="mensajeAsistente">Analizando tus malas decisiones...</p></div>
                     </div>
                 </div>
 
@@ -145,19 +133,17 @@
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 text-center space-y-2">
                     <h3 class="font-bold text-gray-700 dark:text-slate-200 text-xs uppercase"><i class="fas fa-dice text-purple-500"></i> Reto Sorpresa del Día</h3>
                     <div id="cajaRetoDiario" class="text-sm font-semibold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 py-3 px-2 rounded-xl hidden"></div>
-                    <button id="btnGirarRuleta" onclick="girarRuleta()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">
-                        🎲 Girar Ruleta del Sufrimiento
-                    </button>
+                    <button id="btnGirarRuleta" onclick="girarRuleta()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 rounded-xl text-xs shadow-md transition-all">🎲 Girar Ruleta del Sufrimiento</button>
                 </div>
 
                 <div id="alertaExceso" class="hidden bg-red-100 dark:bg-red-950/80 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-3.5 rounded-r-xl shadow-sm">
                     <p class="font-bold text-xs"><i class="fas fa-exclamation-triangle"></i> ¡Atención! Has superado tu meta de calorías para hoy.</p>
                 </div>
 
-                <!-- Resumen y Anillo de Calorías -->
+                <!-- BALANCE DIARIO -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm text-center relative border border-transparent dark:border-slate-800">
                     <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-gray-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Balance del Día</h2>
+                        <h2 class="text-gray-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">Balance</h2>
                         <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-400" id="kcalRestantesBadge">Restan: 2000</span>
                     </div>
 
@@ -168,19 +154,14 @@
                         </svg>
                         <div class="absolute inset-0 flex flex-col items-center justify-center">
                             <span class="text-3xl font-black text-gray-800 dark:text-white" id="caloriasConsumidas">0</span>
-                            <span class="text-[11px] text-gray-400 font-medium" id="metaCaloriasText">/ 2000 kcal</span>
+                            <span class="text-[11px] text-gray-400" id="metaCaloriasText">/ 2000 kcal</span>
                         </div>
                     </div>
-
-                    <div id="infoEjercicioBadge" class="hidden mt-2 text-[11px] font-semibold text-orange-500">
-                        <i class="fas fa-running"></i> +<span id="kcalEjercicioText">0</span> kcal extra por ejercicio
-                    </div>
-
-                    <!-- Macros -->
+                    <div id="infoEjercicioBadge" class="hidden mt-2 text-[11px] font-semibold text-orange-500"><i class="fas fa-running"></i> +<span id="kcalEjercicioText">0</span> kcal extra</div>
                     <div class="grid grid-cols-3 gap-2 mt-4 text-sm border-t dark:border-slate-800 pt-3.5">
-                        <div class="bg-blue-50/70 dark:bg-blue-950/40 p-2 rounded-xl"><p class="text-blue-600 dark:text-blue-400 font-bold"><span id="carbTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaCarbs">/ 250g</p><p class="text-gray-600 dark:text-slate-300 text-xs font-semibold mt-0.5">Carbs</p></div>
-                        <div class="bg-red-50/70 dark:bg-red-950/40 p-2 rounded-xl"><p class="text-red-600 dark:text-red-400 font-bold"><span id="protTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaProt">/ 100g</p><p class="text-gray-600 dark:text-slate-300 text-xs font-semibold mt-0.5">Proteína</p></div>
-                        <div class="bg-yellow-50/70 dark:bg-yellow-950/40 p-2 rounded-xl"><p class="text-yellow-600 dark:text-yellow-400 font-bold"><span id="grasTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaGras">/ 65g</p><p class="text-gray-600 dark:text-slate-300 text-xs font-semibold mt-0.5">Grasas</p></div>
+                        <div class="bg-blue-50/70 dark:bg-blue-950/40 p-2 rounded-xl"><p class="text-blue-600 dark:text-blue-400 font-bold"><span id="carbTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaCarbs">/ 250g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Carbs</p></div>
+                        <div class="bg-red-50/70 dark:bg-red-950/40 p-2 rounded-xl"><p class="text-red-600 dark:text-red-400 font-bold"><span id="protTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaProt">/ 100g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Proteína</p></div>
+                        <div class="bg-yellow-50/70 dark:bg-yellow-950/40 p-2 rounded-xl"><p class="text-yellow-600 dark:text-yellow-400 font-bold"><span id="grasTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaGras">/ 65g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Grasas</p></div>
                     </div>
                 </div>
 
@@ -201,35 +182,24 @@
                         <button onclick="seleccionarTiempoComida('Snacks')" id="tc-Snacks" class="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 dark:text-slate-400">Snacks</button>
                     </div>
 
-                    <div id="barraFavoritos" class="hidden space-y-1">
-                        <div id="listaFavoritosChips" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div>
-                    </div>
+                    <div id="barraFavoritos" class="hidden space-y-1"><div id="listaFavoritosChips" class="flex gap-1.5 overflow-x-auto no-scrollbar pb-1"></div></div>
 
                     <div id="modoBusqueda" class="space-y-2">
-                        <input type="text" id="inputComida" list="sugerenciasAlimentos" placeholder="Busca: proteína, pollo, huevo..." class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" onkeypress="if(event.key === 'Enter') registrarComidaLocal()">
+                        <input type="text" id="inputComida" list="sugerenciasAlimentos" placeholder="Busca alimentos..." class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" onkeypress="if(event.key === 'Enter') registrarComidaLocal()">
                         <datalist id="sugerenciasAlimentos"></datalist>
                         <div class="flex gap-2">
-                            <select id="selectMedida" class="flex-1 px-3 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                                <option value="1">1 porción estándar</option><option value="0.25">1/4 (Un cuarto)</option><option value="0.5">1/2 (Mitad)</option><option value="1.5">1.5 (Una y media)</option><option value="2">2 (Doble)</option>
-                            </select>
-                            <button onclick="registrarComidaLocal()" class="bg-brand-500 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-md hover:bg-brand-600 transition-colors flex items-center gap-1.5"><i class="fas fa-plus"></i> Agregar</button>
+                            <select id="selectMedida" class="flex-1 px-3 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-slate-200"><option value="1">1 porción estándar</option><option value="0.25">1/4 (Un cuarto)</option><option value="0.5">1/2 (Mitad)</option><option value="1.5">1.5</option><option value="2">2 (Doble)</option></select>
+                            <button onclick="registrarComidaLocal()" class="bg-brand-500 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-md hover:bg-brand-600 transition-colors"><i class="fas fa-plus"></i></button>
                         </div>
                         <button onclick="sugerirQueComer()" class="w-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 font-bold py-2 rounded-xl text-xs mt-1 transition-colors">🤖 ¿Qué me alcanza comer?</button>
                         <div id="cajaSugerenciasCena" class="hidden mt-2 p-2 border border-indigo-200/60 dark:border-slate-700 rounded-xl space-y-1.5"></div>
                     </div>
 
                     <div id="modoManual" class="hidden space-y-2 pt-1">
-                        <input type="text" id="manNombre" placeholder="Nombre de alimento" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm">
-                        <div class="grid grid-cols-4 gap-2">
-                            <input type="number" id="manKcal" placeholder="Kcal" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center">
-                            <input type="number" id="manCarbs" placeholder="Carbs" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center">
-                            <input type="number" id="manProt" placeholder="Prot" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center">
-                            <input type="number" id="manGras" placeholder="Gras" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm text-center">
-                        </div>
-                        <select id="manMedida" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs">
-                            <option value="1">1 porción (valores de arriba)</option><option value="0.5">1/2 (Mitad)</option><option value="2">2 (Doble)</option>
-                        </select>
-                        <button onclick="registrarComidaManual()" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors">Guardar y Aprender</button>
+                        <input type="text" id="manNombre" placeholder="Nombre" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm">
+                        <div class="grid grid-cols-4 gap-2"><input type="number" id="manKcal" placeholder="Kcal" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm text-center border dark:border-slate-700"><input type="number" id="manCarbs" placeholder="C" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm text-center border dark:border-slate-700"><input type="number" id="manProt" placeholder="P" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm text-center border dark:border-slate-700"><input type="number" id="manGras" placeholder="G" class="px-2 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-sm text-center border dark:border-slate-700"></div>
+                        <select id="manMedida" class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl text-xs border dark:border-slate-700"><option value="1">1 porción (valores arriba)</option><option value="0.5">1/2 (Mitad)</option><option value="2">2 (Doble)</option></select>
+                        <button onclick="registrarComidaManual()" class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-bold text-sm hover:bg-blue-700">Guardar y Aprender</button>
                     </div>
                 </div>
 
@@ -250,73 +220,99 @@
 
                 <!-- HISTORIAL COMIDAS -->
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4">
-                    <div class="flex justify-between items-center border-b dark:border-slate-800 pb-2"><h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm">Comidas de Hoy</h3><span class="text-[11px] text-gray-400">Toca <i class="far fa-star"></i> para favorito</span></div>
+                    <div class="flex justify-between items-center border-b dark:border-slate-800 pb-2"><h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm">Comidas de Hoy</h3></div>
                     <div id="contenedorComidasAgrupadas" class="space-y-4"></div>
                 </div>
             </div>
 
-            <!-- PESTAÑA 2: LOGROS, RANKING Y HEATMAP -->
+            <!-- PESTAÑA 2: LOGROS, LIGA Y HEATMAP -->
             <div id="tab-progreso" class="tab-content space-y-5">
                 
-                <!-- HEATMAP: EL AÑO EN PÍXELES -->
+                <!-- HEATMAP -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-3">
                     <h2 class="font-black text-gray-800 dark:text-slate-100 text-sm uppercase mb-1"><i class="fas fa-th text-brand-500"></i> Tu Historial en Píxeles</h2>
-                    <p class="text-[10px] text-gray-500 dark:text-slate-400 mb-2">Mantén la cadena verde. Rojo = te pasaste. Amarillo = déficit extremo. Gris = vagancia.</p>
+                    <p class="text-[10px] text-gray-500 dark:text-slate-400 mb-2">Mantén la cadena verde. Rojo = pasaste. Amarillo = déficit extremo. Gris = vagancia.</p>
                     <div class="flex flex-wrap gap-1.5" id="heatmapContainer"></div>
                 </div>
 
-                <!-- TABLA DE POSICIONES -->
+                <!-- GRAFICAS -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-4"><i class="fas fa-chart-bar text-brand-500"></i> Calorías (Últimos 7 Días)</h2>
+                    <div id="graficoBarras" class="h-44 flex items-end justify-between gap-1.5 border-b border-gray-200 dark:border-slate-800 pb-2"></div>
+                    <div id="graficoFechas" class="flex justify-between text-xs text-gray-400 mt-2"></div>
+                </div>
+
+                <!-- TABLA EVOLUCION -->
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
+                    <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm mb-3"><i class="fas fa-history text-brand-500"></i> Evolución Semanal</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500 dark:text-slate-400">
+                            <thead class="text-xs text-gray-700 dark:text-slate-300 uppercase bg-gray-50 dark:bg-slate-800">
+                                <tr><th class="px-2 py-2 rounded-l-lg">Día</th><th class="px-2 py-2">Peso</th><th class="px-2 py-2 text-center rounded-r-lg">Calorías</th></tr>
+                            </thead>
+                            <tbody id="tablaEvolucion"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- LIGA AMIGOS -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-3">
                     <div class="flex justify-between items-center mb-1">
                         <h2 class="font-black text-gray-800 dark:text-slate-100 text-sm uppercase"><i class="fas fa-users text-indigo-500"></i> Liga de Amigos</h2>
                         <button onclick="exportarCodigoReto()" class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-3 py-1.5 rounded-full"><i class="fas fa-share"></i> Mi Código</button>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="inpCodigoAmigo" placeholder="Pega código de un amigo aquí" class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs">
+                        <input type="text" id="inpCodigoAmigo" placeholder="Pega código de amigo" class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs">
                         <button onclick="importarCodigoReto()" class="bg-indigo-500 text-white font-bold px-3 py-2 rounded-xl text-xs">Añadir</button>
                     </div>
                     <div id="listaRetoGrupal" class="space-y-2 mt-4"></div>
                 </div>
 
+                <!-- RACHA -->
+                <div class="bg-gradient-to-r from-orange-500 to-amber-500 text-white p-4 rounded-2xl shadow-sm relative overflow-hidden">
+                    <div class="flex items-center gap-3 relative z-10"><div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center text-2xl" id="rachaEmojiNivel">🌱</div><div><div class="flex items-center gap-2"><span class="font-black text-base" id="rachaDiasTexto">0 días</span><span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-black/25" id="rachaTituloNivel">Novato</span></div></div></div>
+                    <div class="mt-3 relative z-10"><div class="w-full h-1.5 bg-black/20 rounded-full overflow-hidden"><div id="rachaBarraProgreso" class="h-full bg-white rounded-full transition-all" style="width: 0%"></div></div></div>
+                </div>
+
+                <!-- MEDALLAS -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
                     <div class="flex justify-between items-center mb-3">
-                        <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-trophy text-yellow-500"></i> Medallas Personales</h2>
+                        <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-trophy text-yellow-500"></i> Medallas</h2>
                         <span class="text-xs font-bold text-orange-500" id="recordRachaText">Récord: 0</span>
                     </div>
                     <div class="grid grid-cols-3 gap-2.5" id="gridMedallas"></div>
                 </div>
             </div>
 
-            <!-- PESTAÑA 3: GUÍA GYM Y BITÁCORA -->
+            <!-- PESTAÑA 3: GYM -->
             <div id="tab-gym" class="tab-content space-y-5">
                 
-                <!-- PESO Y MEDIDAS CORPORALES -->
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4">
                     <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm border-b dark:border-slate-800 pb-2"><i class="fas fa-ruler-combined text-blue-500"></i> Medidas y Peso (<span id="pesoFechaLabel">Hoy</span>)</h2>
                     <div class="flex gap-2 items-end">
-                        <div class="flex-1"><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Peso (kg)</label><input type="number" id="inputPeso" placeholder="71.5" step="0.1" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold"></div>
+                        <div class="flex-1"><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Peso (kg)</label><input type="number" id="inputPeso" step="0.1" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm font-bold"></div>
                         <button onclick="guardarPeso()" class="bg-blue-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm">Guardar</button>
                     </div>
                     <div class="grid grid-cols-3 gap-2 border-t dark:border-slate-800 pt-3">
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cintura (cm)</label><input type="number" id="inpCintura" placeholder="80" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-center"></div>
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Brazo (cm)</label><input type="number" id="inpBrazo" placeholder="35" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-center"></div>
-                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pierna (cm)</label><input type="number" id="inpPierna" placeholder="55" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-center"></div>
+                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cintura (cm)</label><input type="number" id="inpCintura" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center"></div>
+                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Brazo (cm)</label><input type="number" id="inpBrazo" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center"></div>
+                        <div><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Pierna (cm)</label><input type="number" id="inpPierna" step="0.1" onchange="guardarMedidas()" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center"></div>
                     </div>
                 </div>
 
                 <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-3">
                     <div class="flex justify-between items-center border-b dark:border-slate-800 pb-2"><h3 class="font-bold text-gray-700 dark:text-slate-200 text-sm"><i class="fas fa-clipboard-list text-emerald-500"></i> Rutina de Hoy</h3><span class="text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 px-2 py-0.5 rounded-full" id="conteoEjercicios">0 series</span></div>
                     <div class="flex gap-2">
-                        <input type="text" id="gymEjercicio" placeholder="Ej: Press Banca" class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs">
-                        <input type="number" id="gymPeso" placeholder="kg/lb" class="w-16 px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs text-center">
-                        <input type="number" id="gymReps" placeholder="Reps" class="w-16 px-2 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs text-center">
+                        <input type="text" id="gymEjercicio" placeholder="Ej: Press Banca" class="flex-1 px-3 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs">
+                        <input type="number" id="gymPeso" placeholder="kg/lb" class="w-16 px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs text-center">
+                        <input type="number" id="gymReps" placeholder="Reps" class="w-16 px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs text-center">
                         <button onclick="agregarEjercicioRutina()" class="bg-emerald-500 text-white font-bold px-3 rounded-xl text-xs">+</button>
                     </div>
                     <ul id="listaRutinaHoy" class="space-y-1.5 mt-2"></ul>
                     <div class="flex justify-between items-center gap-2 pt-3 border-t dark:border-slate-800 mt-2">
                         <span class="text-xs font-bold text-gray-600 dark:text-slate-300">Calorías extra:</span>
                         <input type="number" id="inpGastoExtra" placeholder="kcal" class="w-20 px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-xs text-center font-bold text-orange-500">
-                        <button onclick="registrarEjercicioManual()" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">Sumar al día</button>
+                        <button onclick="registrarEjercicioManual()" class="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm">Sumar</button>
                     </div>
                 </div>
 
@@ -332,33 +328,29 @@
                 </div>
             </div>
 
-            <!-- PESTAÑA 4: PERFIL, IDENTIDAD Y AJUSTES -->
+            <!-- PESTAÑA 4: PERFIL -->
             <div id="tab-perfil" class="tab-content space-y-5">
                 
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-4">
                     <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm border-b dark:border-slate-800 pb-2"><i class="fas fa-palette text-pink-500"></i> Identidad y Tema</h2>
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 bg-gray-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-2xl" id="avatarPreview">U</div>
-                        <div class="flex-1"><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Avatar (Emoji)</label><input type="text" id="inpAvatarEmoji" maxlength="2" placeholder="😎" onchange="guardarIdentidad()" class="w-16 text-center bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-lg py-1 px-1"></div>
+                        <div class="flex-1"><label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Avatar (Emoji)</label><input type="text" id="inpAvatarEmoji" maxlength="2" placeholder="😎" onchange="guardarIdentidad()" class="w-16 text-center bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-lg text-lg py-1 px-1"></div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Tema de Color</label>
-                        <select id="selTemaColor" onchange="guardarIdentidad()" class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm py-2 px-3 font-semibold cursor-pointer">
+                        <select id="selTemaColor" onchange="guardarIdentidad()" class="w-full bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-sm py-2 px-3 font-semibold cursor-pointer">
                             <option value="">🌳 Defecto (Verde)</option><option value="theme-ocean">🌊 Océano (Azul)</option><option value="theme-fire">🔥 Fuego (Naranja)</option><option value="theme-cyber">👾 Cyberpunk (Morado)</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-sm relative overflow-hidden border border-slate-800">
-                    <div class="flex justify-between items-center mb-1"><h2 class="font-bold text-sm"><i class="fas fa-clock text-yellow-400"></i> Ayuno</h2><span class="text-xs bg-slate-800 px-2.5 py-1 rounded-lg text-yellow-400 font-bold" id="planAyunoText">16:8</span></div>
-                    <div class="text-center my-5"><p id="temporizadorAyuno" class="text-5xl font-light tracking-wider">00:00:00</p><p id="estadoAyunoText" class="text-xs text-yellow-400 mt-2">No iniciado</p></div>
-                    <div class="flex gap-2"><button onclick="iniciarAyuno()" id="btnIniciarAyuno" class="flex-1 bg-brand-500 hover:bg-brand-600 py-3 rounded-xl font-bold text-sm">Iniciar</button><button onclick="detenerAyuno()" class="flex-1 bg-red-500 hover:bg-red-600 py-3 rounded-xl font-bold text-sm">Detener</button></div>
-                    <div class="flex gap-2 mt-2"><button onclick="setPlanAyuno(14)" class="flex-1 bg-slate-800 text-xs py-2 rounded-lg text-gray-300">14:10</button><button onclick="setPlanAyuno(16)" class="flex-1 bg-slate-800 text-xs py-2 rounded-lg text-gray-300">16:8</button><button onclick="setPlanAyuno(18)" class="flex-1 bg-slate-800 text-xs py-2 rounded-lg text-gray-300">18:6</button></div>
-                </div>
-
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm space-y-3 border-l-4 border-brand-500">
                     <div class="flex justify-between items-center"><h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-share-alt text-brand-600"></i> Compartir Comidas</h2><span class="text-xs font-bold text-brand-600 bg-brand-50 dark:bg-brand-950 px-2 py-0.5 rounded-full" id="contadorPersonalizadas">0 creadas</span></div>
-                    <div class="flex gap-2"><button onclick="exportarBibliotecaComidas()" class="flex-1 bg-brand-100 dark:bg-brand-950 text-brand-800 dark:text-brand-300 hover:bg-brand-200 font-bold py-2.5 px-2 rounded-xl text-xs"><i class="fas fa-copy"></i> Copiar mías</button><button onclick="importarBibliotecaComidas()" class="flex-1 bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 hover:bg-blue-200 font-bold py-2.5 px-2 rounded-xl text-xs"><i class="fas fa-plus-circle"></i> Pegar amigo</button></div>
+                    <div class="flex gap-2">
+                        <button onclick="exportarBibliotecaComidas()" class="flex-1 bg-brand-100 dark:bg-brand-950 text-brand-800 dark:text-brand-300 font-bold py-2.5 px-2 rounded-xl text-xs"><i class="fas fa-copy"></i> Copiar mías</button>
+                        <button onclick="importarBibliotecaComidas()" class="flex-1 bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold py-2.5 px-2 rounded-xl text-xs"><i class="fas fa-plus-circle"></i> Pegar amigo</button>
+                    </div>
                 </div>
 
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border border-transparent dark:border-slate-800">
@@ -372,20 +364,33 @@
                             <div class="flex-1"><label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Peso (kg)</label><input type="number" id="calcPeso" step="0.1" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs"></div>
                             <div class="flex-1"><label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Altura (cm)</label><input type="number" id="calcAltura" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs"></div>
                         </div>
-                        <div><label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Actividad</label><select id="calcActividad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs"><option value="1.2">Sedentario (Trabajo sentado)</option><option value="1.375">Ligero (1-3 días/sem)</option><option value="1.55">Moderado (3-5 días/sem)</option><option value="1.725">Fuerte (6-7 días/sem)</option></select></div>
-                        <div><label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Objetivo</label><select id="calcObjetivo" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-blue-600 font-bold text-xs"><option value="0">Mantener peso</option><option value="-250">Déficit ligero (-250 kcal)</option><option value="-500">Déficit normal (-500 kcal)</option><option value="250">Superávit (Ganar masa)</option></select></div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Actividad</label>
+                            <select id="calcActividad" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-xs">
+                                <option value="1.2">Sedentario</option><option value="1.375">Ligero</option><option value="1.55">Moderado</option><option value="1.725">Fuerte</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 dark:text-slate-400 mb-1">Objetivo</label>
+                            <select id="calcObjetivo" class="w-full p-2 border dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold text-xs">
+                                <option value="0">Mantener peso</option><option value="-250">Déficit ligero</option><option value="-500">Déficit normal</option><option value="250">Superávit</option>
+                            </select>
+                        </div>
                         <button onclick="calcularMetas()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl mt-2 text-sm">Guardar Cambios</button>
                     </div>
                 </div>
 
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm space-y-3 border border-transparent dark:border-slate-800">
                     <h2 class="font-bold text-gray-800 dark:text-slate-100 text-sm"><i class="fas fa-cloud-download-alt text-purple-500"></i> Respaldo de Cuenta</h2>
-                    <div class="flex gap-2"><button onclick="exportarRespaldo()" class="flex-1 bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold py-2.5 rounded-xl text-xs"><i class="fas fa-copy"></i> Copiar cuenta</button><button onclick="importarRespaldo()" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold py-2.5 rounded-xl text-xs"><i class="fas fa-paste"></i> Restaurar</button></div>
+                    <div class="flex gap-2">
+                        <button onclick="exportarRespaldo()" class="flex-1 bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold py-2.5 rounded-xl text-xs"><i class="fas fa-copy"></i> Copiar cuenta</button>
+                        <button onclick="importarRespaldo()" class="flex-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold py-2.5 rounded-xl text-xs"><i class="fas fa-paste"></i> Restaurar</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- BARRA DE NAVEGACIÓN INFERIOR (4 PESTAÑAS) -->
+        <!-- BARRA NAVEGACIÓN INFERIOR -->
         <div class="fixed bottom-0 w-full bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 flex justify-around p-2.5 pb-4 z-50 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
             <button onclick="cambiarTab('diario')" id="nav-diario" class="flex-1 flex flex-col items-center text-brand-600 cursor-pointer"><i class="fas fa-book-open text-xl mb-1"></i><span class="text-[10px] font-bold">Diario</span></button>
             <button onclick="cambiarTab('progreso')" id="nav-progreso" class="flex-1 flex flex-col items-center text-gray-400 hover:text-brand-600 cursor-pointer"><i class="fas fa-trophy text-xl mb-1"></i><span class="text-[10px] font-bold">Logros</span></button>
@@ -394,151 +399,108 @@
         </div>
     </div>
 
-    <!-- SCRIPT ÚNICO Y DEFINITIVO -->
+    <!-- SCRIPT (ÚNICO Y DEFINITIVO) -->
     <script>
-        // ==========================================
-        // 1. VARIABLES GLOBALES Y UTILIDADES
-        // ==========================================
-        let usuariosDB = JSON.parse(localStorage.getItem('nutriWeb_Users')) || {};
-        let usuarioActivoKey = localStorage.getItem('nutriWeb_CurrentUser') || null;
-        let fechaActual = new Date();
-        let tiempoComidaActual = 'Desayuno';
-        let intervaloAyuno = null;
+        // 1. GLOBALES Y BASE DE DATOS
+        let usuariosDB = JSON.parse(localStorage.getItem('nutriWeb_Users')) || {}; 
+        let usuarioActivoKey = localStorage.getItem('nutriWeb_CurrentUser') || null; 
+        let fechaActual = new Date(); let tiempoComidaActual = 'Desayuno'; 
 
         function normalizarTexto(txt) { return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim(); }
-        function getFechaStr(fechaObj) { 
-            let y = fechaObj.getFullYear(); let m = String(fechaObj.getMonth() + 1).padStart(2, '0'); let d = String(fechaObj.getDate()).padStart(2, '0'); 
-            return `${y}-${m}-${d}`; 
-        }
-
+        function getFechaStr(fechaObj) { let y = fechaObj.getFullYear(); let m = String(fechaObj.getMonth() + 1).padStart(2, '0'); let d = String(fechaObj.getDate()).padStart(2, '0'); return `${y}-${m}-${d}`; }
         function getUsuarioActual() { return usuariosDB[usuarioActivoKey]; }
-        function getDatosHoy() {
-            let u = getUsuarioActual(); let str = getFechaStr(fechaActual);
-            if (!u.historial[str]) u.historial[str] = { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: null, ayunoHoras: null, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null };
-            u.historial[str].rutina = u.historial[str].rutina || [];
-            return u.historial[str];
+        
+        function getDatosHoy() { 
+            let u = getUsuarioActual(); let str = getFechaStr(fechaActual); 
+            let hDef = { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: null, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null };
+            if (!u.historial[str]) u.historial[str] = hDef;
+            else { for(let key in hDef) { if(u.historial[str][key] === undefined) u.historial[str][key] = hDef[key]; } }
+            return u.historial[str]; 
         }
         
         function guardarDatos() { 
             localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); 
             actualizarUI(); 
             if(document.getElementById('tab-progreso').classList.contains('active')) { 
-                renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); 
+                renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); dibujarProgresoYTablas();
             } 
         }
 
-        // ==========================================
-        // 2. BASE DE DATOS DE ALIMENTOS
-        // ==========================================
-        const bibliotecaBase = [
-            { nombre: "Creatina Monohidratada (1 scoop 5g)", kcal: 0, c: 0, p: 0, g: 0 }, { nombre: "Pre-entreno en polvo (1 scoop)", kcal: 15, c: 3, p: 0, g: 0 }, { nombre: "Batido de proteína Whey (1 scoop en agua)", kcal: 120, c: 3, p: 24, g: 1 }, { nombre: "Rice Cakes / Tortita de arroz (1 unidad)", kcal: 35, c: 7, p: 1, g: 0 }, { nombre: "Proats (Avena + Whey Protein + Leche)", kcal: 350, c: 45, p: 35, g: 6 }, { nombre: "Queso Cottage / Skyr alto en proteína (1 taza)", kcal: 180, c: 8, p: 25, g: 5 }, { nombre: "Wrap Fit de pollo y aguacate (1 ud)", kcal: 320, c: 28, p: 25, g: 12 }, { nombre: "Huevo entero (1 unidad)", kcal: 72, c: 0, p: 6, g: 5 }, { nombre: "Huevos revueltos (porción 2 uds)", kcal: 165, c: 2, p: 12, g: 12 }, { nombre: "Clara de huevo (1 unidad)", kcal: 17, c: 0, p: 4, g: 0 }, { nombre: "Claras de huevo (1 taza / 8 claras)", kcal: 120, c: 1, p: 26, g: 0 }, { nombre: "Gallo Pinto (1 taza)", kcal: 260, c: 46, p: 7, g: 5 }, { nombre: "Desayuno típico completo (Pinto, huevo, queso, plátano)", kcal: 560, c: 68, p: 21, g: 22 }, { nombre: "Avena en hojuelas (1 taza cruda)", kcal: 300, c: 54, p: 10, g: 6 }, { nombre: "Pechuga de pollo a la plancha (100g / 1 filete peq)", kcal: 165, c: 0, p: 31, g: 4 }, { nombre: "Pechuga de pollo hervida desmenuzada (1 taza)", kcal: 230, c: 0, p: 43, g: 5 }, { nombre: "Carne de res magra / Bistec (100g)", kcal: 215, c: 0, p: 27, g: 11 }, { nombre: "Carne molida de res (1 taza / 150g)", kcal: 375, c: 0, p: 39, g: 22 }, { nombre: "Sardinas en salsa de tomate (100g / media lata)", kcal: 150, c: 3, p: 18, g: 7 }, { nombre: "Atún en agua (1 lata drenada 100g)", kcal: 110, c: 0, p: 24, g: 1 }, { nombre: "Atún en aceite (1 lata drenada)", kcal: 190, c: 0, p: 24, g: 10 }, { nombre: "Filete de tilapia (1 filete / 150g)", kcal: 190, c: 0, p: 39, g: 4 }, { nombre: "Casado típico con pollo (1 plato)", kcal: 680, c: 82, p: 42, g: 18 }, { nombre: "Arroz con pollo (1 plato / 1.5 tazas)", kcal: 460, c: 58, p: 26, g: 13 }, { nombre: "Arroz blanco cocido (1 taza)", kcal: 205, c: 45, p: 4, g: 0 }, { nombre: "Frijoles negros o rojos cocidos (1 taza)", kcal: 230, c: 40, p: 16, g: 1 }, { nombre: "Pasta / Macarrones cocidos (1 taza)", kcal: 220, c: 43, p: 8, g: 1 }, { nombre: "Tortilla de maíz (1 unidad)", kcal: 60, c: 12, p: 1, g: 1 }, { nombre: "Papa cocida o al horno (1 unidad mediana)", kcal: 130, c: 30, p: 3, g: 0 }, { nombre: "Banano / Plátano (1 unidad mediana)", kcal: 105, c: 27, p: 1, g: 0 }, { nombre: "Manzana (1 unidad mediana)", kcal: 95, c: 25, p: 0, g: 0 }, { nombre: "Aguacate (1 unidad entera mediana)", kcal: 320, c: 16, p: 4, g: 30 }, { nombre: "Mantequilla de maní (1 cucharada)", kcal: 95, c: 3, p: 4, g: 8 }, { nombre: "Almendras (1 puñado / 25g)", kcal: 145, c: 5, p: 5, g: 12 }, { nombre: "Hamburguesa sencilla con queso (1 unidad)", kcal: 480, c: 40, p: 26, g: 24 }, { nombre: "Pizza de pepperoni (1 rebanada)", kcal: 290, c: 34, p: 12, g: 11 }, { nombre: "Café negro sin azúcar (1 taza)", kcal: 5, c: 0, p: 0, g: 0 }, { nombre: "Refresco Zero / Light (1 lata)", kcal: 0, c: 0, p: 0, g: 0 }
-        ];
-
+        const bibliotecaBase = [ { nombre: "Creatina Monohidratada (1 scoop 5g)", kcal: 0, c: 0, p: 0, g: 0 }, { nombre: "Pre-entreno en polvo (1 scoop)", kcal: 15, c: 3, p: 0, g: 0 }, { nombre: "Batido de proteína Whey (1 scoop en agua)", kcal: 120, c: 3, p: 24, g: 1 }, { nombre: "Rice Cakes / Tortita de arroz (1 unidad)", kcal: 35, c: 7, p: 1, g: 0 }, { nombre: "Proats (Avena + Whey Protein)", kcal: 350, c: 45, p: 35, g: 6 }, { nombre: "Queso Cottage / Skyr (1 taza)", kcal: 180, c: 8, p: 25, g: 5 }, { nombre: "Huevo entero (1 unidad)", kcal: 72, c: 0, p: 6, g: 5 }, { nombre: "Clara de huevo (1 unidad)", kcal: 17, c: 0, p: 4, g: 0 }, { nombre: "Gallo Pinto (1 taza)", kcal: 260, c: 46, p: 7, g: 5 }, { nombre: "Avena en hojuelas (1 taza cruda)", kcal: 300, c: 54, p: 10, g: 6 }, { nombre: "Pechuga de pollo a la plancha (100g)", kcal: 165, c: 0, p: 31, g: 4 }, { nombre: "Carne de res magra / Bistec (100g)", kcal: 215, c: 0, p: 27, g: 11 }, { nombre: "Atún en agua (1 lata)", kcal: 110, c: 0, p: 24, g: 1 }, { nombre: "Arroz blanco cocido (1 taza)", kcal: 205, c: 45, p: 4, g: 0 }, { nombre: "Frijoles negros cocidos (1 taza)", kcal: 230, c: 40, p: 16, g: 1 }, { nombre: "Tortilla de maíz (1 unidad)", kcal: 60, c: 12, p: 1, g: 1 }, { nombre: "Papa cocida (1 unidad mediana)", kcal: 130, c: 30, p: 3, g: 0 }, { nombre: "Banano (1 unidad mediana)", kcal: 105, c: 27, p: 1, g: 0 }, { nombre: "Aguacate (entero)", kcal: 320, c: 16, p: 4, g: 30 }, { nombre: "Mantequilla de maní (1 cucharada)", kcal: 95, c: 3, p: 4, g: 8 }, { nombre: "Almendras (1 puñado 25g)", kcal: 145, c: 5, p: 5, g: 12 }, { nombre: "Café negro sin azúcar", kcal: 5, c: 0, p: 0, g: 0 } ];
         function obtenerBibliotecaCompleta() { return [...(getUsuarioActual().alimentosPersonalizados || []), ...bibliotecaBase]; }
         
         function actualizarDatalist() { 
-            const datalist = document.getElementById('sugerenciasAlimentos'); 
-            if(!datalist) return;
-            datalist.innerHTML = ''; 
-            const u = getUsuarioActual(); 
-            if(document.getElementById('contadorPersonalizadas')) document.getElementById('contadorPersonalizadas').innerText = `${(u.alimentosPersonalizados || []).length} creadas`; 
-            obtenerBibliotecaCompleta().forEach(item => { 
-                let opt = document.createElement('option'); opt.value = item.nombre; datalist.appendChild(opt); 
-            }); 
+            const dl = document.getElementById('sugerenciasAlimentos'); if(!dl) return; dl.innerHTML = ''; 
+            const u = getUsuarioActual(); if(document.getElementById('contadorPersonalizadas')) document.getElementById('contadorPersonalizadas').innerText = `${(u.alimentosPersonalizados || []).length} creadas`; 
+            obtenerBibliotecaCompleta().forEach(item => { let o = document.createElement('option'); o.value = item.nombre; dl.appendChild(o); }); 
         }
 
-        // ==========================================
-        // 3. PWA Y TEMAS (MODO OSCURO Y COLORES)
-        // ==========================================
+        // 2. TEMA, MODO OSCURO Y PWA
         if (localStorage.getItem('nutriWeb_DarkMode') === 'true') document.documentElement.classList.add('dark');
         function toggleDarkMode() { const isDark = document.documentElement.classList.toggle('dark'); localStorage.setItem('nutriWeb_DarkMode', isDark); actualizarIconoDarkMode(); }
-        function actualizarIconoDarkMode() {
-            const icon = document.getElementById('darkModeIcon'); if (!icon) return;
-            if (document.documentElement.classList.contains('dark')) { icon.classList.replace('fa-moon', 'fa-sun'); icon.classList.add('text-yellow-300'); } 
-            else { icon.classList.replace('fa-sun', 'fa-moon'); icon.classList.remove('text-yellow-300'); }
-        }
-        function guardarIdentidad() { 
-            let u = getUsuarioActual(); u.perfil.avatar = document.getElementById('inpAvatarEmoji').value.trim() || u.nombre.charAt(0); u.perfil.tema = document.getElementById('selTemaColor').value; 
-            document.getElementById('userAvatar').innerText = u.perfil.avatar; document.getElementById('avatarPreview').innerText = u.perfil.avatar; 
-            document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200 " + u.perfil.tema; 
-            guardarDatos(); 
-        }
-        function inicializarPWA() { const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); if (isMobile && !isStandalone && !localStorage.getItem('nutriWeb_HideInstallBanner')) { document.getElementById('bannerInstalar').classList.remove('hidden'); } }
+        function actualizarIconoDarkMode() { const i = document.getElementById('darkModeIcon'); if (!i) return; if (document.documentElement.classList.contains('dark')) { i.classList.replace('fa-moon', 'fa-sun'); i.classList.add('text-yellow-300'); } else { i.classList.replace('fa-sun', 'fa-moon'); i.classList.remove('text-yellow-300'); } }
+        function guardarIdentidad() { let u = getUsuarioActual(); u.perfil.avatar = document.getElementById('inpAvatarEmoji').value.trim() || u.nombre.charAt(0); u.perfil.tema = document.getElementById('selTemaColor').value; document.getElementById('userAvatar').innerText = u.perfil.avatar; document.getElementById('avatarPreview').innerText = u.perfil.avatar; document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200 " + u.perfil.tema; guardarDatos(); }
+        function inicializarPWA() { const iSA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; const iM = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); if (iM && !iSA && !localStorage.getItem('nutriWeb_HideInstallBanner')) { document.getElementById('bannerInstalar').classList.remove('hidden'); } }
         function cerrarBannerInstalar() { document.getElementById('bannerInstalar').classList.add('hidden'); localStorage.setItem('nutriWeb_HideInstallBanner', 'true'); }
 
-        // ==========================================
-        // 4. AUTENTICACIÓN Y PERFILES
-        // ==========================================
-        function switchAuthTab(tab) {
-            let fLogin = document.getElementById('formLogin'); let fReg = document.getElementById('formRegister'); let bLogin = document.getElementById('tabBtnLogin'); let bReg = document.getElementById('tabBtnRegister');
-            if (tab === 'login') { fLogin.classList.remove('hidden'); fReg.classList.add('hidden'); bLogin.className = "flex-1 py-3.5 text-sm font-bold text-brand-600 border-b-2 border-brand-500 bg-brand-50/50 dark:bg-slate-800"; bReg.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200"; } 
-            else { fReg.classList.remove('hidden'); fLogin.classList.add('hidden'); bReg.className = "flex-1 py-3.5 text-sm font-bold text-blue-600 border-b-2 border-blue-500 bg-blue-50/50 dark:bg-slate-800"; bLogin.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200"; }
-        }
-        function renderizarPerfilesRapidos() {
-            let keys = Object.keys(usuariosDB); let btns = document.getElementById('botonesPerfiles'); if (keys.length === 0) { document.getElementById('listaUsuariosRapidos').classList.add('hidden'); return; } 
-            document.getElementById('listaUsuariosRapidos').classList.remove('hidden'); btns.innerHTML = '';
-            keys.forEach(k => { btns.innerHTML += `<button onclick="seleccionarPerfilRapido('${k}')" class="px-3 py-1.5 bg-brand-100 dark:bg-brand-950 text-brand-800 dark:text-brand-300 rounded-full text-xs font-bold hover:bg-brand-200"><i class="fas fa-user mr-1"></i>${usuariosDB[k].nombre}</button>`; });
-        }
-        function seleccionarPerfilRapido(key) { document.getElementById('loginUser').value = usuariosDB[key].nombre; document.getElementById('loginPin').focus(); }
-        function calcularFormulaMetas(edad, gen, peso, alt, act, obj) { let tmb = (10 * peso) + (6.25 * alt) - (5 * edad) + (gen === 'm' ? 5 : -161); let m = Math.max(1200, Math.round((tmb * act) + obj)); let pP = obj > 0 ? 0.30 : (obj < 0 ? 0.35 : 0.25); return { metaKcal: m, metaProt: Math.round((m*pP)/4), metaGras: Math.round((m*0.25)/9), metaCarbs: Math.round((m*(1-pP-0.25))/4) }; }
+        // 3. AUTH Y REPARADOR DE PERFILES
+        function switchAuthTab(t) { let fL = document.getElementById('formLogin'), fR = document.getElementById('formRegister'), bL = document.getElementById('tabBtnLogin'), bR = document.getElementById('tabBtnRegister'); if (t === 'login') { fL.classList.remove('hidden'); fR.classList.add('hidden'); bL.className = "flex-1 py-3.5 text-sm font-bold text-brand-600 border-b-2 border-brand-500 bg-brand-50/50 dark:bg-slate-800"; bR.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200"; } else { fR.classList.remove('hidden'); fL.classList.add('hidden'); bR.className = "flex-1 py-3.5 text-sm font-bold text-blue-600 border-b-2 border-blue-500 bg-blue-50/50 dark:bg-slate-800"; bL.className = "flex-1 py-3.5 text-sm font-bold text-gray-400 hover:text-gray-600 dark:hover:text-slate-200"; } }
+        function renderizarPerfilesRapidos() { let ks = Object.keys(usuariosDB); let bt = document.getElementById('botonesPerfiles'); if (ks.length === 0) { document.getElementById('listaUsuariosRapidos').classList.add('hidden'); return; } document.getElementById('listaUsuariosRapidos').classList.remove('hidden'); bt.innerHTML = ''; ks.forEach(k => { bt.innerHTML += `<button onclick="seleccionarPerfilRapido('${k}')" class="px-3 py-1.5 bg-brand-100 dark:bg-brand-950 text-brand-800 dark:text-brand-300 rounded-full text-xs font-bold hover:bg-brand-200"><i class="fas fa-user mr-1"></i>${usuariosDB[k].nombre}</button>`; }); }
+        function seleccionarPerfilRapido(k) { document.getElementById('loginUser').value = usuariosDB[k].nombre; document.getElementById('loginPin').focus(); }
+        function calcularFormulaMetas(e, g, w, a, ac, o) { let tmb = (10 * w) + (6.25 * a) - (5 * e) + (g === 'm' ? 5 : -161); let m = Math.max(1200, Math.round((tmb * ac) + o)); let pP = o > 0 ? 0.30 : (o < 0 ? 0.35 : 0.25); return { metaKcal: m, metaProt: Math.round((m*pP)/4), metaGras: Math.round((m*0.25)/9), metaCarbs: Math.round((m*(1-pP-0.25))/4) }; }
         
-        function registrarUsuario() {
-            let n = document.getElementById('regUser').value.trim(); let p = document.getElementById('regPin').value.trim(); let e = parseInt(document.getElementById('regEdad').value); let g = document.getElementById('regGenero').value; let w = parseFloat(document.getElementById('regPeso').value); let a = parseFloat(document.getElementById('regAltura').value); let ac = parseFloat(document.getElementById('regActividad').value); let o = parseInt(document.getElementById('regObjetivo').value);
-            if (!n || p.length !== 4) return alert("Nombre y PIN 4 dígitos requeridos."); if (!e || !w || !a) return alert("Completa edad, peso y altura."); let k = normalizarTexto(n); if (usuariosDB[k]) return alert("Usuario existe.");
-            let m = calcularFormulaMetas(e, g, w, a, ac, o);
-            usuariosDB[k] = { nombre: n, pin: p, perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, horasAyuno: 16, inicioAyuno: null, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '' }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, ayunoHoras: null, comidas: [], rutina: [], celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] };
-            localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); entrarAlSistema(k);
+        function registrarUsuario() { 
+            let n=document.getElementById('regUser').value.trim(), p=document.getElementById('regPin').value.trim(), e=parseInt(document.getElementById('regEdad').value), g=document.getElementById('regGenero').value, w=parseFloat(document.getElementById('regPeso').value), a=parseFloat(document.getElementById('regAltura').value), ac=parseFloat(document.getElementById('regActividad').value), o=parseInt(document.getElementById('regObjetivo').value); 
+            if (!n || p.length !== 4) return alert("Nombre y PIN 4 dígitos requeridos."); if (!e || !w || !a) return alert("Faltan datos corporales."); 
+            let k = normalizarTexto(n); if (usuariosDB[k]) return alert("Usuario ya existe."); 
+            let m = calcularFormulaMetas(e, g, w, a, ac, o); 
+            usuariosDB[k] = { nombre: n, pin: p, perfil: { edad: e, genero: g, altura: a, actividad: ac, objetivo: o, metaKcal: m.metaKcal, metaCarbs: m.metaCarbs, metaProt: m.metaProt, metaGras: m.metaGras, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: n.charAt(0), tema: '' }, historial: { [getFechaStr(new Date())]: { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: w, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null } }, alimentosPersonalizados: [], favoritos: [] }; 
+            localStorage.setItem('nutriWeb_Users', JSON.stringify(usuariosDB)); entrarAlSistema(k); 
         }
-        function iniciarSesion() { let n = document.getElementById('loginUser').value.trim(); let p = document.getElementById('loginPin').value.trim(); let k = normalizarTexto(n); if (!usuariosDB[k] || usuariosDB[k].pin !== p) return alert("Usuario o PIN incorrecto."); entrarAlSistema(k); }
         
-        function entrarAlSistema(key) {
-            usuarioActivoKey = key; localStorage.setItem('nutriWeb_CurrentUser', key); fechaActual = new Date();
-            document.getElementById('authScreen').classList.add('hidden'); document.getElementById('mainApp').classList.remove('hidden'); actualizarIconoDarkMode();
+        function iniciarSesion() { let n = document.getElementById('loginUser').value.trim(), p = document.getElementById('loginPin').value.trim(), k = normalizarTexto(n); if (!usuariosDB[k] || usuariosDB[k].pin !== p) return alert("Usuario/PIN incorrecto."); entrarAlSistema(k); }
+        
+        function entrarAlSistema(k) {
+            usuarioActivoKey = k; localStorage.setItem('nutriWeb_CurrentUser', k); fechaActual = new Date(); document.getElementById('authScreen').classList.add('hidden'); document.getElementById('mainApp').classList.remove('hidden');
+            let u = getUsuarioActual(); 
             
-            let u = getUsuarioActual(); u.alimentosPersonalizados = u.alimentosPersonalizados || []; u.favoritos = u.favoritos || []; u.perfil.medidas = u.perfil.medidas || {}; u.perfil.amigosReto = u.perfil.amigosReto || {}; u.perfil.avatar = u.perfil.avatar || u.nombre.charAt(0); u.perfil.tema = u.perfil.tema || '';
+            // REPARADOR DE DATOS VIEJOS (Seguro contra crashes)
+            u.alimentosPersonalizados = u.alimentosPersonalizados || []; u.favoritos = u.favoritos || [];
+            let pDef = { edad: 25, genero: 'm', altura: 170, actividad: 1.2, objetivo: 0, metaKcal: 2000, metaCarbs: 250, metaProt: 100, metaGras: 65, mejorRacha: 0, medidas: { cintura: null, brazo: null, pierna: null }, amigosReto: {}, avatar: u.nombre.charAt(0), tema: '' };
+            for(let ky in pDef) { if(u.perfil[ky] === undefined) u.perfil[ky] = pDef[ky]; }
+            if(!u.perfil.medidas) u.perfil.medidas = { cintura: null, brazo: null, pierna: null };
+            Object.keys(u.historial).forEach(f => {
+                let hDef = { calorias: 0, carbs: 0, prot: 0, gras: 0, agua: 0, ejercicioKcal: 0, peso: null, comidas: [], rutina: [], pasos: null, sueno: null, energia: null, celebrado: false, retoDelDia: null };
+                for(let hk in hDef) { if(u.historial[f][hk] === undefined) u.historial[f][hk] = hDef[hk]; }
+            });
+
             document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200 " + u.perfil.tema;
             document.getElementById('userNameHeader').innerText = u.nombre; document.getElementById('userAvatar').innerText = u.perfil.avatar; document.getElementById('avatarPreview').innerText = u.perfil.avatar; document.getElementById('inpAvatarEmoji').value = u.perfil.avatar; document.getElementById('selTemaColor').value = u.perfil.tema;
             document.getElementById('calcEdad').value = u.perfil.edad; document.getElementById('calcGenero').value = u.perfil.genero; document.getElementById('calcAltura').value = u.perfil.altura; document.getElementById('calcActividad').value = u.perfil.actividad; document.getElementById('calcObjetivo').value = u.perfil.objetivo;
             document.getElementById('inpCintura').value = u.perfil.medidas.cintura || ''; document.getElementById('inpBrazo').value = u.perfil.medidas.brazo || ''; document.getElementById('inpPierna').value = u.perfil.medidas.pierna || '';
+            actualizarIconoDarkMode();
             
             let hr = new Date().getHours(); if (hr < 11) seleccionarTiempoComida('Desayuno'); else if (hr < 15) seleccionarTiempoComida('Almuerzo'); else if (hr < 18) seleccionarTiempoComida('Snacks'); else seleccionarTiempoComida('Cena');
-            actualizarDatalist(); renderizarFavoritos(); if (u.perfil.inicioAyuno) cicloAyuno(); actualizarUI();
+            actualizarDatalist(); renderizarFavoritos(); actualizarUI();
         }
-        function cerrarSesion() { if (intervaloAyuno) clearInterval(intervaloAyuno); usuarioActivoKey = null; localStorage.removeItem('nutriWeb_CurrentUser'); document.getElementById('loginPin').value = ''; document.getElementById('mainApp').classList.add('hidden'); document.getElementById('authScreen').classList.remove('hidden'); renderizarPerfilesRapidos(); document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200"; }
+        function cerrarSesion() { usuarioActivoKey = null; localStorage.removeItem('nutriWeb_CurrentUser'); document.getElementById('loginPin').value = ''; document.getElementById('mainApp').classList.add('hidden'); document.getElementById('authScreen').classList.remove('hidden'); renderizarPerfilesRapidos(); document.getElementById('cuerpoApp').className = "bg-slate-100 dark:bg-slate-950 text-gray-800 dark:text-slate-100 transition-colors duration-200"; }
 
-        // ==========================================
-        // 5. GAMIFICACIÓN (ASISTENTE Y RULETA)
-        // ==========================================
-        function actualizarAsistenteToxico(dia, perfil, metaEfectiva) {
-            const msgEl = document.getElementById('mensajeAsistente');
-            if(!msgEl) return;
-            const restantes = metaEfectiva - dia.calorias;
-            const protRestante = perfil.metaProt - dia.prot;
-            const hora = new Date().getHours();
-
-            if (dia.comidas.length === 0) {
-                msgEl.innerHTML = `Día en blanco. O te pusiste a hacer ayuno extremo o te dio pereza registrar hoy. Ojalá sea lo primero.`;
-            } else if (restantes < 0) {
-                msgEl.innerHTML = `Te pasaste por <b>${Math.abs(restantes)} kcal</b>. Excelente trabajo construyendo esa papada. "Volumen sucio" le dicen.`;
-            } else if (protRestante > 25 && restantes > 150) {
-                msgEl.innerHTML = `Te sobran <b>${restantes} kcal</b> pero te faltan <b>${protRestante}g de proteína</b>. Deja el pan y cómete algo que alimente ese músculo.`;
-            } else if (dia.agua < 1000 && hora >= 14) {
-                msgEl.innerHTML = `Llevas apenas <b>${dia.agua} ml</b> de agua y ya es tarde. ¿Eres un cactus? Ve a hidratarte ya.`;
-            } else if (restantes <= 100 && restantes >= 0) {
-                msgEl.innerHTML = `Milagro. Estás casi exacto en tu meta (restan <b>${restantes} kcal</b>). Disfruta este momento de disciplina.`;
-            } else {
-                msgEl.innerHTML = `Llevas <b>${dia.calorias} kcal</b>. Te sobran <b>${restantes} kcal</b>. Si tienes hambre come, si no, tampoco te creas modelo por un día bueno.`;
-            }
+        // 4. ASISTENTE TÓXICO Y RULETA
+        function actualizarAsistenteToxico(dia, p, mE) {
+            const el = document.getElementById('mensajeAsistente'); if(!el) return; const res = mE - dia.calorias; const pR = p.metaProt - dia.prot; const hr = new Date().getHours();
+            if (dia.comidas.length === 0) el.innerHTML = `Día en blanco. Registra algo o asume tu pereza.`;
+            else if (res < 0) el.innerHTML = `Te pasaste por <b>${Math.abs(res)} kcal</b>. Excelente trabajo construyendo papada. "Volumen sucio" le dicen.`;
+            else if (pR > 25 && res > 150) el.innerHTML = `Sobran <b>${res} kcal</b> pero faltan <b>${pR}g de proteína</b>. Deja el pan y alimenta ese músculo.`;
+            else if (dia.agua < 1000 && hr >= 14) el.innerHTML = `Llevas <b>${dia.agua} ml</b> de agua y ya es tarde. ¿Eres un cactus? Hidrátate.`;
+            else if (res <= 100 && res >= 0) el.innerHTML = `Estás exacto en tu meta. Milagro. Disfruta tu momento de disciplina.`;
+            else el.innerHTML = `Llevas <b>${dia.calorias} kcal</b>. Sobran <b>${res} kcal</b>. Vas bien, pero no te relajes.`;
         }
-
-        const retosToxicos = ["Haz 50 sentadillas o asume que tus piernas parecen palillos.", "Cero azúcar hoy. A ver si tienes voluntad de adulto.", "Toma 1 vaso de agua EN ESTE SEGUNDO. Riñones secos.", "Camina 3000 pasos extra o admite tu sedentarismo.", "Agrega una ensalada hoy. Y no, las papas fritas no cuentan.", "Haz 20 flexiones (lagartijas) ahora mismo o pierde tu dignidad."];
+        const retosToxicos = ["Haz 50 sentadillas o asume que tus piernas parecen palillos.", "Cero azúcar hoy. A ver si tienes voluntad de adulto.", "Toma 1 vaso de agua EN ESTE SEGUNDO. Riñones secos.", "Camina 3000 pasos extra o admite tu sedentarismo.", "Agrega ensalada hoy. Las papas fritas no cuentan.", "Haz 20 flexiones ahora mismo o pierde tu dignidad."];
         function girarRuleta() { let d = getDatosHoy(); if(!d.retoDelDia) { d.retoDelDia = retosToxicos[Math.floor(Math.random() * retosToxicos.length)]; guardarDatos(); } }
 
-        // ==========================================
-        // 6. REGISTRO DE ALIMENTOS
-        // ==========================================
+        // 5. REGISTRO COMIDA Y RECETAS
         function seleccionarTiempoComida(t) { tiempoComidaActual = t; document.querySelectorAll('.tc-btn').forEach(b => b.className="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 transition-all"); document.getElementById(`tc-${t}`).className="tc-btn py-1.5 rounded-lg text-xs font-bold bg-white text-brand-600 shadow-sm transition-all"; }
-        function toggleModoManual() { let b=document.getElementById('modoBusqueda'); let m=document.getElementById('modoManual'); let bt=document.getElementById('btnToggleModo'); if(m.classList.contains('hidden')){ m.classList.remove('hidden'); b.classList.add('hidden'); bt.innerText="Rápida"; }else{ m.classList.add('hidden'); b.classList.remove('hidden'); bt.innerText="Manual"; } }
+        function toggleModoManual() { let b=document.getElementById('modoBusqueda'); let m=document.getElementById('modoManual'); let bt=document.getElementById('btnToggleModo'); if(m.classList.contains('hidden')){ m.classList.remove('hidden'); b.classList.add('hidden'); bt.innerText="Manual"; }else{ m.classList.add('hidden'); b.classList.remove('hidden'); bt.innerText="Rápida"; } }
         
         function registrarComidaLocal() {
             let inps = document.getElementById('inputComida'); let sel = document.getElementById('selectMedida'); let txt = inps.value.trim(); if (!txt) return;
@@ -554,49 +516,41 @@
         }
         function borrarComida(index) { if(confirm("¿Borrar?")) { let d = getDatosHoy(); let c = d.comidas[index]; d.calorias=Math.max(0,d.calorias-c.kcal); d.carbs=Math.max(0,d.carbs-c.c); d.prot=Math.max(0,d.prot-c.p); d.gras=Math.max(0,d.gras-c.g); d.comidas.splice(index, 1); guardarDatos(); } }
         function copiarDiaAnterior() { let a=new Date(fechaActual); a.setDate(a.getDate()-1); let dA=getUsuarioActual().historial[getFechaStr(a)]; if(!dA || !dA.comidas.length) return alert("Nada que copiar."); if(confirm("¿Copiar de ayer?")) { let d=getDatosHoy(); dA.comidas.forEach(c => { d.calorias+=c.kcal; d.carbs+=c.c; d.prot+=c.p; d.gras+=c.g; d.comidas.push({...c}); }); guardarDatos(); } }
-        
         function sugerirQueComer() {
             const c = document.getElementById('cajaSugerenciasCena'); if (!c.classList.contains('hidden')) { c.classList.add('hidden'); return; }
             let r = getUsuarioActual().perfil.metaKcal + (getDatosHoy().ejercicioKcal||0) - getDatosHoy().calorias;
-            if (r < 80) { c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Ya casi llegas a tu límite. Tómate un café o té.</p>`; c.classList.remove('hidden'); return; }
+            if (r < 80) { c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Casi al límite. Toma agua o café.</p>`; c.classList.remove('hidden'); return; }
             let cand = obtenerBibliotecaCompleta().filter(i => i.kcal >= 70 && i.kcal <= r).sort(()=>0.5-Math.random()).slice(0,3);
-            if (!cand.length) c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Tienes ${r} kcal. Arma una porción.</p>`; else { let h = `<p class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Opciones para tus ${r} kcal restantes:</p>`; cand.forEach(s => h += `<div class="flex justify-between items-center bg-white/80 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg text-xs mt-1"><span class="truncate pr-2 font-medium">${s.nombre}</span><span class="font-bold text-brand-600">${s.kcal} kcal</span></div>`); c.innerHTML = h; } c.classList.remove('hidden');
+            if (!cand.length) c.innerHTML = `<p class="text-xs text-indigo-800 dark:text-indigo-300">Tienes ${r} kcal. Arma algo a tu gusto.</p>`; else { let h = `<p class="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Opciones para tus ${r} kcal:</p>`; cand.forEach(s => h += `<div class="flex justify-between items-center bg-white/80 dark:bg-slate-800/80 px-2.5 py-1.5 rounded-lg text-xs mt-1"><span class="truncate pr-2 font-medium">${s.nombre}</span><span class="font-bold text-brand-600">${s.kcal} kcal</span></div>`); c.innerHTML = h; } c.classList.remove('hidden');
         }
-
-        // ==========================================
-        // 7. FAVORITOS Y RECETAS
-        // ==========================================
         function guardarComoReceta(tiempo) {
             let d = getDatosHoy(); let items = d.comidas.filter(c => (c.tiempo || 'Almuerzo') === tiempo);
             if (items.length < 2) return alert("Agrega al menos 2 alimentos a este tiempo para crear un combo.");
-            let nombre = prompt(`Has sumado ${items.length} alimentos. ¿Nombre para esta Receta/Combo?`); if (!nombre) return;
+            let nombre = prompt(`¿Nombre para esta Receta de ${items.length} alimentos?`); if (!nombre) return;
             let tKcal = 0, tC = 0, tP = 0, tG = 0; items.forEach(i => { tKcal += i.kcal; tC += i.c; tP += i.p; tG += i.g; });
-            let u = getUsuarioActual(); u.alimentosPersonalizados.push({ nombre: nombre + " (Combo)", kcal: tKcal, c: tC, p: tP, g: tG }); guardarDatos(); actualizarDatalist(); alert(`¡Combo "${nombre}" guardado!`);
+            getUsuarioActual().alimentosPersonalizados.push({ nombre: nombre + " (Combo)", kcal: tKcal, c: tC, p: tP, g: tG }); guardarDatos(); actualizarDatalist(); alert(`¡Combo "${nombre}" guardado!`);
         }
         function toggleFavorito(nombreBase, kcal, c, p, g) { let u = getUsuarioActual(); u.favoritos = u.favoritos || []; const idx = u.favoritos.findIndex(f => normalizarTexto(f.nombre) === normalizarTexto(nombreBase)); if (idx >= 0) u.favoritos.splice(idx, 1); else u.favoritos.push({ nombre: nombreBase, kcal: kcal, c: c, p: p, g: g }); guardarDatos(); renderizarFavoritos(); }
-        function renderizarFavoritos() { let favs = getUsuarioActual().favoritos || []; let barra = document.getElementById('barraFavoritos'); let cont = document.getElementById('listaFavoritosChips'); if (favs.length === 0) { barra.classList.add('hidden'); return; } barra.classList.remove('hidden'); cont.innerHTML = ''; favs.forEach((f, idx) => { cont.innerHTML += `<button onclick="agregarFavoritoRapido(${idx})" class="shrink-0 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800/60 text-yellow-800 dark:text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-100 flex items-center gap-1.5"><i class="fas fa-plus-circle text-green-500"></i><span class="truncate max-w-[130px]">${f.nombre.split('(')[0].trim()}</span><span class="text-[10px] opacity-75">(${f.kcal})</span></button>`; }); }
+        function renderizarFavoritos() { let favs = getUsuarioActual().favoritos || []; let barra = document.getElementById('barraFavoritos'); let cont = document.getElementById('listaFavoritosChips'); if (favs.length === 0) { barra.classList.add('hidden'); return; } barra.classList.remove('hidden'); cont.innerHTML = ''; favs.forEach((f, idx) => { cont.innerHTML += `<button onclick="agregarFavoritoRapido(${idx})" class="shrink-0 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800/60 text-yellow-800 dark:text-yellow-300 rounded-xl text-xs font-bold hover:bg-yellow-100 flex items-center gap-1.5"><i class="fas fa-plus-circle text-brand-500"></i><span class="truncate max-w-[130px]">${f.nombre.split('(')[0].trim()}</span></button>`; }); }
         function agregarFavoritoRapido(idx) { let f = getUsuarioActual().favoritos[idx]; if (!f) return; let d = getDatosHoy(); d.calorias += f.kcal; d.carbs += f.c; d.prot += f.p; d.gras += f.g; d.comidas.push({ texto: f.nombre, nombreBase: f.nombre, kcalBase: f.kcal, cBase: f.c, pBase: f.p, gBase: f.g, kcal: f.kcal, c: f.c, p: f.p, g: f.g, tiempo: tiempoComidaActual }); guardarDatos(); }
 
-        // ==========================================
-        // 8. GYM, HÁBITOS, AGUA Y METAS
-        // ==========================================
+        // 6. GYM Y MEDIDAS
         function guardarHabitos() { let d=getDatosHoy(); d.pasos=parseInt(document.getElementById('inpPasos').value)||null; d.sueno=parseFloat(document.getElementById('inpSueno').value)||null; d.energia=document.getElementById('inpEnergia').value||null; guardarDatos(); }
         function guardarMedidas() { let u=getUsuarioActual(); u.perfil.medidas.cintura=parseFloat(document.getElementById('inpCintura').value)||null; u.perfil.medidas.brazo=parseFloat(document.getElementById('inpBrazo').value)||null; u.perfil.medidas.pierna=parseFloat(document.getElementById('inpPierna').value)||null; guardarDatos(); }
         function guardarPeso() { let p=document.getElementById('inputPeso').value; if(p){ getDatosHoy().peso=parseFloat(p); guardarDatos(); document.getElementById('inputPeso').value=''; } }
         function sumarAgua(c) { getDatosHoy().agua=Math.max(0,getDatosHoy().agua+c); guardarDatos(); }
+        
         function agregarEjercicioRutina() { let e=document.getElementById('gymEjercicio').value.trim(); let p=parseFloat(document.getElementById('gymPeso').value)||0; let r=parseInt(document.getElementById('gymReps').value)||0; if(!e || r<=0) return; let d=getDatosHoy(); d.rutina.push({e:e, p:p, r:r}); guardarDatos(); document.getElementById('gymEjercicio').value=''; document.getElementById('gymPeso').value=''; document.getElementById('gymReps').value=''; }
-        function borrarEjercicioRutina(idx) { if(confirm("¿Borrar?")) { getDatosHoy().rutina.splice(idx, 1); guardarDatos(); } }
+        function borrarEjercicioRutina(idx) { if(confirm("¿Borrar serie?")) { getDatosHoy().rutina.splice(idx, 1); guardarDatos(); } }
         function registrarEjercicioManual() { let k=parseInt(document.getElementById('inpGastoExtra').value)||0; if(k>0){ getDatosHoy().ejercicioKcal+=k; document.getElementById('inpGastoExtra').value=''; guardarDatos(); } }
         function calcular1RM() { let p=parseFloat(document.getElementById('rmPeso').value)||0; let r=parseInt(document.getElementById('rmReps').value)||0; if(p<=0 || r<=0) return; document.getElementById('resultado1RM').classList.remove('hidden'); document.getElementById('rmValor').innerText=`${Math.round(p*(1+(r/30)))} kg`; }
         function calcularMetas() { let u = getUsuarioActual(); let m = calcularFormulaMetas(parseInt(document.getElementById('calcEdad').value), document.getElementById('calcGenero').value, parseFloat(document.getElementById('calcPeso').value), parseFloat(document.getElementById('calcAltura').value), parseFloat(document.getElementById('calcActividad').value), parseInt(document.getElementById('calcObjetivo').value)); u.perfil.metaKcal = m.metaKcal; u.perfil.metaProt = m.metaProt; u.perfil.metaGras = m.metaGras; u.perfil.metaCarbs = m.metaCarbs; getDatosHoy().peso = parseFloat(document.getElementById('calcPeso').value); guardarDatos(); alert(`Meta actualizada: ${m.metaKcal} kcal.`); }
 
-        // ==========================================
-        // 9. NAVEGACIÓN Y ACTUALIZACIÓN UI GLOBAL
-        // ==========================================
+        // 7. ACTUALIZACIÓN UI GLOBAL Y TABS
         function cambiarTab(tab) {
             document.querySelectorAll('.tab-content').forEach(e=>e.classList.remove('active')); document.getElementById(`tab-${tab}`).classList.add('active');
             document.querySelectorAll('[id^="nav-"]').forEach(e=>{e.classList.remove('text-brand-600'); e.classList.add('text-gray-400');}); document.getElementById(`nav-${tab}`).classList.remove('text-gray-400'); document.getElementById(`nav-${tab}`).classList.add('text-brand-600');
-            if(tab==='progreso') { renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); }
+            if(tab==='progreso') { renderizarMedallas(); renderizarHeatmap(); renderizarRetoGrupal(); dibujarProgresoYTablas(); }
         }
         function cambiarFecha(dias) { fechaActual.setDate(fechaActual.getDate()+dias); let h=getFechaStr(new Date()); let a=getFechaStr(fechaActual); document.getElementById('fechaDisplay').innerText = a===h ? "Hoy" : (a===getFechaStr(new Date(Date.now()-86400000)) ? "Ayer" : a); document.getElementById('pesoFechaLabel').innerText=document.getElementById('fechaDisplay').innerText; actualizarUI(); }
 
@@ -620,19 +574,16 @@
             if(dia.calorias > mE) { document.getElementById('anilloCalorias').style.stroke = "#ef4444"; document.getElementById('alertaExceso').classList.remove('hidden'); } 
             else { document.getElementById('anilloCalorias').style.stroke = "var(--b500)"; document.getElementById('alertaExceso').classList.add('hidden'); }
 
-            // Confetti 🎉
             if (res <= 50 && res >= -10 && dia.comidas.length > 0 && !dia.celebrado) {
-                if (typeof confetti === 'function') { confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#22c55e', '#facc15', '#ef4444', '#3b82f6'] }); }
+                if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#22c55e', '#facc15', '#ef4444', '#3b82f6'] });
                 dia.celebrado = true; guardarDatos();
             }
 
             actualizarAsistenteToxico(dia, p, mE);
 
-            // Ruleta UI
             if (dia.retoDelDia) { document.getElementById('btnGirarRuleta').classList.add('hidden'); document.getElementById('cajaRetoDiario').classList.remove('hidden'); document.getElementById('cajaRetoDiario').innerText = dia.retoDelDia; } 
             else { document.getElementById('btnGirarRuleta').classList.remove('hidden'); document.getElementById('cajaRetoDiario').classList.add('hidden'); }
 
-            // Historial Comidas
             const cont = document.getElementById('contenedorComidasAgrupadas'); 
             if(dia.comidas.length === 0) cont.innerHTML = '<p class="text-xs text-gray-400 text-center py-4">Sin registros en este día.</p>'; 
             else {
@@ -640,7 +591,7 @@
                 [{i:'Desayuno',ic:'fa-coffee text-amber-500'},{i:'Almuerzo',ic:'fa-sun text-orange-500'},{i:'Cena',ic:'fa-moon text-indigo-500'},{i:'Snacks',ic:'fa-apple-alt text-brand-500'}].forEach(t => {
                     let cL = dia.comidas.map((c,ix) => ({...c, idx:ix})).filter(c => (c.tiempo||'Almuerzo') === t.i);
                     if(cL.length > 0) { 
-                        h += `<div class="space-y-2"><div class="flex justify-between items-center text-xs font-bold text-gray-500 dark:text-slate-400 px-1"><span><i class="fas ${t.ic} mr-1"></i> ${t.i}</span><div class="flex items-center gap-3"><span class="text-brand-600">${cL.reduce((a,i)=>a+i.kcal,0)} kcal</span><button onclick="guardarComoReceta('${t.i}')" class="text-indigo-500 hover:text-indigo-400 p-1" title="Guardar combo"><i class="fas fa-save"></i></button></div></div><ul class="space-y-2">`;
+                        h += `<div class="space-y-2"><div class="flex justify-between items-center text-xs font-bold text-gray-500 dark:text-slate-400 px-1"><span><i class="fas ${t.ic} mr-1"></i> ${t.i}</span><div class="flex items-center gap-3"><span class="text-brand-600">${cL.reduce((a,i)=>a+i.kcal,0)} kcal</span><button onclick="guardarComoReceta('${t.i}')" class="text-indigo-500 hover:text-indigo-400 p-1"><i class="fas fa-save"></i></button></div></div><ul class="space-y-2">`;
                         cL.forEach(c => { 
                             let esF = fN.includes(normalizarTexto(c.nombreBase||c.texto)); let sC = esF ? 'fas fa-star text-yellow-400' : 'far fa-star text-gray-300 dark:text-slate-600';
                             let kB=c.kcalBase||c.kcal; let cB=c.cBase!==undefined?c.cBase:c.c; let pB=c.pBase!==undefined?c.pBase:c.p; let gB=c.gBase!==undefined?c.gBase:c.g;
@@ -650,68 +601,90 @@
                 }); cont.innerHTML = h;
             }
             
-            // Rutina Hoy
             const rut = document.getElementById('listaRutinaHoy'); rut.innerHTML = ''; document.getElementById('conteoEjercicios').innerText = `${dia.rutina.length} series`;
             dia.rutina.forEach((r, idx) => { rut.innerHTML += `<li class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-xl border border-emerald-100 dark:border-emerald-800 text-xs"><span class="font-bold text-emerald-800 dark:text-emerald-300 truncate pr-2">${r.e}</span><div class="shrink-0 flex items-center gap-3"><span class="text-emerald-700 dark:text-emerald-400 font-medium">${r.p} kg x ${r.r} reps</span><button onclick="borrarEjercicioRutina(${idx})" class="text-gray-400 hover:text-red-500"><i class="fas fa-times"></i></button></div></li>`; });
 
-            // Racha
-            let rc=0; let esc=false; let fC=new Date(); let hoS=getFechaStr(fC); let hoT=u.historial[hoS]?.comidas?.length>0; if(hoT) rc++; fC.setDate(fC.getDate()-1);
-            for(let i=0; i<365; i++){ let st=getFechaStr(fC); let ti=u.historial[st]?.comidas?.length>0; if(ti) rc++; else if(!esc && rc>0) esc=true; else if(!hoT && i===0) continue; else break; fC.setDate(fC.getDate()-1); }
-            if(rc>u.perfil.mejorRacha) u.perfil.mejorRacha = rc;
+            // RACHA COMPATIBLE (Sin operadores modernos)
+            let rc=0; let esc=false; let fC=new Date(); let hoS=getFechaStr(fC); 
+            let hoT = false;
+            if(u.historial[hoS] && u.historial[hoS].comidas && u.historial[hoS].comidas.length > 0) hoT = true;
+            if(hoT) rc++; 
+            fC.setDate(fC.getDate()-1);
             
-            document.getElementById('rachaDisplay').innerText = rc; document.getElementById('rachaDiasTexto').innerText = `${rc} días`;
-            const iF = document.getElementById('iconoFuegoHeader'); if(hoT) iF.classList.add('fuego-activo'); else iF.classList.remove('fuego-activo');
-            const niv = [{min:0,max:3,t:"Novato",e:"🌱"},{min:3,max:7,t:"Constante",e:"🔥"},{min:7,max:14,t:"Disciplinado",e:"⚡"},{min:14,max:30,t:"Imparable",e:"🏆"},{min:30,max:100,t:"Leyenda",e:"👑"}];
-            let nA = niv[0]; for(let n of niv) if(rc>=n.min) nA=n;
-            document.getElementById('rachaEmojiNivel').innerText = nA.e; document.getElementById('rachaTituloNivel').innerText = nA.t;
-            let rng = nA.max-nA.min; document.getElementById('rachaBarraProgreso').style.width = `${Math.round((Math.min(rc-nA.min, rng)/rng)*100)}%`;
+            for(let i=0; i<365; i++){ 
+                let st = getFechaStr(fC); 
+                let ti = false;
+                if(u.historial[st] && u.historial[st].comidas && u.historial[st].comidas.length > 0) ti = true;
+                
+                if(ti) rc++; 
+                else if(!esc && rc>0) esc=true; 
+                else if(!hoT && i===0) continue; 
+                else break; 
+                fC.setDate(fC.getDate()-1); 
+            }
+            
+            if(rc > u.perfil.mejorRacha) u.perfil.mejorRacha = rc;
+            
+            document.getElementById('rachaDisplay').innerText = rc;
+            if(document.getElementById('rachaDiasTexto')) {
+                document.getElementById('rachaDiasTexto').innerText = `${rc} días`;
+                const iF = document.getElementById('iconoFuegoHeader'); if(hoT) iF.classList.add('fuego-activo'); else iF.classList.remove('fuego-activo');
+                const niv = [{min:0,max:3,t:"Novato",e:"🌱"},{min:3,max:7,t:"Constante",e:"🔥"},{min:7,max:14,t:"Disciplinado",e:"⚡"},{min:14,max:30,t:"Imparable",e:"🏆"},{min:30,max:100,t:"Leyenda",e:"👑"}];
+                let nA = niv[0]; for(let n of niv) if(rc>=n.min) nA=n;
+                document.getElementById('rachaEmojiNivel').innerText = nA.e; document.getElementById('rachaTituloNivel').innerText = nA.t;
+                let rng = nA.max-nA.min; document.getElementById('rachaBarraProgreso').style.width = `${Math.round((Math.min(rc-nA.min, rng)/rng)*100)}%`;
+            }
         }
 
-        // ==========================================
-        // 10. AYUNO, RETOS Y LOGROS
-        // ==========================================
-        function iniciarAyuno() { let u=getUsuarioActual(); if(u.perfil.inicioAyuno) return; u.perfil.inicioAyuno=new Date().getTime(); guardarDatos(); cicloAyuno(); }
-        function detenerAyuno() { let u=getUsuarioActual(); if(!u.perfil.inicioAyuno) return; getDatosHoy().ayunoHoras=((new Date().getTime()-u.perfil.inicioAyuno)/3600000).toFixed(1); u.perfil.inicioAyuno=null; guardarDatos(); document.getElementById('temporizadorAyuno').innerText="00:00:00"; document.getElementById('estadoAyunoText').innerText="No iniciado"; alert("Ayuno completado."); }
-        function setPlanAyuno(h) { getUsuarioActual().perfil.horasAyuno=h; document.getElementById('planAyunoText').innerText=`${h}:${24-h}`; guardarDatos(); }
-        function cicloAyuno() { if(intervaloAyuno) clearInterval(intervaloAyuno); intervaloAyuno=setInterval(()=>{ let u=getUsuarioActual(); if(!u || !u.perfil.inicioAyuno) return clearInterval(intervaloAyuno); let d=new Date().getTime()-u.perfil.inicioAyuno; document.getElementById('temporizadorAyuno').innerText=`${String(Math.floor(d/3600000)).padStart(2,'0')}:${String(Math.floor((d%3600000)/60000)).padStart(2,'0')}:${String(Math.floor((d%60000)/1000)).padStart(2,'0')}`; document.getElementById('estadoAyunoText').innerText = d >= (u.perfil.horasAyuno*3600000) ? "¡Meta alcanzada! 🎉" : "Ayuno en curso..."; },1000); }
-
-        function renderizarHeatmap() {
-            let u=getUsuarioActual(); let h='';
-            for(let i=83; i>=0; i--) { 
-                let d=new Date(fechaActual); d.setDate(d.getDate()-i); let dt=u.historial[getFechaStr(d)]; let c='bg-gray-200 dark:bg-slate-700';
-                if(dt && dt.comidas.length>0) { let df=dt.calorias-(u.perfil.metaKcal); if(df>200) c='bg-red-500'; else if(df>=-100 && df<=100) c='bg-brand-500'; else c='bg-yellow-400'; }
-                h+=`<div class="w-3.5 h-3.5 rounded-sm ${c} opacity-90"></div>`;
-            } document.getElementById('heatmapContainer').innerHTML = h;
+        // 8. LOGROS, LIGA Y TABLAS
+        function renderizarHeatmap() { let u=getUsuarioActual(); let h=''; for(let i=83; i>=0; i--) { let d=new Date(fechaActual); d.setDate(d.getDate()-i); let dt=u.historial[getFechaStr(d)]; let c='bg-gray-200 dark:bg-slate-700'; if(dt && dt.comidas && dt.comidas.length>0) { let df=dt.calorias-(u.perfil.metaKcal); if(df>200) c='bg-red-500'; else if(df>=-100 && df<=100) c='bg-brand-500'; else c='bg-yellow-400'; } h+=`<div class="w-3.5 h-3.5 rounded-sm ${c} opacity-90"></div>`; } document.getElementById('heatmapContainer').innerHTML = h; }
+        function renderizarMedallas() { let u=getUsuarioActual(); let rc = parseInt(document.getElementById('rachaDisplay').innerText)||0; document.getElementById('recordRachaText').innerText=`Récord: ${u.perfil.mejorRacha} días`; const m = [{n:"1er Paso", i:"🥗", d:rc>=1},{n:"En Llamas", i:"🔥", d:u.perfil.mejorRacha>=3},{n:"Semana", i:"⚡", d:u.perfil.mejorRacha>=7},{n:"Imparable", i:"👑", d:u.perfil.mejorRacha>=14}]; document.getElementById('gridMedallas').innerHTML = ''; m.forEach(x => { let st=x.d?"bg-amber-50 dark:bg-slate-800 border-amber-300 opacity-100":"bg-gray-50 border-gray-200 opacity-45 grayscale"; document.getElementById('gridMedallas').innerHTML+=`<div class="p-3 rounded-2xl border text-center flex flex-col items-center justify-center ${st}"><span class="text-2xl mb-1">${x.i}</span><p class="text-xs font-bold">${x.n}</p></div>`; }); }
+        
+        function dibujarProgresoYTablas() {
+            let u = getUsuarioActual(); let maxKcal = u.perfil.metaKcal || 2000;
+            const container = document.getElementById('graficoBarras'); const labels = document.getElementById('graficoFechas'); const tabla = document.getElementById('tablaEvolucion');
+            if (!container || !labels || !tabla) return;
+            container.innerHTML = ''; labels.innerHTML = ''; tabla.innerHTML = '';
+            
+            for(let i = 6; i >= 0; i--) {
+                let d = new Date(fechaActual); d.setDate(d.getDate() - i); let str = getFechaStr(d);
+                let dataDia = u.historial[str] || { calorias: 0, peso: null };
+                let height = Math.min((dataDia.calorias / maxKcal) * 100, 100); if(height === 0) height = 3; 
+                let color = dataDia.calorias > maxKcal ? 'bg-red-400' : 'bg-brand-500';
+                container.innerHTML += `<div class="w-full ${color} rounded-t-md transition-all" style="height: ${height}%"></div>`;
+                
+                let diaNom = d.toLocaleDateString('es-ES', { weekday: 'short' });
+                labels.innerHTML += `<span class="flex-1 text-center capitalize">${diaNom.substring(0,3)}</span>`;
+                let pesoTxt = dataDia.peso ? `${dataDia.peso} kg` : "-";
+                
+                tabla.innerHTML = `
+                    <tr class="bg-white dark:bg-slate-900 border-b dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/50">
+                        <td class="px-2 py-2.5 font-semibold text-gray-800 dark:text-slate-200 capitalize">${diaNom.substring(0,3)} ${d.getDate()}</td>
+                        <td class="px-2 py-2.5">${pesoTxt}</td>
+                        <td class="px-2 py-2.5 font-bold text-center ${dataDia.calorias > maxKcal ? 'text-red-500' : 'text-brand-600'}">${dataDia.calorias}</td>
+                    </tr>
+                ` + tabla.innerHTML; 
+            }
         }
 
-        function renderizarMedallas() {
-            let u=getUsuarioActual(); let rc = parseInt(document.getElementById('rachaDisplay').innerText)||0; document.getElementById('recordRachaText').innerText=`Récord: ${u.perfil.mejorRacha} días`;
-            const m = [{n:"1er Paso", i:"🥗", d:rc>=1},{n:"En Llamas", i:"🔥", d:u.perfil.mejorRacha>=3},{n:"Semana", i:"⚡", d:u.perfil.mejorRacha>=7},{n:"Imparable", i:"👑", d:u.perfil.mejorRacha>=14}];
-            document.getElementById('gridMedallas').innerHTML = '';
-            m.forEach(x => { let st=x.d?"bg-amber-50 dark:bg-slate-800 border-amber-300 opacity-100":"bg-gray-50 border-gray-200 opacity-45 grayscale"; document.getElementById('gridMedallas').innerHTML+=`<div class="p-3 rounded-2xl border text-center flex flex-col items-center justify-center ${st}"><span class="text-2xl mb-1">${x.i}</span><p class="text-xs font-bold">${x.n}</p></div>`; });
+        function exportarCodigoReto() { let u=getUsuarioActual(); let payload = {tipo:"NutriWeb_Reto", n:u.nombre, r:parseInt(document.getElementById('rachaDisplay').innerText)||0, m:u.perfil.mejorRacha}; let c=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); navigator.clipboard.writeText(c).then(()=>alert("¡Código copiado!")).catch(()=>prompt("Copia:",c)); }
+        function importarCodigoReto() { 
+            let c = document.getElementById('inpCodigoAmigo').value; if(!c) return; 
+            try { 
+                c = c.replace(/\s+/g, ''); 
+                let p = JSON.parse(decodeURIComponent(escape(atob(c)))); 
+                if(p.tipo!=="NutriWeb_Reto") throw new Error(); 
+                let u=getUsuarioActual(); u.perfil.amigosReto[normalizarTexto(p.n)]={nombre:p.n, racha:p.r, mejor:p.m}; guardarDatos(); document.getElementById('inpCodigoAmigo').value=''; alert(`¡${p.n} añadido!`); 
+            } catch(e) { alert("Código Inválido. Asegúrate de copiar todo el código sin espacios."); } 
         }
+        function renderizarRetoGrupal() { let u=getUsuarioActual(); let rl=parseInt(document.getElementById('rachaDisplay').innerText)||0; let l=[{nombre:u.nombre+" (Tú)", racha:rl, mejor:u.perfil.mejorRacha||0}]; if(u.perfil.amigosReto) Object.keys(u.perfil.amigosReto).forEach(k=>l.push(u.perfil.amigosReto[k])); l.sort((a,b)=>b.racha-a.racha); let h=''; l.forEach((i,x)=>{ let ic=x===0?'🥇':x===1?'🥈':x===2?'🥉':'👏'; let bg=i.nombre.includes("(Tú)")?'bg-indigo-50 dark:bg-indigo-900/30':'bg-gray-50 dark:bg-slate-800'; h+=`<div class="flex justify-between items-center ${bg} p-2.5 rounded-xl border"><div class="flex items-center gap-2"><span class="text-xl">${ic}</span><span class="font-bold text-sm text-gray-800 dark:text-slate-200">${i.nombre}</span></div><div class="text-right"><p class="font-black text-orange-500 text-sm">${i.racha} días 🔥</p><p class="text-[10px] text-gray-400">Récord: ${i.mejor}</p></div></div>`; }); document.getElementById('listaRetoGrupal').innerHTML=h; }
 
-        function exportarCodigoReto() { let u=getUsuarioActual(); let c=btoa(unescape(encodeURIComponent(JSON.stringify({tipo:"NutriWeb_Reto", n:u.nombre, r:parseInt(document.getElementById('rachaDisplay').innerText)||0, m:u.perfil.mejorRacha})))); navigator.clipboard.writeText(c).then(()=>alert("¡Código de Liga copiado!")).catch(()=>prompt("Copia:",c)); }
-        function importarCodigoReto() { let c=document.getElementById('inpCodigoAmigo').value; if(!c) return; try{ let p=JSON.parse(decodeURIComponent(escape(atob(c)))); if(p.tipo!=="NutriWeb_Reto") throw new Error(); let u=getUsuarioActual(); u.perfil.amigosReto[normalizarTexto(p.n)]={nombre:p.n, racha:p.r, mejor:p.m}; guardarDatos(); document.getElementById('inpCodigoAmigo').value=''; alert(`¡${p.n} añadido!`); }catch(e){alert("Inválido.");} }
-        function renderizarRetoGrupal() {
-            let u=getUsuarioActual(); let rl=parseInt(document.getElementById('rachaDisplay').innerText)||0; let l=[{nombre:u.nombre+" (Tú)", racha:rl, mejor:u.perfil.mejorRacha||0}];
-            if(u.perfil.amigosReto) Object.keys(u.perfil.amigosReto).forEach(k=>l.push(u.perfil.amigosReto[k])); l.sort((a,b)=>b.racha-a.racha); let h='';
-            l.forEach((i,x)=>{ let ic=x===0?'🥇':x===1?'🥈':x===2?'🥉':'👏'; let bg=i.nombre.includes("(Tú)")?'bg-indigo-50 dark:bg-indigo-900/30':'bg-gray-50 dark:bg-slate-800'; h+=`<div class="flex justify-between items-center ${bg} p-2.5 rounded-xl border"><div class="flex items-center gap-2"><span class="text-xl">${ic}</span><span class="font-bold text-sm text-gray-800 dark:text-slate-200">${i.nombre}</span></div><div class="text-right"><p class="font-black text-orange-500 text-sm">${i.racha} días 🔥</p><p class="text-[10px] text-gray-400">Récord: ${i.mejor}</p></div></div>`; }); document.getElementById('listaRetoGrupal').innerHTML=h;
-        }
-
-        // ==========================================
-        // 11. COMPARTIR Y RESPALDO
-        // ==========================================
-        function exportarBibliotecaComidas() { let lista = getUsuarioActual().alimentosPersonalizados || []; if (lista.length === 0) return alert("Sin comidas nuevas."); let c = btoa(unescape(encodeURIComponent(JSON.stringify({ tipo: "NutriWeb_Comidas", items: lista })))); navigator.clipboard.writeText(c).then(() => alert(`Copiadas ${lista.length} comidas. Pégalo en WhatsApp.`)).catch(() => prompt("Copia:", c)); }
-        function importarBibliotecaComidas() { let c = prompt("Pega código:"); if (!c) return; try { let p = JSON.parse(decodeURIComponent(escape(atob(c.trim())))); if (p.tipo !== "NutriWeb_Comidas") throw new Error(); let u = getUsuarioActual(); let ex = obtenerBibliotecaCompleta().map(i => normalizarTexto(i.nombre)); let ag = 0; p.items.forEach(i => { if (i.nombre && i.kcal && !ex.includes(normalizarTexto(i.nombre))) { u.alimentosPersonalizados.push({ nombre: i.nombre, kcal: parseInt(i.kcal)||0, c: parseInt(i.c)||0, p: parseInt(i.p)||0, g: parseInt(i.g)||0 }); ex.push(normalizarTexto(i.nombre)); ag++; } }); guardarDatos(); actualizarDatalist(); alert(ag > 0 ? `¡${ag} agregadas!` : "Ya las tenías."); } catch (e) { alert("Inválido."); } }
+        function exportarBibliotecaComidas() { let lista = getUsuarioActual().alimentosPersonalizados || []; if (lista.length === 0) return alert("Sin comidas nuevas."); let c = btoa(unescape(encodeURIComponent(JSON.stringify({ tipo: "NutriWeb_Comidas", items: lista })))); navigator.clipboard.writeText(c).then(() => alert(`Copiadas.`)).catch(() => prompt("Copia:", c)); }
+        function importarBibliotecaComidas() { let c = prompt("Pega código:"); if (!c) return; try { c = c.replace(/\s+/g, ''); let p = JSON.parse(decodeURIComponent(escape(atob(c)))); if (p.tipo !== "NutriWeb_Comidas") throw new Error(); let u = getUsuarioActual(); let ex = obtenerBibliotecaCompleta().map(i => normalizarTexto(i.nombre)); let ag = 0; p.items.forEach(i => { if (i.nombre && i.kcal && !ex.includes(normalizarTexto(i.nombre))) { u.alimentosPersonalizados.push({ nombre: i.nombre, kcal: parseInt(i.kcal)||0, c: parseInt(i.c)||0, p: parseInt(i.p)||0, g: parseInt(i.g)||0 }); ex.push(normalizarTexto(i.nombre)); ag++; } }); guardarDatos(); actualizarDatalist(); alert(`¡${ag} agregadas!`); } catch (e) { alert("Inválido."); } }
         function exportarRespaldo() { let c = btoa(unescape(encodeURIComponent(JSON.stringify(getUsuarioActual())))); navigator.clipboard.writeText(c).then(() => alert("Respaldo copiado.")).catch(() => prompt("Copia:", c)); }
-        function importarRespaldo() { let c = prompt("Pega código de respaldo:"); if (!c) return; try { let d = JSON.parse(decodeURIComponent(escape(atob(c.trim())))); if (!d.nombre) throw new Error(); usuariosDB[usuarioActivoKey] = d; guardarDatos(); entrarAlSistema(usuarioActivoKey); alert("¡Restaurado!"); } catch (e) { alert("Inválido."); } }
+        function importarRespaldo() { let c = prompt("Pega código de respaldo:"); if (!c) return; try { c = c.replace(/\s+/g, ''); let d = JSON.parse(decodeURIComponent(escape(atob(c)))); if (!d.nombre) throw new Error(); usuariosDB[usuarioActivoKey] = d; guardarDatos(); entrarAlSistema(usuarioActivoKey); alert("¡Restaurado!"); } catch (e) { alert("Inválido."); } }
 
-        // ==========================================
-        // INICIALIZACIÓN DE LA APLICACIÓN
-        // ==========================================
-        inicializarPWA();
-        if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) entrarAlSistema(usuarioActivoKey); else renderizarPerfilesRapidos();
+        inicializarPWA(); if (usuarioActivoKey && usuariosDB[usuarioActivoKey]) entrarAlSistema(usuarioActivoKey); else renderizarPerfilesRapidos();
     </script>
 </body>
 </html>
