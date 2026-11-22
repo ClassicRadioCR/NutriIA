@@ -152,14 +152,20 @@
                     <p class="font-bold text-xs"><i class="fas fa-exclamation-triangle"></i> ¡Atención! Has superado tu meta de calorías para hoy.</p>
                 </div>
 
-                <!-- SUMA RÁPIDA DE CALORÍAS -->
-                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 flex justify-between items-center transition-colors">
-                    <div class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-slate-200">
-                        <i class="fas fa-bolt text-yellow-500"></i> Suma Rápida (Kcal)
+                <!-- SUMA RÁPIDA DE CALORÍAS Y MACROS -->
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-transparent dark:border-slate-800 space-y-2.5 transition-colors">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-slate-200">
+                            <i class="fas fa-bolt text-yellow-500"></i> Suma Rápida
+                        </div>
+                        <span class="text-[10px] text-gray-400 font-medium">Kcal auto si solo pones macros</span>
                     </div>
-                    <div class="flex gap-2">
-                        <input type="number" id="inpSumaRapida" placeholder="Ej. 150" class="w-20 px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs text-center font-bold transition-colors" onkeypress="if(event.key === 'Enter') sumarCaloriasRapido()">
-                        <button onclick="sumarCaloriasRapido()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm transition-colors active:scale-95"><i class="fas fa-plus"></i></button>
+                    <div class="flex gap-1.5 items-center">
+                        <input type="number" id="inpSumaKcal" placeholder="Kcal" min="0" class="w-full px-2 py-2 bg-gray-50 dark:bg-slate-800 border dark:border-slate-700 rounded-xl text-xs text-center font-bold transition-colors" onkeypress="if(event.key === 'Enter') sumarMacrosRapido()">
+                        <input type="number" id="inpSumaCarbs" placeholder="C (g)" min="0" class="w-full px-2 py-2 bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100 dark:border-slate-700 rounded-xl text-xs text-center font-bold text-blue-700 dark:text-blue-300 transition-colors" onkeypress="if(event.key === 'Enter') sumarMacrosRapido()">
+                        <input type="number" id="inpSumaProt" placeholder="P (g)" min="0" class="w-full px-2 py-2 bg-red-50/50 dark:bg-red-950/30 border border-red-100 dark:border-slate-700 rounded-xl text-xs text-center font-bold text-red-700 dark:text-red-300 transition-colors" onkeypress="if(event.key === 'Enter') sumarMacrosRapido()">
+                        <input type="number" id="inpSumaGras" placeholder="G (g)" min="0" class="w-full px-2 py-2 bg-yellow-50/50 dark:bg-yellow-950/30 border border-yellow-100 dark:border-slate-700 rounded-xl text-xs text-center font-bold text-yellow-700 dark:text-yellow-300 transition-colors" onkeypress="if(event.key === 'Enter') sumarMacrosRapido()">
+                        <button onclick="sumarMacrosRapido()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition-colors active:scale-95 shrink-0"><i class="fas fa-plus"></i></button>
                     </div>
                 </div>
 
@@ -183,9 +189,30 @@
                     <div id="infoEjercicioBadge" class="hidden mt-2 text-[11px] font-semibold text-orange-500 animate-fade-in"><i class="fas fa-running"></i> +<span id="kcalEjercicioText">0</span> kcal extra</div>
                     
                     <div class="grid grid-cols-3 gap-2 mt-4 text-sm border-t dark:border-slate-800 pt-3.5 transition-colors">
-                        <div class="bg-blue-50/70 dark:bg-blue-950/40 p-2 rounded-xl transition-colors"><p class="text-blue-600 dark:text-blue-400 font-bold"><span id="carbTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaCarbs">/ 250g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Carbs</p></div>
-                        <div class="bg-red-50/70 dark:bg-red-950/40 p-2 rounded-xl transition-colors"><p class="text-red-600 dark:text-red-400 font-bold"><span id="protTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaProt">/ 100g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Proteína</p></div>
-                        <div class="bg-yellow-50/70 dark:bg-yellow-950/40 p-2 rounded-xl transition-colors"><p class="text-yellow-600 dark:text-yellow-400 font-bold"><span id="grasTotal">0</span>g</p><p class="text-gray-400 text-[10px]" id="metaGras">/ 65g</p><p class="text-gray-600 dark:text-slate-300 text-xs mt-0.5">Grasas</p></div>
+                        <div class="bg-blue-50/70 dark:bg-blue-950/40 p-2 rounded-xl transition-colors">
+                            <p class="text-blue-600 dark:text-blue-400 font-bold"><span id="carbTotal">0</span>g</p>
+                            <p class="text-gray-400 text-[10px]" id="metaCarbs">/ 250g</p>
+                            <div class="w-full h-1.5 bg-blue-200/60 dark:bg-blue-900/60 rounded-full overflow-hidden mt-1.5">
+                                <div id="barCarbs" class="h-full bg-blue-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p class="text-gray-600 dark:text-slate-300 text-xs mt-1">Carbs</p>
+                        </div>
+                        <div class="bg-red-50/70 dark:bg-red-950/40 p-2 rounded-xl transition-colors">
+                            <p class="text-red-600 dark:text-red-400 font-bold"><span id="protTotal">0</span>g</p>
+                            <p class="text-gray-400 text-[10px]" id="metaProt">/ 100g</p>
+                            <div class="w-full h-1.5 bg-red-200/60 dark:bg-red-900/60 rounded-full overflow-hidden mt-1.5">
+                                <div id="barProt" class="h-full bg-red-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p class="text-gray-600 dark:text-slate-300 text-xs mt-1">Proteína</p>
+                        </div>
+                        <div class="bg-yellow-50/70 dark:bg-yellow-950/40 p-2 rounded-xl transition-colors">
+                            <p class="text-yellow-600 dark:text-yellow-400 font-bold"><span id="grasTotal">0</span>g</p>
+                            <p class="text-gray-400 text-[10px]" id="metaGras">/ 65g</p>
+                            <div class="w-full h-1.5 bg-yellow-200/60 dark:bg-yellow-900/60 rounded-full overflow-hidden mt-1.5">
+                                <div id="barGras" class="h-full bg-yellow-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p class="text-gray-600 dark:text-slate-300 text-xs mt-1">Grasas</p>
+                        </div>
                     </div>
                 </div>
 
@@ -910,7 +937,7 @@
         function girarRuleta() { let d = getDatosHoy(); if(!d.retoDelDia) { d.retoDelDia = retosToxicos[Math.floor(Math.random() * retosToxicos.length)]; guardarDatos(); } }
 
         function seleccionarTiempoComida(t) { tiempoComidaActual = t; document.querySelectorAll('.tc-btn').forEach(b => b.className="tc-btn py-1.5 rounded-lg text-xs font-bold text-gray-500 transition-all"); document.getElementById(`tc-${t}`).className="tc-btn py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm transition-all"; }
-        function toggleModoManual() { let b=document.getElementById('modoBusqueda'); let m=document.getElementById('modoManual'); let bt=document.getElementById('btnToggleModo'); if(m.classList.contains('hidden')){ m.classList.remove('hidden'); b.classList.add('hidden'); bt.innerText="Manual"; }else{ m.classList.add('hidden'); b.classList.remove('hidden'); bt.innerText="Rápida"; } }
+        function toggleModoManual() { let b=document.getElementById('modoBusqueda'); let m=document.getElementById('modoManual'); let bt=document.getElementById('btnToggleModo'); if(m.classList.contains('hidden')){ m.classList.remove('hidden'); b.classList.add('hidden'); bt.innerText="Volver a buscar"; }else{ m.classList.add('hidden'); b.classList.remove('hidden'); bt.innerText="Manual"; } }
         
         function registrarComidaLocal() {
             let inps = document.getElementById('inputComida'); let sel = document.getElementById('selectMedida'); let txt = inps.value.trim(); if (!txt) return;
@@ -985,6 +1012,9 @@
             document.getElementById('carbTotal').innerText = dia.carbs; document.getElementById('metaCarbs').innerText = `/ ${p.metaCarbs}g`;
             document.getElementById('protTotal').innerText = dia.prot; document.getElementById('metaProt').innerText = `/ ${p.metaProt}g`;
             document.getElementById('grasTotal').innerText = dia.gras; document.getElementById('metaGras').innerText = `/ ${p.metaGras}g`;
+            document.getElementById('barCarbs').style.width = `${Math.min((dia.carbs / (p.metaCarbs || 1)) * 100, 100)}%`;
+            document.getElementById('barProt').style.width = `${Math.min((dia.prot / (p.metaProt || 1)) * 100, 100)}%`;
+            document.getElementById('barGras').style.width = `${Math.min((dia.gras / (p.metaGras || 1)) * 100, 100)}%`;
             document.getElementById('aguaTotal').innerText = dia.agua;
             
             document.getElementById('inpPasos').value = dia.pasos || ''; document.getElementById('inpSueno').value = dia.sueno || ''; document.getElementById('inpEnergia').value = dia.energia || '';
@@ -1751,21 +1781,39 @@
         // NUEVAS FUNCIONES: SUMA RÁPIDA Y CALCULADORA GYM
         // =========================================================
 
-        function sumarCaloriasRapido() {
-            let inp = document.getElementById('inpSumaRapida');
-            let k = parseInt(inp.value);
-            if(!k || k <= 0) return;
+        function sumarMacrosRapido() {
+            let inpK = document.getElementById('inpSumaKcal');
+            let inpC = document.getElementById('inpSumaCarbs');
+            let inpP = document.getElementById('inpSumaProt');
+            let inpG = document.getElementById('inpSumaGras');
+
+            let k = parseInt(inpK.value) || 0;
+            let c = parseInt(inpC.value) || 0;
+            let p = parseInt(inpP.value) || 0;
+            let g = parseInt(inpG.value) || 0;
+
+            // Si dejó Kcal vacío pero ingresó macros, calcula las calorías automáticamente
+            if (k <= 0 && (c > 0 || p > 0 || g > 0)) {
+                k = (c * 4) + (p * 4) + (g * 9);
+            }
+
+            if (k <= 0 && c <= 0 && p <= 0 && g <= 0) return;
+
             let d = getDatosHoy();
             d.calorias += k;
+            d.carbs += c;
+            d.prot += p;
+            d.gras += g;
             d.comidas.push({ 
                 texto: `Suma Rápida`, 
                 nombreBase: `Suma Rápida`, 
-                kcalBase: k, cBase: 0, pBase: 0, gBase: 0, 
-                kcal: k, c: 0, p: 0, g: 0, 
+                kcalBase: k, cBase: c, pBase: p, gBase: g, 
+                kcal: k, c: c, p: p, g: g, 
                 tiempo: tiempoComidaActual 
             });
+
             guardarDatos();
-            inp.value = '';
+            inpK.value = ''; inpC.value = ''; inpP.value = ''; inpG.value = '';
         }
 
         let ultimoGastoCalculado = 0;
